@@ -1,0 +1,10 @@
+openapi: 3.1.0
+info:
+  title: AI-Dala API (contract-first stub)
+  version: 0.1.0
+  description: >-
+    Source of truth for Go backend and generated TypeScript SDK.
+servers: []
+paths: {}
+components:
+  schemas: {}
