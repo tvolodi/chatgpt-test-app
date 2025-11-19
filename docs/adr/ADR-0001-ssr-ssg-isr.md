@@ -1,5 +1,5 @@
 # ADR-0001: Page Rendering Strategy (SSR/SSG/ISR)
-- Status: proposed
+- Status: approved
 - Date: 2025-11-17
 
 ## Context

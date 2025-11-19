@@ -4,7 +4,7 @@
 
 ## 1. Realm & Clients
 
-- Realm: <name>
+- Realm: ai-dala-realm
 - Public clients: webapp (PKCE) with allowed redirects <urls>.
 - Confidential clients: backend workers if needed.
 
