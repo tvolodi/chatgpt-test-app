@@ -1,10 +1,203 @@
 openapi: 3.1.0
 info:
-  title: AI-Dala API (contract-first stub)
+  title: AI-Dala API
   version: 0.1.0
-  description: >-
-    Source of truth for Go backend and generated TypeScript SDK.
-servers: []
-paths: {}
+  description: Contract-first source of truth for Go backend and generated TypeScript SDK.
+servers:
+  - url: http://localhost:3000/api
+    description: Local development
+paths:
+  /auth/login:
+    post:
+      tags: [auth]
+      summary: Authenticate user via email and password.
+      operationId: login
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+      responses:
+        '200':
+          description: Successful authentication with token and user info.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LoginResponse'
+        '401':
+          description: Invalid credentials.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '429':
+          description: Too many requests.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Unexpected server error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      security: []
+  /content/news:
+    get:
+      tags: [news]
+      summary: List news items
+      operationId: listNews
+      parameters:
+        - in: query
+          name: page
+          schema:
+            type: integer
+            minimum: 1
+          description: Page number (1-based).
+        - in: query
+          name: page_size
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 50
+            default: 10
+          description: Items per page.
+        - in: query
+          name: category
+          schema:
+            type: string
+            enum: ["OpenAI", "Tools", "Market", "AI-Dala updates"]
+          description: Optional category filter.
+      responses:
+        '200':
+          description: Paginated list of news items.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NewsListResponse'
+        '400':
+          description: Invalid query parameters.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /content/news/{slug}:
+    get:
+      tags: [news]
+      summary: Get a news item by slug
+      operationId: getNewsBySlug
+      parameters:
+        - in: path
+          name: slug
+          required: true
+          schema:
+            type: string
+          description: News slug
+      responses:
+        '200':
+          description: News item detail.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NewsItem'
+        '404':
+          description: Not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
 components:
-  schemas: {}
+  schemas:
+    LoginRequest:
+      type: object
+      required: [email, password]
+      properties:
+        email:
+          type: string
+          format: email
+          description: User email address.
+        password:
+          type: string
+          minLength: 8
+          description: User password.
+    User:
+      type: object
+      required: [id, email]
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: User identifier.
+        email:
+          type: string
+          format: email
+        name:
+          type: string
+          nullable: true
+    LoginResponse:
+      type: object
+      required: [token, user]
+      properties:
+        token:
+          type: string
+          description: Session or JWT token.
+        user:
+          $ref: '#/components/schemas/User'
+    ErrorResponse:
+      type: object
+      required: [error_code, message]
+      properties:
+        error_code:
+          type: string
+        message:
+          type: string
+    NewsItem:
+      type: object
+      required:
+        - id
+        - slug
+        - title
+        - summary
+        - body
+        - url
+        - image
+        - published_at
+      properties:
+        id:
+          type: string
+        slug:
+          type: string
+        title:
+          type: string
+        summary:
+          type: string
+        body:
+          type: string
+          description: Markdown body
+        url:
+          type: string
+        image:
+          type: string
+        published_at:
+          type: string
+          format: date-time
+        tags:
+          type: array
+          items:
+            type: string
+    NewsListResponse:
+      type: object
+      required: [items, total, page, page_size]
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/NewsItem'
+        total:
+          type: integer
+        page:
+          type: integer
+        page_size:
+          type: integer

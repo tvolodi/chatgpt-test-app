@@ -1,0 +1,12 @@
+run:
+  timeout: 2m
+  tests: true
+linters:
+  enable:
+    - govet
+    - staticcheck
+    - gosimple
+    - unused
+    - revive
+issues:
+  exclude-use-default: false

@@ -1,0 +1,22 @@
+# Node/Next.js
+node_modules/
+.next/
+out/
+dist/
+
+# TypeScript
+*.tsbuildinfo
+
+# Go
+bin/
+
+# Env/Secrets
+.env
+.env.local
+.env.*
+
+# Editor/OS
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/

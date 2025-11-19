@@ -1,0 +1,51 @@
+version: "3.9"
+
+services:
+  web:
+    build:
+      context: ./web
+    ports:
+      - "3000:3000"
+    environment:
+      NODE_ENV: development
+      NEXT_PUBLIC_API_BASE_URL: "http://localhost:4000/api"
+    depends_on:
+      - api
+    volumes:
+      - ./web:/app
+      - /app/node_modules
+
+  api:
+    build:
+      context: ./api
+    ports:
+      - "4000:4000"
+    environment:
+      DATABASE_URL: "postgres://postgres:postgres@db:5432/ai_dala?sslmode=disable"
+      KEYCLOAK_ISSUER: "http://keycloak:8080/realms/ai-dala"
+    depends_on:
+      - db
+      - keycloak
+
+  db:
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: ai_dala
+    ports:
+      - "5432:5432"
+    volumes:
+      - db_data:/var/lib/postgresql/data
+
+  keycloak:
+    image: quay.io/keycloak/keycloak:24.0.0
+    command: start-dev
+    environment:
+      KEYCLOAK_ADMIN: admin
+      KEYCLOAK_ADMIN_PASSWORD: admin
+    ports:
+      - "8080:8080"
+
+volumes:
+  db_data:
