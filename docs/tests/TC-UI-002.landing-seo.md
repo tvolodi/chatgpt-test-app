@@ -6,7 +6,7 @@
 
 - Title: Landing SEO and metadata
 - Type: ui
-- Scope: REQ-001 (Landing)
+- Scope: REQ-003 (Landing)
 
 ## 2. Preconditions
 
@@ -28,7 +28,7 @@
 
 ## 5. Traceability
 
-- Requirements: REQ-001 (AC-5, AC-6, AC-7)
+- Requirements: REQ-003 (AC-5, AC-6, AC-7)
 - Modules: MOD-FE-Landing
 
 ## 6. Notes

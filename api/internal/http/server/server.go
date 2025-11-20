@@ -5,8 +5,19 @@ import (
 	"log"
 	"net/http"
 
+	"github.com/ai-dala/api/internal/auth"
 	"github.com/google/uuid"
 )
+
+type Server struct {
+	auth auth.Service
+}
+
+func NewServer(authService auth.Service) *Server {
+	return &Server{
+		auth: authService,
+	}
+}
 
 // LoggingMiddleware logs method, path, and a basic correlation ID.
 func LoggingMiddleware(next http.Handler) http.Handler {
@@ -21,50 +32,25 @@ func LoggingMiddleware(next http.Handler) http.Handler {
 	})
 }
 
-func RegisterRoutes(mux *http.ServeMux) {
-	mux.HandleFunc("POST /api/auth/login", loginHandler)
+func (s *Server) RegisterRoutes(mux *http.ServeMux) {
+	// Public routes
 	mux.HandleFunc("GET /api/content/news", newsListHandler)
 	mux.HandleFunc("GET /api/content/news/", newsDetailHandler)
 	mux.HandleFunc("GET /api/content/news/{slug}", newsDetailHandler)
+
+	// Protected routes
+	mux.Handle("GET /api/protected/resource", auth.Middleware(http.HandlerFunc(s.protectedHandler)))
 }
 
-type loginRequest struct {
-	Email    string `json:"email"`
-	Password string `json:"password"`
+func (s *Server) protectedHandler(w http.ResponseWriter, r *http.Request) {
+	writeJSON(w, http.StatusOK, map[string]string{
+		"message": "You have accessed a protected resource!",
+	})
 }
 
 type errorResponse struct {
 	ErrorCode string `json:"error_code"`
 	Message   string `json:"message"`
-}
-
-func loginHandler(w http.ResponseWriter, r *http.Request) {
-	var req loginRequest
-	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-		writeJSON(w, http.StatusBadRequest, errorResponse{
-			ErrorCode: "INVALID_PAYLOAD",
-			Message:   "Invalid request body",
-		})
-		return
-	}
-
-	// TODO: Replace placeholder logic with real authentication and hashing.
-	if req.Email == "" || req.Password == "" {
-		writeJSON(w, http.StatusUnauthorized, errorResponse{
-			ErrorCode: "INVALID_CREDENTIALS",
-			Message:   "Invalid email or password.",
-		})
-		return
-	}
-
-	writeJSON(w, http.StatusOK, map[string]any{
-		"token": "placeholder-token",
-		"user": map[string]any{
-			"id":    uuid.NewString(),
-			"email": req.Email,
-			"name":  "Example User",
-		},
-	})
 }
 
 func writeJSON(w http.ResponseWriter, status int, payload any) {

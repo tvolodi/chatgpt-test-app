@@ -6,7 +6,7 @@
 
 - Title: Landing page structure and navigation
 - Type: ui
-- Scope: REQ-001 (Landing)
+- Scope: REQ-003 (Landing)
 
 ## 2. Preconditions
 
@@ -28,7 +28,7 @@
 
 ## 5. Traceability
 
-- Requirements: REQ-001 (AC-1, AC-2, AC-3, AC-4, AC-9)
+- Requirements: REQ-003 (AC-1, AC-2, AC-3, AC-4, AC-9)
 - Modules: MOD-FE-Landing (to be created)
 
 ## 6. Notes

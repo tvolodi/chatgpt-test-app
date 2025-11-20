@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import type { CSSProperties, ReactNode } from "react";
 import { newsItems } from "../data/news";
 import { articleItems } from "../data/articles";
+import { Navigation } from "./components/Navigation";
 
 export const revalidate = 1800; // ISR revalidation every 30 minutes
 
@@ -121,35 +122,7 @@ export default function HomePage() {
       >
         <div style={{ ...containerStyle, display: "flex", alignItems: "center", gap: 12, padding: "16px" }}>
           <Image src="/AI-Dala-logo.png" alt="AI-Dala logo" width={48} height={48} priority />
-          <nav aria-label="Primary">
-            <ul style={{ display: "flex", gap: 16, listStyle: "none", margin: 0, padding: 0 }}>
-              <li>
-                <a href="#about" style={navLinkStyle}>
-                  About
-                </a>
-              </li>
-              <li>
-                <a href="#news" style={navLinkStyle}>
-                  News
-                </a>
-              </li>
-              <li>
-                <a href="#articles" style={navLinkStyle}>
-                  Articles
-                </a>
-              </li>
-              <li>
-                <a href="#contact" style={navLinkStyle}>
-                  Contact / Subscribe
-                </a>
-              </li>
-              <li>
-                <a href="/signin" style={navLinkStyle}>
-                  Sign in
-                </a>
-              </li>
-            </ul>
-          </nav>
+          <Navigation />
         </div>
       </header>
 
@@ -180,7 +153,7 @@ export default function HomePage() {
                 </a>
               </div>
             </div>
-            <div
+            {/* <div
               style={{
                 background: theme.colors.white,
                 borderRadius: 12,
@@ -197,7 +170,7 @@ export default function HomePage() {
                 style={{ width: "100%", height: "auto", objectFit: "contain" }}
                 priority
               />
-            </div>
+            </div> */}
           </div>
         </section>
 

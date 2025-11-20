@@ -7,5 +7,6 @@
 
 | REQ_ID   | Title                      | Type           | Priority | Status   | File                         |
 |----------|----------------------------|----------------|----------|----------|------------------------------|
-| REQ-001  | Site landing page (public) | functional     | high     | approved | REQ-001.site-landing-page.md |
+| REQ-001  | User login via Keycloak    | functional     | high     | approved | REQ-001.login.md             |
 | REQ-002  | AI News page               | functional     | medium   | approved | REQ-002.AI-news-page.md      |
+| REQ-003  | Site landing page (public) | functional     | high     | approved | REQ-003.site-landing-page.md |

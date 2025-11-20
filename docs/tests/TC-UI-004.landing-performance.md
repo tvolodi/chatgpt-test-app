@@ -6,7 +6,7 @@
 
 - Title: Landing performance and ISR freshness
 - Type: perf
-- Scope: REQ-001 (Landing)
+- Scope: REQ-003 (Landing)
 
 ## 2. Preconditions
 
@@ -24,7 +24,7 @@
 
 ## 5. Traceability
 
-- Requirements: REQ-001 (AC-5, AC-6)
+- Requirements: REQ-003 (AC-5, AC-6)
 - Modules: MOD-FE-Landing
 
 ## 6. Notes

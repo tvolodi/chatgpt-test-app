@@ -3,9 +3,11 @@ import Image from "next/image";
 import { notFound } from "next/navigation";
 import { fetchNewsItem } from "../services";
 
+export const dynamic = 'force-dynamic'; // Force dynamic rendering
 export const revalidate = 1800; // 30m
 
 type Params = { slug: string };
+
 
 export async function generateMetadata({ params }: { params: Params }): Promise<Metadata> {
   const item = await fetchNewsItem(params.slug);

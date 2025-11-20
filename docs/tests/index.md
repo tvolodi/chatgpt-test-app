@@ -14,3 +14,4 @@
 | TC-UI-007     | ui         | News list SEO and structured data      | MOD-FE-News        | REQ-002                  | TC-UI-007.news-seo.md                         |
 | TC-UI-008     | ui         | News detail view and sharing           | MOD-FE-News        | REQ-002                  | TC-UI-008.news-detail-share.md                |
 | TC-UI-009     | perf       | News performance and ISR freshness     | MOD-FE-News        | REQ-002                  | TC-UI-009.news-performance-isr.md             |
+| TC-UNIT-002   | unit       | API Authentication (JWT/Bcrypt)        | MOD-BE-Auth        | REQ-001, REQ-011         | TC-UNIT-002.api-auth.md                       |
