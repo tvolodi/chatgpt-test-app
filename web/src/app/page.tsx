@@ -37,10 +37,10 @@ export const metadata: Metadata = {
 
 const theme = {
   colors: {
-    primary: "#3A9BDC", // Sky Blue
-    secondary: "#2B2B2B", // Dark Gray
-    accent: "#E6C68E", // Sand Beige
-    background: "#F7F9FC",
+    primary: "#0066FF", // Electric Blue
+    secondary: "#0A1929", // Deep Navy  
+    accent: "#FF6B35", // Sunset Orange
+    background: "#F8FAFC",
     white: "#FFFFFF"
   },
   fonts: "Inter, system-ui, sans-serif"
@@ -274,24 +274,28 @@ const primaryButtonStyle: CSSProperties = {
   display: "inline-block",
   background: theme.colors.primary,
   color: theme.colors.white,
-  padding: "12px 16px",
-  borderRadius: 10,
+  padding: "14px 28px",
+  borderRadius: 12,
   fontWeight: 700,
   textDecoration: "none",
   minWidth: 160,
-  textAlign: "center"
+  textAlign: "center",
+  boxShadow: "0 8px 20px rgba(0, 102, 255, 0.3)",
+  transition: "all 0.3s ease"
 };
 
 const secondaryButtonStyle: CSSProperties = {
   display: "inline-block",
   background: theme.colors.accent,
-  color: theme.colors.secondary,
-  padding: "12px 16px",
-  borderRadius: 10,
+  color: theme.colors.white,
+  padding: "14px 28px",
+  borderRadius: 12,
   fontWeight: 700,
   textDecoration: "none",
   minWidth: 160,
-  textAlign: "center"
+  textAlign: "center",
+  boxShadow: "0 8px 20px rgba(255, 107, 53, 0.3)",
+  transition: "all 0.3s ease"
 };
 
 const linkStyle: CSSProperties = {
