@@ -2,25 +2,25 @@
 
 import type { CSSProperties } from "react";
 
-export default function SettingsPage() {
+export default function CategoriesPage() {
     return (
         <div style={containerStyle}>
             {/* Page Header */}
             <div style={headerStyle}>
-                <h1 style={headingStyle}>Settings</h1>
-                <p style={subtitleStyle}>Manage your account and preferences</p>
+                <h1 style={headingStyle}>Categories</h1>
+                <p style={subtitleStyle}>Manage content categories</p>
             </div>
 
             {/* Empty State */}
             <div style={emptyStateStyle}>
-                <div style={iconStyle}>⚙️</div>
-                <h2 style={emptyHeadingStyle}>Settings</h2>
+                <div style={iconStyle}>📁</div>
+                <h2 style={emptyHeadingStyle}>No Categories Yet</h2>
                 <p style={emptyTextStyle}>
-                    User settings and preferences will be added in a future update.
+                    Category management functionality will be added in a future update.
                 </p>
                 <div style={infoBoxStyle}>
                     <p style={{ margin: 0, fontSize: "14px" }}>
-                        <strong>Coming Soon:</strong> Manage your profile, preferences, and account settings.
+                        <strong>Coming Soon:</strong> Create, edit, and organize categories for your content.
                     </p>
                 </div>
             </div>
