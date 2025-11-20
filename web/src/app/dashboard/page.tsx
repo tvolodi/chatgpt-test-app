@@ -88,7 +88,7 @@ const loadingStyle: CSSProperties = {
 
 const spinnerStyle: CSSProperties = {
     fontSize: "18px",
-    color: "#3A9BDC",
+    color: "#0066FF",
     fontWeight: 600
 };
 
@@ -104,7 +104,7 @@ const welcomeCardStyle: CSSProperties = {
 const brandBadgeStyle: CSSProperties = {
     display: "inline-block",
     padding: "6px 16px",
-    background: "linear-gradient(135deg, #3A9BDC 0%, #2B7FB8 100%)",
+    background: "linear-gradient(135deg, #0066FF 0%, #6366F1 100%)",
     color: "#FFFFFF",
     borderRadius: 20,
     fontSize: "12px",
@@ -116,7 +116,7 @@ const brandBadgeStyle: CSSProperties = {
 const headingStyle: CSSProperties = {
     fontSize: "36px",
     fontWeight: 700,
-    color: "#2B2B2B",
+    color: "#0A1929",
     margin: "0 0 16px",
     lineHeight: 1.2
 };
@@ -140,11 +140,12 @@ const statsGridStyle: CSSProperties = {
 
 const statCardStyle: CSSProperties = {
     background: "#FFFFFF",
-    borderRadius: 12,
-    padding: "24px",
-    boxShadow: "0 4px 12px rgba(0, 0, 0, 0.04)",
+    borderRadius: 16,
+    padding: "28px 24px",
+    boxShadow: "0 10px 30px rgba(0, 0, 0, 0.08), 0 4px 12px rgba(0, 0, 0, 0.04)",
     textAlign: "center",
-    transition: "transform 0.3s ease, box-shadow 0.3s ease"
+    transition: "transform 0.3s ease, box-shadow 0.3s ease",
+    border: "1px solid rgba(0, 0, 0, 0.05)"
 };
 
 const statIconStyle: CSSProperties = {
@@ -155,7 +156,7 @@ const statIconStyle: CSSProperties = {
 const statValueStyle: CSSProperties = {
     fontSize: "32px",
     fontWeight: 700,
-    color: "#3A9BDC",
+    color: "#0066FF",
     margin: "0 0 8px"
 };
 
@@ -166,9 +167,9 @@ const statLabelStyle: CSSProperties = {
 };
 
 const infoBoxStyle: CSSProperties = {
-    background: "#E8F4F8",
-    border: "1px solid #3A9BDC",
+    background: "#EFF6FF",
+    border: "1px solid #0066FF",
     borderRadius: 12,
     padding: "16px 20px",
-    color: "#2B2B2B"
+    color: "#0A1929"
 };
