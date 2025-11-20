@@ -58,12 +58,17 @@ export function Navigation() {
                     {isLoading ? (
                         <span style={{ ...navLinkStyle, opacity: 0.5 }}>...</span>
                     ) : session ? (
-                        <button
-                            onClick={handleLogout}
-                            style={buttonStyle}
-                        >
-                            Logout
-                        </button>
+                        <>
+                            <a href="/dashboard" style={navLinkStyle}>
+                                Dashboard
+                            </a>
+                            <button
+                                onClick={handleLogout}
+                                style={buttonStyle}
+                            >
+                                Logout
+                            </button>
+                        </>
                     ) : (
                         <a href="/login" style={navLinkStyle}>
                             Sign in
