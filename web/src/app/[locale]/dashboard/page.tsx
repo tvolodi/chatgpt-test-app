@@ -4,10 +4,12 @@ import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 import type { CSSProperties } from "react";
+import { useTranslations } from 'next-intl';
 
 export default function DashboardPage() {
     const { data: session, status } = useSession();
     const router = useRouter();
+    const t = useTranslations('dashboard');
 
     useEffect(() => {
         if (status === "unauthenticated") {
@@ -33,10 +35,10 @@ export default function DashboardPage() {
             <div style={welcomeCardStyle}>
                 <div style={brandBadgeStyle}>AI-DALA</div>
                 <h1 style={headingStyle}>
-                    Welcome back, {session.user?.name || "User"}!
+                    {t('welcome', { name: session.user?.name || 'User' })}
                 </h1>
                 <p style={subtitleStyle}>
-                    Your journey on the Steppe continues. Explore AI-powered content, manage your learning, and grow with AI-Dala.
+                    {t('subtitle')}
                 </p>
             </div>
 
@@ -45,29 +47,29 @@ export default function DashboardPage() {
                 <div style={statCardStyle}>
                     <div style={statIconStyle}>📰</div>
                     <div style={statValueStyle}>12</div>
-                    <div style={statLabelStyle}>News Articles</div>
+                    <div style={statLabelStyle}>{t('stats.newsArticles')}</div>
                 </div>
                 <div style={statCardStyle}>
                     <div style={statIconStyle}>📝</div>
                     <div style={statValueStyle}>8</div>
-                    <div style={statLabelStyle}>Saved Articles</div>
+                    <div style={statLabelStyle}>{t('stats.savedArticles')}</div>
                 </div>
                 <div style={statCardStyle}>
                     <div style={statIconStyle}>🎓</div>
                     <div style={statValueStyle}>3</div>
-                    <div style={statLabelStyle}>Courses</div>
+                    <div style={statLabelStyle}>{t('stats.courses')}</div>
                 </div>
                 <div style={statCardStyle}>
                     <div style={statIconStyle}>⭐</div>
                     <div style={statValueStyle}>24</div>
-                    <div style={statLabelStyle}>Achievements</div>
+                    <div style={statLabelStyle}>{t('stats.achievements')}</div>
                 </div>
             </div>
 
             {/* Info Message */}
             <div style={infoBoxStyle}>
                 <p style={{ margin: 0, fontSize: "14px", lineHeight: 1.6 }}>
-                    <strong>Note:</strong> This is the initial dashboard layout. Specific features and widgets will be added in future requirements (REQ-007).
+                    <strong>{t('note')}:</strong> {t('noteText')}
                 </p>
             </div>
         </div>
