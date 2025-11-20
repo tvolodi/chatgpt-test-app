@@ -28,6 +28,8 @@ export function DashboardSidebar() {
         { href: "/dashboard", label: "Home", icon: "🏠" },
         { href: "/dashboard/news", label: "News", icon: "📰" },
         { href: "/dashboard/articles", label: "Articles", icon: "📝" },
+        { href: "/dashboard/categories", label: "Categories", icon: "📁" },
+        { href: "/dashboard/tags", label: "Tags", icon: "🏷️" },
         { href: "/dashboard/settings", label: "Settings", icon: "⚙️" }
     ];
 
@@ -48,8 +50,8 @@ export function DashboardSidebar() {
                             href={item.href}
                             style={{
                                 ...navItemStyle,
-                                background: isActive ? "#E8F4F8" : "transparent",
-                                color: isActive ? "#3A9BDC" : "#2B2B2B",
+                                background: isActive ? "#0066FF" : "transparent",
+                                color: isActive ? "#FFFFFF" : "#6B7280",
                                 fontWeight: isActive ? 700 : 600
                             }}
                         >
@@ -85,7 +87,7 @@ const toggleButtonStyle: CSSProperties = {
     cursor: "pointer",
     fontSize: "16px",
     fontWeight: 700,
-    color: "#3A9BDC",
+    color: "#0066FF",
     transition: "all 0.3s ease"
 };
 
