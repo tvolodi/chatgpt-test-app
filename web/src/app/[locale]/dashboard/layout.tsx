@@ -1,6 +1,6 @@
-import { DashboardHeader } from "../components/dashboard/Header";
-import { DashboardSidebar } from "../components/dashboard/Sidebar";
-import { DashboardFooter } from "../components/dashboard/Footer";
+import { DashboardHeader } from "../../components/dashboard/Header";
+import { DashboardSidebar } from "../../components/dashboard/Sidebar";
+import { DashboardFooter } from "../../components/dashboard/Footer";
 import type { ReactNode } from "react";
 import type { CSSProperties } from "react";
 
