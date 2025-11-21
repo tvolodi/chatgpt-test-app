@@ -1,0 +1,130 @@
+# Page snapshot
+
+```yaml
+- generic [ref=e1]:
+  - generic [ref=e2]:
+    - banner [ref=e3]:
+      - generic [ref=e4]:
+        - img "AI-Dala logo" [ref=e5]
+        - navigation "Primary" [ref=e6]:
+          - list [ref=e7]:
+            - listitem [ref=e8]:
+              - link "About" [ref=e9] [cursor=pointer]:
+                - /url: "#about"
+            - listitem [ref=e10]:
+              - link "News" [ref=e11] [cursor=pointer]:
+                - /url: "#news"
+            - listitem [ref=e12]:
+              - link "Articles" [ref=e13] [cursor=pointer]:
+                - /url: "#articles"
+            - listitem [ref=e14]:
+              - link "Contact / Subscribe" [ref=e15] [cursor=pointer]:
+                - /url: "#contact"
+            - listitem [ref=e16]:
+              - link "Sign in" [ref=e17] [cursor=pointer]:
+                - /url: /login
+            - listitem [ref=e18]:
+              - generic [ref=e19]:
+                - button "🇬🇧 EN ▲" [active] [ref=e20] [cursor=pointer]:
+                  - generic [ref=e21]: 🇬🇧
+                  - generic [ref=e22]: EN
+                  - generic [ref=e23]: ▲
+                - generic [ref=e24]:
+                  - button "🇬🇧 English ✓" [ref=e25] [cursor=pointer]:
+                    - generic [ref=e26]: 🇬🇧
+                    - generic [ref=e27]: English
+                    - generic [ref=e28]: ✓
+                  - button "🇷🇺 Русский" [ref=e29] [cursor=pointer]:
+                    - generic [ref=e30]: 🇷🇺
+                    - generic [ref=e31]: Русский
+                  - button "🇰🇿 Қазақ" [ref=e32] [cursor=pointer]:
+                    - generic [ref=e33]: 🇰🇿
+                    - generic [ref=e34]: Қазақ
+        - generic [ref=e35]: LOCALE-TEST-EN
+    - main [ref=e36]:
+      - region "Build, launch, and grow with AI-Dala." [ref=e37]:
+        - generic [ref=e39]:
+          - paragraph [ref=e40]: AI-Dala
+          - heading "Build, launch, and grow with AI-Dala." [level=1] [ref=e41]
+          - paragraph [ref=e42]: CMS + AI search + secure auth in one powerful stack. Where ideas meet the steppe — and grow with AI.
+          - generic [ref=e43]:
+            - link "Start with AI Dala" [ref=e44] [cursor=pointer]:
+              - /url: "#contact"
+              - text: Start with AI Dala →
+            - link "Join AI master-class" [ref=e45] [cursor=pointer]:
+              - /url: "#contact"
+      - region "What is AI-Dala?" [ref=e46]:
+        - heading "What is AI-Dala?" [level=2] [ref=e47]
+        - paragraph [ref=e48]: AI-Dala is an AI-driven CMS and search platform that blends Next.js, Go APIs, and secure identity to help you build performant, discoverable experiences.
+        - link "Learn more about AI-Dala" [ref=e49] [cursor=pointer]:
+          - /url: /about
+      - region "For whom" [ref=e50]:
+        - heading "For whom" [level=2] [ref=e51]
+        - generic [ref=e52]:
+          - article "Entrepreneurs" [ref=e53]
+          - article "Developers" [ref=e54]
+          - article "Students" [ref=e55]
+      - region "Latest articles" [ref=e56]:
+        - heading "Latest articles" [level=2] [ref=e57]
+        - generic [ref=e58]:
+          - article [ref=e59]:
+            - 'heading "Designing with AI-Dala: from concept to launch" [level=3] [ref=e60]'
+            - paragraph [ref=e61]: A walkthrough of building a landing experience with the AI-Dala stack.
+            - generic [ref=e62]: Updated 12 нояб. 2025 г.
+            - 'link "Designing with AI-Dala: from concept to launch article" [ref=e63] [cursor=pointer]':
+              - /url: /articles/designing-with-ai-dala
+              - text: Read more
+          - article [ref=e64]:
+            - heading "Optimizing Next.js for ISR and SEO" [level=3] [ref=e65]
+            - paragraph [ref=e66]: Practical tips to meet p95 latency and SEO targets for public pages.
+            - generic [ref=e67]: Updated 8 нояб. 2025 г.
+            - link "Optimizing Next.js for ISR and SEO article" [ref=e68] [cursor=pointer]:
+              - /url: /articles/optimizing-nextjs-isr-seo
+              - text: Read more
+          - article [ref=e69]:
+            - heading "Securing auth flows with Keycloak" [level=3] [ref=e70]
+            - paragraph [ref=e71]: Configuring Keycloak clients and claims for AI-Dala applications.
+            - generic [ref=e72]: Updated 3 нояб. 2025 г.
+            - link "Securing auth flows with Keycloak article" [ref=e73] [cursor=pointer]:
+              - /url: /articles/securing-auth-keycloak
+              - text: Read more
+      - region "AI News" [ref=e74]:
+        - heading "AI News" [level=2] [ref=e75]
+        - generic [ref=e76]:
+          - article [ref=e77]:
+            - heading "AI-Dala launches master-class series" [level=3] [ref=e78]
+            - paragraph [ref=e79]: New live sessions on building AI-first products with the AI-Dala stack.
+            - generic [ref=e80]: Published 15 нояб. 2025 г.
+            - link "AI-Dala launches master-class series article" [ref=e81] [cursor=pointer]:
+              - /url: /news/master-class-launch
+              - text: Read more
+          - article [ref=e82]:
+            - heading "AI search pipeline reaches milestone" [level=3] [ref=e83]
+            - paragraph [ref=e84]: Hybrid search and embeddings now power content discovery across the platform.
+            - generic [ref=e85]: Published 10 нояб. 2025 г.
+            - link "AI search pipeline reaches milestone article" [ref=e86] [cursor=pointer]:
+              - /url: /news/ai-search-milestone
+              - text: Read more
+          - article [ref=e87]:
+            - 'heading "Community spotlight: creators from the Steppe" [level=3] [ref=e88]'
+            - paragraph [ref=e89]: Entrepreneurs, developers, and students share their AI-Dala journeys.
+            - generic [ref=e90]: Published 5 нояб. 2025 г.
+            - 'link "Community spotlight: creators from the Steppe article" [ref=e91] [cursor=pointer]':
+              - /url: /news/community-spotlight
+              - text: Read more
+      - region "About the project & author" [ref=e92]:
+        - heading "About the project & author" [level=2] [ref=e93]
+        - paragraph [ref=e94]: AI-Dala is built by Volodymyr to bring AI-powered content management, search, and learning tools to creators across the Steppe and beyond.
+      - region "Contact & subscribe" [ref=e95]:
+        - heading "Contact & subscribe" [level=2] [ref=e96]
+        - paragraph [ref=e97]: Stay updated on AI news, master-classes, and platform releases.
+        - generic [ref=e98]:
+          - link "Contact us" [ref=e99] [cursor=pointer]:
+            - /url: mailto:hello@ai-dala.com
+          - link "Join AI Dala Telegram" [ref=e100] [cursor=pointer]:
+            - /url: https://t.me/ai_dala
+            - text: Join Telegram
+          - link "Subscribe" [ref=e101] [cursor=pointer]:
+            - /url: /subscribe
+  - alert [ref=e102]
+```
