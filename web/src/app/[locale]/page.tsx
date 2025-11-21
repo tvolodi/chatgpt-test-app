@@ -1,13 +1,18 @@
-"use client";
-
 import Image from "next/image";
+import type { Metadata } from "next";
 import type { CSSProperties, ReactNode } from "react";
 import { newsItems } from "../../data/news";
 import { articleItems } from "../../data/articles";
 import { Navigation } from "../components/Navigation";
-import { useTranslations } from 'next-intl';
+import { getTranslations } from 'next-intl/server';
 
-// Note: Metadata moved to layout.tsx since this is now a client component
+export const metadata: Metadata = {
+  title: "AI-Dala | AI-driven CMS and search",
+  description: "AI-Dala combines Next.js, Go APIs, and AI search to build secure, fast digital experiences.",
+};
+
+// Force dynamic rendering to ensure translations work correctly
+export const dynamic = 'force-dynamic';
 
 const theme = {
   colors: {
@@ -53,9 +58,13 @@ function formatDate(iso: string) {
   });
 }
 
-export default function HomePage() {
-  const t = useTranslations('landing');
-  const tCommon = useTranslations('common');
+export default async function HomePage({
+  params: { locale }
+}: {
+  params: { locale: string };
+}) {
+  const t = await getTranslations({ locale, namespace: 'landing' });
+  const tCommon = await getTranslations({ locale, namespace: 'common' });
   const news = newsItems.slice(0, 5);
   const articles = articleItems.slice(0, 3);
   const schema = {

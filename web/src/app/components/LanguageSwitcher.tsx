@@ -20,23 +20,12 @@ export function LanguageSwitcher() {
     const currentLocale = locales.find(l => l.code === locale) || locales[0];
 
     function onSelectChange(newLocale: string) {
+        // Only handles RU and KK - English uses <a> tag for native navigation
         startTransition(() => {
-            // Remove current locale from pathname if it exists
             const pathnameWithoutLocale = pathname.replace(/^\/(en|ru|kk)/, '') || '/';
-
-            // Add new locale to pathname (unless it's default 'en')
-            const newPathname = newLocale === 'en'
-                ? pathnameWithoutLocale
-                : `/${newLocale}${pathnameWithoutLocale}`;
-
-            // For switching to English (default locale), use window.location to ensure full reload
-            if (newLocale === 'en') {
-                window.location.href = newPathname;
-            } else {
-                // Use push for non-default locales
-                router.push(newPathname);
-                router.refresh();
-            }
+            const newPathname = `/${newLocale}${pathnameWithoutLocale}`;
+            router.push(newPathname);
+            router.refresh();
             setIsOpen(false);
         });
     }
@@ -56,19 +45,36 @@ export function LanguageSwitcher() {
             {isOpen && (
                 <div style={dropdownStyle}>
                     {locales.map((loc) => (
-                        <button
-                            key={loc.code}
-                            onClick={() => onSelectChange(loc.code)}
-                            style={{
-                                ...dropdownItemStyle,
-                                background: loc.code === locale ? '#EFF6FF' : 'transparent',
-                                color: loc.code === locale ? '#0066FF' : '#6B7280'
-                            }}
-                        >
-                            <span style={{ fontSize: 16 }}>{loc.flag}</span>
-                            <span>{loc.name}</span>
-                            {loc.code === locale && <span style={{ marginLeft: 'auto', color: '#0066FF' }}>✓</span>}
-                        </button>
+                        loc.code === 'en' ? (
+                            <a
+                                key={loc.code}
+                                href="/en"
+                                style={{
+                                    ...dropdownItemStyle,
+                                    background: loc.code === locale ? '#EFF6FF' : 'transparent',
+                                    color: loc.code === locale ? '#0066FF' : '#6B7280',
+                                    textDecoration: 'none'
+                                }}
+                            >
+                                <span style={{ fontSize: 16 }}>{loc.flag}</span>
+                                <span>{loc.name}</span>
+                                {loc.code === locale && <span style={{ marginLeft: 'auto', color: '#0066FF' }}>✓</span>}
+                            </a>
+                        ) : (
+                            <button
+                                key={loc.code}
+                                onClick={() => onSelectChange(loc.code)}
+                                style={{
+                                    ...dropdownItemStyle,
+                                    background: loc.code === locale ? '#EFF6FF' : 'transparent',
+                                    color: loc.code === locale ? '#0066FF' : '#6B7280'
+                                }}
+                            >
+                                <span style={{ fontSize: 16 }}>{loc.flag}</span>
+                                <span>{loc.name}</span>
+                                {loc.code === locale && <span style={{ marginLeft: 'auto', color: '#0066FF' }}>✓</span>}
+                            </button>
+                        )
                     ))}
                 </div>
             )}
