@@ -1,4 +1,3 @@
-```typescript
 import { getRequestConfig } from 'next-intl/server';
 
 export default getRequestConfig(async ({ locale }) => {
@@ -7,7 +6,6 @@ export default getRequestConfig(async ({ locale }) => {
 
     return {
         locale: validLocale,
-        messages: (await import(`../ messages / ${ validLocale }.json`)).default
+        messages: (await import(`../messages/${validLocale}.json`)).default
     };
 });
-```
