@@ -15,11 +15,12 @@ test.describe('Multilanguage Support (REQ-006)', () => {
         await expect(page.getByRole('link', { name: /Start with AI Dala/i })).toBeVisible();
 
         // Open language switcher
-        const languageSwitcher = page.locator('button').filter({ hasText: 'EN' });
+        const languageSwitcher = page.getByTestId('language-switcher-trigger');
         await languageSwitcher.click();
 
         // Switch to Russian
-        await page.getByRole('button', { name: /Русский/i }).click();
+        const dropdown = page.getByTestId('language-switcher-dropdown');
+        await dropdown.getByRole('button', { name: /Русский/i }).click();
         await page.waitForLoadState('networkidle');
 
         // Verify URL changed to /ru
@@ -33,11 +34,12 @@ test.describe('Multilanguage Support (REQ-006)', () => {
         await expect(page.getByRole('link', { name: /Начать с AI Dala/i })).toBeVisible();
 
         // Open language switcher again
-        const languageSwitcherRu = page.locator('button').filter({ hasText: 'RU' });
+        const languageSwitcherRu = page.getByTestId('language-switcher-trigger');
         await languageSwitcherRu.click();
 
         // Switch to Kazakh
-        await page.getByRole('button', { name: /Қазақ/i }).click();
+        const dropdownRu = page.getByTestId('language-switcher-dropdown');
+        await dropdownRu.getByRole('button', { name: /Қазақ/i }).click();
         await page.waitForLoadState('networkidle');
 
         // Verify URL changed to /kk
@@ -51,9 +53,13 @@ test.describe('Multilanguage Support (REQ-006)', () => {
         await expect(page.getByRole('link', { name: /AI Dala бастау/i })).toBeVisible();
 
         // Switch back to English
-        const languageSwitcherKk = page.locator('button').filter({ hasText: 'KK' });
+        const languageSwitcherKk = page.getByTestId('language-switcher-trigger');
         await languageSwitcherKk.click();
-        await page.getByRole('button', { name: /English/i }).click();
+
+        const dropdownKk = page.getByTestId('language-switcher-dropdown');
+        const englishLink = dropdownKk.getByRole('link', { name: /English/i });
+        await englishLink.waitFor({ state: 'visible' });
+        await englishLink.click();
         await page.waitForLoadState('networkidle');
 
         // Verify URL is back to / (no locale prefix for English)
@@ -106,16 +112,19 @@ test.describe('Multilanguage Support (REQ-006)', () => {
         await page.waitForLoadState('networkidle');
 
         // Open language switcher
-        const languageSwitcher = page.locator('button').filter({ hasText: 'EN' });
+        const languageSwitcher = page.getByTestId('language-switcher-trigger');
         await languageSwitcher.click();
 
         // Verify all 3 languages are shown
-        await expect(page.getByRole('button', { name: /English/i })).toBeVisible();
-        await expect(page.getByRole('button', { name: /Русский/i })).toBeVisible();
-        await expect(page.getByRole('button', { name: /Қазақ/i })).toBeVisible();
+        const dropdown = page.getByTestId('language-switcher-dropdown');
+        await expect(dropdown).toBeVisible();
+
+        const englishLink = dropdown.getByRole('link', { name: /English/i });
+        await expect(englishLink).toBeVisible();
+        await expect(dropdown.getByRole('button', { name: /Русский/i })).toBeVisible();
+        await expect(dropdown.getByRole('button', { name: /Қазақ/i })).toBeVisible();
 
         // Verify flags are present (emojis)
-        const dropdown = page.locator('div').filter({ hasText: /English.*Русский.*Қазақ/ });
         await expect(dropdown).toContainText('🇬🇧');
         await expect(dropdown).toContainText('🇷🇺');
         await expect(dropdown).toContainText('🇰🇿');

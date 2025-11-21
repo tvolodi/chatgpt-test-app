@@ -33,6 +33,7 @@ export function LanguageSwitcher() {
     return (
         <div style={containerStyle}>
             <button
+                data-testid="language-switcher-trigger"
                 onClick={() => setIsOpen(!isOpen)}
                 style={buttonStyle}
                 disabled={isPending}
@@ -43,7 +44,7 @@ export function LanguageSwitcher() {
             </button>
 
             {isOpen && (
-                <div style={dropdownStyle}>
+                <div data-testid="language-switcher-dropdown" style={dropdownStyle}>
                     {locales.map((loc) => (
                         loc.code === 'en' ? (
                             <a

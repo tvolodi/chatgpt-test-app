@@ -11,6 +11,7 @@ const inter = Inter({ subsets: ["latin"] });
 export const metadata: Metadata = {
     title: "AI Dala",
     description: "AI-Native Web Portal",
+    metadataBase: new URL('https://ai-dala.com'),
 };
 
 const locales = ['en', 'ru', 'kk'];

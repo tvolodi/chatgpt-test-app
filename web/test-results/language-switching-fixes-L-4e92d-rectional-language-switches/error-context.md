@@ -25,16 +25,17 @@
                 - /url: /login
             - listitem [ref=e18]:
               - generic [ref=e19]:
-                - button "🇬🇧 EN ▲" [active] [ref=e20] [cursor=pointer]:
+                - button "🇬🇧 EN ▲" [disabled] [ref=e20] [cursor=pointer]:
                   - generic [ref=e21]: 🇬🇧
                   - generic [ref=e22]: EN
                   - generic [ref=e23]: ▲
                 - generic [ref=e24]:
-                  - button "🇬🇧 English ✓" [ref=e25] [cursor=pointer]:
+                  - link "🇬🇧 English ✓" [ref=e25] [cursor=pointer]:
+                    - /url: /en
                     - generic [ref=e26]: 🇬🇧
                     - generic [ref=e27]: English
                     - generic [ref=e28]: ✓
-                  - button "🇷🇺 Русский" [ref=e29] [cursor=pointer]:
+                  - button "🇷🇺 Русский" [active] [ref=e29] [cursor=pointer]:
                     - generic [ref=e30]: 🇷🇺
                     - generic [ref=e31]: Русский
                   - button "🇰🇿 Қазақ" [ref=e32] [cursor=pointer]:

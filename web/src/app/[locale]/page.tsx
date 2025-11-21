@@ -94,6 +94,11 @@ export default async function HomePage({
     ]
   };
 
+  const getLocalizedHref = (url: string) => {
+    if (locale === 'en') return url;
+    return `/${locale}${url.startsWith('/') ? url : `/${url}`}`;
+  };
+
   return (
     <div style={{ background: theme.colors.background, minHeight: "100vh" }}>
       <header
@@ -204,7 +209,7 @@ export default async function HomePage({
           </h2>
           <CardGrid>
             {articles.map((article) => (
-              <Card key={article.id} title={article.title} summary={article.summary} href={article.url} readMoreText={t('readMore')}>
+              <Card key={article.id} title={article.title} summary={article.summary} href={getLocalizedHref(article.url)} readMoreText={t('readMore')}>
                 <small style={{ color: "#4B5563" }}>{t('updated')} {formatDate(article.updated_at)}</small>
               </Card>
             ))}
@@ -217,7 +222,7 @@ export default async function HomePage({
           </h2>
           <CardGrid>
             {news.map((item) => (
-              <Card key={item.id} title={item.title} summary={item.summary} href={item.url} readMoreText={t('readMore')}>
+              <Card key={item.id} title={item.title} summary={item.summary} href={getLocalizedHref(item.url)} readMoreText={t('readMore')}>
                 <small style={{ color: "#4B5563" }}>{t('published')} {formatDate(item.published_at)}</small>
               </Card>
             ))}

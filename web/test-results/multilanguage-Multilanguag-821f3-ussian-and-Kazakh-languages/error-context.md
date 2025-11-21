@@ -30,7 +30,8 @@
                   - generic [ref=e22]: EN
                   - generic [ref=e23]: ▲
                 - generic [ref=e24]:
-                  - button "🇬🇧 English ✓" [ref=e25] [cursor=pointer]:
+                  - link "🇬🇧 English ✓" [ref=e25] [cursor=pointer]:
+                    - /url: /en
                     - generic [ref=e26]: 🇬🇧
                     - generic [ref=e27]: English
                     - generic [ref=e28]: ✓

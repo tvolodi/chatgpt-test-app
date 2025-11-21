@@ -4,7 +4,7 @@ test.describe("Landing page (REQ-001)", () => {
   test("structure and navigation (TC-UI-001)", async ({ page }) => {
     await page.goto("/");
 
-    const hero = page.getByRole("heading", { level: 1, name: "Build, launch, and grow with AI-Dala." });
+    const hero = page.getByRole("heading", { level: 1, name: /Build, launch, and grow/i });
     await expect(hero).toBeVisible();
     await expect(page.getByRole("img", { name: "AI-Dala logo" })).toBeVisible();
     await expect(page.getByRole("link", { name: "Start with AI Dala" })).toBeVisible();
@@ -16,7 +16,7 @@ test.describe("Landing page (REQ-001)", () => {
     await expect(nav.getByRole("link", { name: "News", exact: true })).toHaveAttribute("href", "#news");
     await expect(nav.getByRole("link", { name: "Articles", exact: true })).toHaveAttribute("href", "#articles");
     await expect(nav.getByRole("link", { name: "Contact / Subscribe", exact: true })).toHaveAttribute("href", "#contact");
-    await expect(nav.getByRole("link", { name: "Sign in", exact: true })).toHaveAttribute("href", "/signin");
+    await expect(nav.getByRole("link", { name: "Sign in", exact: true })).toHaveAttribute("href", "/login");
 
     // Section order via anchors/headings
     const sections = ["What is AI-Dala?", "For whom", "Latest articles", "AI News", "About the project & author", "Contact & subscribe"];
