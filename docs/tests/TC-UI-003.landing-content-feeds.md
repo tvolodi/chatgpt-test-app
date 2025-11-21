@@ -6,7 +6,7 @@
 
 - Title: Landing news and articles blocks (fixtures)
 - Type: ui
-- Scope: REQ-001 (Landing)
+- Scope: REQ-003 (Landing)
 
 ## 2. Preconditions
 
@@ -26,7 +26,7 @@
 
 ## 5. Traceability
 
-- Requirements: REQ-001 (AC-3, AC-5, AC-6, AC-10, AC-11)
+- Requirements: REQ-003 (AC-3, AC-5, AC-6, AC-10, AC-11)
 - Modules: MOD-FE-Landing
 
 ## 6. Notes

@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import type { CSSProperties, ReactNode } from "react";
 import { newsItems } from "../data/news";
 import { articleItems } from "../data/articles";
+import { Navigation } from "./components/Navigation";
 
 export const revalidate = 1800; // ISR revalidation every 30 minutes
 
@@ -36,10 +37,10 @@ export const metadata: Metadata = {
 
 const theme = {
   colors: {
-    primary: "#3A9BDC", // Sky Blue
-    secondary: "#2B2B2B", // Dark Gray
-    accent: "#E6C68E", // Sand Beige
-    background: "#F7F9FC",
+    primary: "#0066FF", // Electric Blue
+    secondary: "#0A1929", // Deep Navy  
+    accent: "#FF6B35", // Sunset Orange
+    background: "#F8FAFC",
     white: "#FFFFFF"
   },
   fonts: "Inter, system-ui, sans-serif"
@@ -121,35 +122,7 @@ export default function HomePage() {
       >
         <div style={{ ...containerStyle, display: "flex", alignItems: "center", gap: 12, padding: "16px" }}>
           <Image src="/AI-Dala-logo.png" alt="AI-Dala logo" width={48} height={48} priority />
-          <nav aria-label="Primary">
-            <ul style={{ display: "flex", gap: 16, listStyle: "none", margin: 0, padding: 0 }}>
-              <li>
-                <a href="#about" style={navLinkStyle}>
-                  About
-                </a>
-              </li>
-              <li>
-                <a href="#news" style={navLinkStyle}>
-                  News
-                </a>
-              </li>
-              <li>
-                <a href="#articles" style={navLinkStyle}>
-                  Articles
-                </a>
-              </li>
-              <li>
-                <a href="#contact" style={navLinkStyle}>
-                  Contact / Subscribe
-                </a>
-              </li>
-              <li>
-                <a href="/signin" style={navLinkStyle}>
-                  Sign in
-                </a>
-              </li>
-            </ul>
-          </nav>
+          <Navigation />
         </div>
       </header>
 
@@ -180,7 +153,7 @@ export default function HomePage() {
                 </a>
               </div>
             </div>
-            <div
+            {/* <div
               style={{
                 background: theme.colors.white,
                 borderRadius: 12,
@@ -197,7 +170,7 @@ export default function HomePage() {
                 style={{ width: "100%", height: "auto", objectFit: "contain" }}
                 priority
               />
-            </div>
+            </div> */}
           </div>
         </section>
 
@@ -301,24 +274,28 @@ const primaryButtonStyle: CSSProperties = {
   display: "inline-block",
   background: theme.colors.primary,
   color: theme.colors.white,
-  padding: "12px 16px",
-  borderRadius: 10,
+  padding: "14px 28px",
+  borderRadius: 12,
   fontWeight: 700,
   textDecoration: "none",
   minWidth: 160,
-  textAlign: "center"
+  textAlign: "center",
+  boxShadow: "0 8px 20px rgba(0, 102, 255, 0.3)",
+  transition: "all 0.3s ease"
 };
 
 const secondaryButtonStyle: CSSProperties = {
   display: "inline-block",
   background: theme.colors.accent,
-  color: theme.colors.secondary,
-  padding: "12px 16px",
-  borderRadius: 10,
+  color: theme.colors.white,
+  padding: "14px 28px",
+  borderRadius: 12,
   fontWeight: 700,
   textDecoration: "none",
   minWidth: 160,
-  textAlign: "center"
+  textAlign: "center",
+  boxShadow: "0 8px 20px rgba(255, 107, 53, 0.3)",
+  transition: "all 0.3s ease"
 };
 
 const linkStyle: CSSProperties = {
