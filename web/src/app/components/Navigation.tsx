@@ -2,6 +2,7 @@
 
 import { useSession, signOut } from "next-auth/react";
 import type { CSSProperties } from "react";
+import { LanguageSwitcher } from "./LanguageSwitcher";
 
 const navLinkStyle: CSSProperties = {
     textDecoration: "none",
@@ -74,6 +75,9 @@ export function Navigation() {
                             Sign in
                         </a>
                     )}
+                </li>
+                <li>
+                    <LanguageSwitcher />
                 </li>
             </ul>
         </nav>

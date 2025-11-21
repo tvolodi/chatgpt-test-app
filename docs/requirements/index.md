@@ -12,3 +12,4 @@
 | REQ-003  | Site landing page (public) | functional     | high     | approved | REQ-003.site-landing-page.md |
 | REQ-004  | User Dashboard Layout      | functional     | high     | approved | REQ-004.dashboard.md         |
 | REQ-005  | Dashboard Sidebar Navigation | functional   | high     | approved | REQ-005.dashboard-sidebar.md |
+| REQ-006  | Multilanguage Support (i18n) | functional   | high     | draft    | REQ-006.multilanguage.md     |

@@ -2,8 +2,11 @@
 
 import { signIn } from "next-auth/react";
 import Image from "next/image";
+import { useTranslations } from 'next-intl';
 
 export default function LoginPage() {
+    const t = useTranslations('login');
+
     return (
         <div
             style={{
@@ -64,7 +67,7 @@ export default function LoginPage() {
                         lineHeight: 1.2
                     }}
                 >
-                    Welcome Back
+                    {t('title')}
                 </h1>
 
                 {/* Subtitle */}
@@ -76,7 +79,7 @@ export default function LoginPage() {
                         lineHeight: 1.5
                     }}
                 >
-                    Sign in to access your dashboard and continue your journey on the Steppe
+                    {t('subtitle')}
                 </p>
 
                 {/* Sign In Button */}
@@ -107,54 +110,6 @@ export default function LoginPage() {
                 >
                     Sign In with Keycloak
                 </button>
-
-                {/* Divider */}
-                <div
-                    style={{
-                        display: "flex",
-                        alignItems: "center",
-                        margin: "32px 0",
-                        gap: "16px"
-                    }}
-                >
-                    <div style={{ flex: 1, height: "1px", background: "#E5E7EB" }} />
-                    <span style={{ fontSize: "14px", color: "#9CA3AF", fontWeight: 500 }}>
-                        New to AI-Dala?
-                    </span>
-                    <div style={{ flex: 1, height: "1px", background: "#E5E7EB" }} />
-                </div>
-
-                {/* Info Text */}
-                <p
-                    style={{
-                        fontSize: "14px",
-                        color: "#6B7280",
-                        lineHeight: 1.6,
-                        margin: 0
-                    }}
-                >
-                    Click the button above to sign in. If you don't have an account, you can create one on the Keycloak registration page.
-                </p>
-
-                {/* Footer Accent */}
-                <div
-                    style={{
-                        marginTop: "40px",
-                        paddingTop: "24px",
-                        borderTop: "1px solid #E5E7EB"
-                    }}
-                >
-                    <p
-                        style={{
-                            fontSize: "13px",
-                            color: "#9CA3AF",
-                            margin: 0,
-                            fontStyle: "italic"
-                        }}
-                    >
-                        "Where Ideas Meet the Steppe — and Grow with AI"
-                    </p>
-                </div>
             </div>
         </div>
     );

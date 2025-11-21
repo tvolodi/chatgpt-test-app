@@ -1,0 +1,98 @@
+{
+    "common": {
+        "appName": "AI-Dala",
+        "home": "Home",
+        "signIn": "Sign in",
+        "logout": "Logout",
+        "dashboard": "Dashboard",
+        "comingSoon": "Coming Soon"
+    },
+    "navigation": {
+        "news": "News",
+        "articles": "Articles",
+        "categories": "Categories",
+        "tags": "Tags",
+        "settings": "Settings"
+    },
+    "landing": {
+        "badge": "AI-Dala",
+        "heroTitle": "Build, launch, and grow\nwith AI-Dala.",
+        "heroSubtitle": "CMS + AI search + secure auth in one powerful stack. Where ideas meet the steppe — and grow with AI.",
+        "ctaPrimary": "Start with AI Dala →",
+        "ctaSecondary": "Join AI master-class",
+        "aboutHeading": "What is AI-Dala?",
+        "aboutText": "AI-Dala is an AI-driven CMS and search platform that blends Next.js, Go APIs, and secure identity to help you build performant, discoverable experiences.",
+        "aboutLink": "Learn more about AI-Dala",
+        "forWhomHeading": "For whom",
+        "audiences": {
+            "entrepreneurs": "Entrepreneurs",
+            "developers": "Developers",
+            "students": "Students"
+        },
+        "articlesHeading": "Latest articles",
+        "newsHeading": "AI News",
+        "authorHeading": "About the project & author",
+        "authorText": "AI-Dala is built by Volodymyr to bring AI-powered content management, search, and learning tools to creators across the Steppe and beyond.",
+        "contactHeading": "Contact & subscribe",
+        "contactText": "Stay updated on AI news, master-classes, and platform releases.",
+        "contactUs": "Contact us",
+        "joinTelegram": "Join Telegram",
+        "subscribe": "Subscribe",
+        "readMore": "Read more",
+        "updated": "Updated",
+        "published": "Published"
+    },
+    "login": {
+        "title": "Welcome to AI-Dala",
+        "subtitle": "Sign in to continue"
+    },
+    "dashboard": {
+        "welcome": "Welcome back, {name}!",
+        "subtitle": "Your journey on the Steppe continues. Explore AI-powered content, manage your learning, and grow with AI-Dala.",
+        "note": "Note",
+        "noteText": "This is the initial dashboard layout. Specific features and widgets will be added in future requirements (REQ-007).",
+        "stats": {
+            "newsArticles": "News Articles",
+            "savedArticles": "Saved Articles",
+            "courses": "Courses",
+            "achievements": "Achievements"
+        },
+        "pages": {
+            "news": {
+                "title": "News",
+                "subtitle": "Manage news articles",
+                "emptyTitle": "No News Articles Yet",
+                "emptyText": "News management functionality will be added in a future update.",
+                "comingSoonText": "Create, edit, and publish news articles."
+            },
+            "articles": {
+                "title": "Articles",
+                "subtitle": "Manage articles and blog posts",
+                "emptyTitle": "No Articles Yet",
+                "emptyText": "Article management functionality will be added in a future update.",
+                "comingSoonText": "Create, edit, and publish articles and blog posts."
+            },
+            "categories": {
+                "title": "Categories",
+                "subtitle": "Manage content categories",
+                "emptyTitle": "No Categories Yet",
+                "emptyText": "Category management functionality will be added in a future update.",
+                "comingSoonText": "Create, edit, and organize categories for your content."
+            },
+            "tags": {
+                "title": "Tags",
+                "subtitle": "Manage content tags",
+                "emptyTitle": "No Tags Yet",
+                "emptyText": "Tag management functionality will be added in a future update.",
+                "comingSoonText": "Create, edit, and organize tags for better content discovery."
+            },
+            "settings": {
+                "title": "Settings",
+                "subtitle": "Manage your account and preferences",
+                "emptyTitle": "Settings",
+                "emptyText": "User settings and preferences will be added in a future update.",
+                "comingSoonText": "Manage your profile, preferences, and account settings."
+            }
+        }
+    }
+}
