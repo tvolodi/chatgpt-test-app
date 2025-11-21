@@ -1,39 +1,13 @@
+"use client";
+
 import Image from "next/image";
-import type { Metadata } from "next";
 import type { CSSProperties, ReactNode } from "react";
 import { newsItems } from "../../data/news";
 import { articleItems } from "../../data/articles";
 import { Navigation } from "../components/Navigation";
+import { useTranslations } from 'next-intl';
 
-export const revalidate = 1800; // ISR revalidation every 30 minutes
-
-export const metadata: Metadata = {
-  title: "AI-Dala | AI-driven CMS and search",
-  description: "AI-Dala combines Next.js, Go APIs, and AI search to build secure, fast digital experiences.",
-  metadataBase: new URL("https://ai-dala.com"),
-  alternates: { canonical: "/" },
-  openGraph: {
-    title: "AI-Dala | AI-driven CMS and search",
-    description: "AI-Dala combines Next.js, Go APIs, and AI search to build secure, fast digital experiences.",
-    url: "https://ai-dala.com/",
-    siteName: "AI-Dala",
-    images: [
-      {
-        url: "/AI-Dala-logo.png",
-        width: 1200,
-        height: 630,
-        alt: "AI-Dala circular horizon logo"
-      }
-    ],
-    type: "website"
-  },
-  twitter: {
-    card: "summary_large_image",
-    title: "AI-Dala | AI-driven CMS and search",
-    description: "AI-Dala combines Next.js, Go APIs, and AI search to build secure, fast digital experiences.",
-    images: ["/AI-Dala-logo.png"]
-  }
-};
+// Note: Metadata moved to layout.tsx since this is now a client component
 
 const theme = {
   colors: {
@@ -80,6 +54,8 @@ function formatDate(iso: string) {
 }
 
 export default function HomePage() {
+  const t = useTranslations('landing');
+  const tCommon = useTranslations('common');
   const news = newsItems.slice(0, 5);
   const articles = articleItems.slice(0, 3);
   const schema = {
@@ -123,6 +99,20 @@ export default function HomePage() {
         <div style={{ ...containerStyle, display: "flex", alignItems: "center", gap: 12, padding: "16px" }}>
           <Image src="/AI-Dala-logo.png" alt="AI-Dala logo" width={48} height={48} priority />
           <Navigation />
+          {/* Locale test identifier - hidden but accessible for testing */}
+          <span
+            data-testid="locale-identifier"
+            style={{
+              position: "absolute",
+              left: "-9999px",
+              width: "1px",
+              height: "1px",
+              overflow: "hidden"
+            }}
+            aria-hidden="true"
+          >
+            {tCommon('localeTest')}
+          </span>
         </div>
       </header>
 
@@ -137,19 +127,19 @@ export default function HomePage() {
             }}
           >
             <div>
-              <p style={{ color: theme.colors.accent, margin: "0 0 8px", fontWeight: 600 }}>AI-Dala</p>
+              <p style={{ color: theme.colors.accent, margin: "0 0 8px", fontWeight: 600 }}>{t('badge')}</p>
               <h1 id="hero-heading" style={{ fontSize: "40px", margin: "0 0 16px", color: theme.colors.secondary }}>
-                Build, launch, and grow with AI-Dala.
+                {t('heroTitle')}
               </h1>
               <p style={{ fontSize: "18px", margin: "0 0 24px", color: theme.colors.secondary }}>
-                CMS + AI search + secure auth in one stack.
+                {t('heroSubtitle')}
               </p>
               <div style={{ display: "flex", gap: 12, flexWrap: "wrap" }}>
                 <a href="#contact" style={primaryButtonStyle} aria-label="Start with AI Dala">
-                  Start with AI Dala
+                  {t('ctaPrimary')}
                 </a>
                 <a href="#contact" style={secondaryButtonStyle} aria-label="Join AI master-class">
-                  Join AI master-class
+                  {t('ctaSecondary')}
                 </a>
               </div>
             </div>
@@ -176,23 +166,22 @@ export default function HomePage() {
 
         <section style={sectionStyle} id="about" aria-labelledby="about-heading">
           <h2 id="about-heading" style={headingStyle}>
-            What is AI-Dala?
+            {t('aboutHeading')}
           </h2>
           <p style={{ margin: "0 0 16px", fontSize: "16px", lineHeight: 1.6 }}>
-            AI-Dala is an AI-driven CMS and search platform that blends Next.js, Go APIs, and secure identity to help you
-            build performant, discoverable experiences.
+            {t('aboutText')}
           </p>
           <a href="/about" style={linkStyle}>
-            Learn more about AI-Dala
+            {t('aboutLink')}
           </a>
         </section>
 
         <section style={sectionStyle} aria-labelledby="for-whom-heading">
           <h2 id="for-whom-heading" style={headingStyle}>
-            For whom
+            {t('forWhomHeading')}
           </h2>
           <div style={pillRowStyle}>
-            {["Entrepreneurs", "Developers", "Students"].map((aud) => (
+            {[t('audiences.entrepreneurs'), t('audiences.developers'), t('audiences.students')].map((aud) => (
               <div key={aud} style={pillStyle} role="article" aria-label={aud}>
                 {aud}
               </div>
@@ -202,12 +191,12 @@ export default function HomePage() {
 
         <section style={sectionStyle} id="articles" aria-labelledby="articles-heading">
           <h2 id="articles-heading" style={headingStyle}>
-            Latest articles
+            {t('articlesHeading')}
           </h2>
           <CardGrid>
             {articles.map((article) => (
-              <Card key={article.id} title={article.title} summary={article.summary} href={article.url}>
-                <small style={{ color: "#4B5563" }}>Updated {formatDate(article.updated_at)}</small>
+              <Card key={article.id} title={article.title} summary={article.summary} href={article.url} readMoreText={t('readMore')}>
+                <small style={{ color: "#4B5563" }}>{t('updated')} {formatDate(article.updated_at)}</small>
               </Card>
             ))}
           </CardGrid>
@@ -215,12 +204,12 @@ export default function HomePage() {
 
         <section style={sectionStyle} id="news" aria-labelledby="news-heading">
           <h2 id="news-heading" style={headingStyle}>
-            AI News
+            {t('newsHeading')}
           </h2>
           <CardGrid>
             {news.map((item) => (
-              <Card key={item.id} title={item.title} summary={item.summary} href={item.url}>
-                <small style={{ color: "#4B5563" }}>Published {formatDate(item.published_at)}</small>
+              <Card key={item.id} title={item.title} summary={item.summary} href={item.url} readMoreText={t('readMore')}>
+                <small style={{ color: "#4B5563" }}>{t('published')} {formatDate(item.published_at)}</small>
               </Card>
             ))}
           </CardGrid>
@@ -228,30 +217,29 @@ export default function HomePage() {
 
         <section style={sectionStyle} aria-labelledby="author-heading">
           <h2 id="author-heading" style={headingStyle}>
-            About the project & author
+            {t('authorHeading')}
           </h2>
           <p style={{ margin: "0 0 12px", fontSize: "16px", lineHeight: 1.6 }}>
-            AI-Dala is built by Volodymyr to bring AI-powered content management, search, and learning tools to creators
-            across the Steppe and beyond.
+            {t('authorText')}
           </p>
         </section>
 
         <section style={{ ...sectionStyle, borderBottom: "none" }} id="contact" aria-labelledby="contact-heading">
           <h2 id="contact-heading" style={headingStyle}>
-            Contact & subscribe
+            {t('contactHeading')}
           </h2>
           <p style={{ margin: "0 0 12px", fontSize: "16px", lineHeight: 1.6 }}>
-            Stay updated on AI news, master-classes, and platform releases.
+            {t('contactText')}
           </p>
           <div style={{ display: "flex", gap: 12, flexWrap: "wrap" }}>
             <a href="mailto:hello@ai-dala.com" style={secondaryButtonStyle}>
-              Contact us
+              {t('contactUs')}
             </a>
             <a href="https://t.me/ai_dala" style={primaryButtonStyle} aria-label="Join AI Dala Telegram">
-              Join Telegram
+              {t('joinTelegram')}
             </a>
             <a href="/subscribe" style={secondaryButtonStyle}>
-              Subscribe
+              {t('subscribe')}
             </a>
           </div>
         </section>
@@ -323,10 +311,11 @@ type CardProps = {
   title: string;
   summary: string;
   href: string;
+  readMoreText: string;
   children?: ReactNode;
 };
 
-function Card({ title, summary, href, children }: CardProps) {
+function Card({ title, summary, href, readMoreText, children }: CardProps) {
   return (
     <article
       style={{
@@ -344,7 +333,7 @@ function Card({ title, summary, href, children }: CardProps) {
       <p style={{ margin: 0, fontSize: "15px", lineHeight: 1.6 }}>{summary}</p>
       {children}
       <a href={href} style={linkStyle} aria-label={`${title} article`}>
-        Read more
+        {readMoreText}
       </a>
     </article>
   );

@@ -22,7 +22,7 @@ services:
       - "4000:4000"
     environment:
       DATABASE_URL: "postgres://postgres:postgres@db:5432/ai_dala?sslmode=disable"
-      KEYCLOAK_ISSUER: "http://keycloak:8080/realms/ai-dala"
+      KEYCLOAK_ISSUER: "http://keycloak:8080/realms/ai-dala-realm"
     depends_on:
       - db
       - keycloak

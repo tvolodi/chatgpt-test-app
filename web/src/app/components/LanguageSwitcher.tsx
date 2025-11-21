@@ -29,7 +29,14 @@ export function LanguageSwitcher() {
                 ? pathnameWithoutLocale
                 : `/${newLocale}${pathnameWithoutLocale}`;
 
-            router.replace(newPathname);
+            // For switching to English (default locale), use window.location to ensure full reload
+            if (newLocale === 'en') {
+                window.location.href = newPathname;
+            } else {
+                // Use push for non-default locales
+                router.push(newPathname);
+                router.refresh();
+            }
             setIsOpen(false);
         });
     }

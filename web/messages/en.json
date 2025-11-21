@@ -5,11 +5,14 @@
         "signIn": "Sign in",
         "logout": "Logout",
         "dashboard": "Dashboard",
-        "comingSoon": "Coming Soon"
+        "comingSoon": "Coming Soon",
+        "localeTest": "LOCALE-TEST-EN"
     },
     "navigation": {
+        "about": "About",
         "news": "News",
         "articles": "Articles",
+        "contact": "Contact / Subscribe",
         "categories": "Categories",
         "tags": "Tags",
         "settings": "Settings"

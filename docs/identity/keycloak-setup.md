@@ -1,4 +1,59 @@
-# Keycloak Setup Guide - Public Client
+# Keycloak Setup Guide - Automated Import
+
+This guide explains the automated Keycloak configuration for the AI-Dala web application.
+
+## Automated Setup
+
+The Keycloak realm and client are now automatically imported on container startup via `keycloak/realm-export.json`.
+
+### What's Configured
+
+The realm export automatically creates:
+
+- **Realm**: `ai-dala-realm`
+- **Client**: `webapp` (public client with PKCE)
+- **Test User**: `testuser` / `test123`
+- **Login Features**:
+  - ✅ User registration enabled
+  - ✅ Forgot password enabled
+  - ✅ Remember me enabled
+
+### Quick Start
+
+1. Start the Keycloak container:
+   ```powershell
+   docker-compose up -d keycloak
+   ```
+
+2. Wait for Keycloak to initialize (~30 seconds)
+
+3. Verify the setup:
+   - Open [http://localhost:8080](http://localhost:8080)
+   - Login with `admin` / `admin`
+   - Select `ai-dala-realm` from the dropdown
+   - Verify the `webapp` client exists
+
+### Applying Configuration Changes
+
+If you modify `keycloak/realm-export.json`, restart the container:
+
+```powershell
+./scripts/setup-keycloak.ps1
+```
+
+Or manually:
+
+```powershell
+docker-compose up -d --force-recreate keycloak
+```
+
+## Manual Setup (Legacy)
+
+For manual setup instructions, see the original guide below.
+
+---
+
+# Keycloak Setup Guide - Public Client (Manual)
 
 This guide walks you through configuring Keycloak for the AI-Dala web application using a **public client** (no client secret).
 

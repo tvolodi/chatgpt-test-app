@@ -5,11 +5,14 @@
         "signIn": "Кіру",
         "logout": "Шығу",
         "dashboard": "Басқару тақтасы",
-        "comingSoon": "Жақында"
+        "comingSoon": "Жақында",
+        "localeTest": "LOCALE-TEST-KK"
     },
     "navigation": {
+        "about": "Жоба туралы",
         "news": "Жаңалықтар",
         "articles": "Мақалалар",
+        "contact": "Байланыс / Жазылу",
         "categories": "Санаттар",
         "tags": "Тегтер",
         "settings": "Параметрлер"

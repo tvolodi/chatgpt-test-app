@@ -5,11 +5,14 @@
         "signIn": "Войти",
         "logout": "Выйти",
         "dashboard": "Панель управления",
-        "comingSoon": "Скоро"
+        "comingSoon": "Скоро",
+        "localeTest": "LOCALE-TEST-RU"
     },
     "navigation": {
+        "about": "О проекте",
         "news": "Новости",
         "articles": "Статьи",
+        "contact": "Контакты / Подписка",
         "categories": "Категории",
         "tags": "Теги",
         "settings": "Настройки"

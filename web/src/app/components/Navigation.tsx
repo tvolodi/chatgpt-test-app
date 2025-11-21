@@ -3,6 +3,7 @@
 import { useSession, signOut } from "next-auth/react";
 import type { CSSProperties } from "react";
 import { LanguageSwitcher } from "./LanguageSwitcher";
+import { useTranslations } from 'next-intl';
 
 const navLinkStyle: CSSProperties = {
     textDecoration: "none",
@@ -27,6 +28,8 @@ const buttonStyle: CSSProperties = {
 export function Navigation() {
     const { data: session, status } = useSession();
     const isLoading = status === "loading";
+    const t = useTranslations('navigation');
+    const tCommon = useTranslations('common');
 
     const handleLogout = () => {
         signOut({ callbackUrl: "/" });
@@ -37,22 +40,22 @@ export function Navigation() {
             <ul style={{ display: "flex", gap: 16, listStyle: "none", margin: 0, padding: 0, alignItems: "center" }}>
                 <li>
                     <a href="#about" style={navLinkStyle}>
-                        About
+                        {t('about')}
                     </a>
                 </li>
                 <li>
                     <a href="#news" style={navLinkStyle}>
-                        News
+                        {t('news')}
                     </a>
                 </li>
                 <li>
                     <a href="#articles" style={navLinkStyle}>
-                        Articles
+                        {t('articles')}
                     </a>
                 </li>
                 <li>
                     <a href="#contact" style={navLinkStyle}>
-                        Contact / Subscribe
+                        {t('contact')}
                     </a>
                 </li>
                 <li>
@@ -61,18 +64,18 @@ export function Navigation() {
                     ) : session ? (
                         <>
                             <a href="/dashboard" style={navLinkStyle}>
-                                Dashboard
+                                {tCommon('dashboard')}
                             </a>
                             <button
                                 onClick={handleLogout}
                                 style={buttonStyle}
                             >
-                                Logout
+                                {tCommon('logout')}
                             </button>
                         </>
                     ) : (
                         <a href="/login" style={navLinkStyle}>
-                            Sign in
+                            {tCommon('signIn')}
                         </a>
                     )}
                 </li>

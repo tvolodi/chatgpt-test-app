@@ -1,12 +1,12 @@
 {
-  "realm": "ai-dala",
+  "realm": "ai-dala-realm",
   "enabled": true,
   "registrationAllowed": true,
   "resetPasswordAllowed": true,
   "rememberMe": true,
   "clients": [
     {
-      "clientId": "ai-dala-web",
+      "clientId": "webapp",
       "enabled": true,
       "publicClient": true,
       "redirectUris": [
@@ -22,17 +22,21 @@
   ],
   "users": [
     {
-      "username": "user",
+      "username": "testuser",
       "enabled": true,
+      "email": "test@ai-dala.com",
+      "firstName": "Test",
+      "lastName": "User",
+      "emailVerified": true,
       "credentials": [
         {
           "type": "password",
-          "value": "password",
+          "value": "test123",
           "temporary": false
         }
       ],
       "realmRoles": [
-        "default-roles-ai-dala"
+        "default-roles-ai-dala-realm"
       ]
     }
   ]
