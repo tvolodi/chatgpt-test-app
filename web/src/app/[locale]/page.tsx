@@ -1,9 +1,9 @@
 import Image from "next/image";
 import type { Metadata } from "next";
 import type { CSSProperties, ReactNode } from "react";
-import { newsItems } from "../data/news";
-import { articleItems } from "../data/articles";
-import { Navigation } from "./components/Navigation";
+import { newsItems } from "../../data/news";
+import { articleItems } from "../../data/articles";
+import { Navigation } from "../components/Navigation";
 
 export const revalidate = 1800; // ISR revalidation every 30 minutes
 
