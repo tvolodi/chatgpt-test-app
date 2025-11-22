@@ -108,6 +108,45 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
+  /tags:
+    get:
+      tags: [tags]
+      summary: List tags
+      operationId: listTags
+      responses:
+        '200':
+          description: List of tags.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Tag'
+  /tags/{code}:
+    get:
+      tags: [tags]
+      summary: Get tag by code
+      operationId: getTagByCode
+      parameters:
+        - in: path
+          name: code
+          required: true
+          schema:
+            type: string
+          description: Tag code
+      responses:
+        '200':
+          description: Tag details.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Tag'
+        '404':
+          description: Tag not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
 components:
   schemas:
     LoginRequest:
@@ -201,3 +240,17 @@ components:
           type: integer
         page_size:
           type: integer
+    Tag:
+      type: object
+      required: [id, code, name]
+      properties:
+        id:
+          type: string
+          format: uuid
+        code:
+          type: string
+        name:
+          type: object
+          description: Localized name (JSONB)
+          additionalProperties:
+            type: string

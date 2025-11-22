@@ -4,6 +4,18 @@
   "registrationAllowed": true,
   "resetPasswordAllowed": true,
   "rememberMe": true,
+  "roles": {
+    "realm": [
+      {
+        "name": "ADMIN",
+        "description": "Administrator role with full access"
+      },
+      {
+        "name": "CONTENT_MANAGER",
+        "description": "Content manager role with content editing access"
+      }
+    ]
+  },
   "clients": [
     {
       "clientId": "webapp",
@@ -14,10 +26,11 @@
       ],
       "webOrigins": [
         "http://localhost:3000",
+        "http://localhost:4000",
         "+"
       ],
       "standardFlowEnabled": true,
-      "directAccessGrantsEnabled": true
+      "directAccessGrantsEnabled": false
     }
   ],
   "users": [
@@ -36,7 +49,46 @@
         }
       ],
       "realmRoles": [
-        "default-roles-ai-dala-realm"
+        "default-roles-ai-dala-realm",
+        "ADMIN"
+      ]
+    },
+    {
+      "username": "ai-admin",
+      "enabled": true,
+      "email": "admin@ai-dala.com",
+      "firstName": "Admin",
+      "lastName": "User",
+      "emailVerified": true,
+      "credentials": [
+        {
+          "type": "password",
+          "value": "admin123",
+          "temporary": false
+        }
+      ],
+      "realmRoles": [
+        "default-roles-ai-dala-realm",
+        "ADMIN"
+      ]
+    },
+    {
+      "username": "content_manager",
+      "enabled": true,
+      "email": "content@ai-dala.com",
+      "firstName": "Content",
+      "lastName": "Manager",
+      "emailVerified": true,
+      "credentials": [
+        {
+          "type": "password",
+          "value": "content123",
+          "temporary": false
+        }
+      ],
+      "realmRoles": [
+        "default-roles-ai-dala-realm",
+        "CONTENT_MANAGER"
       ]
     }
   ]

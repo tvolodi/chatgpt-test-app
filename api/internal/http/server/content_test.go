@@ -9,7 +9,7 @@ import (
 
 func TestNewsListHandler(t *testing.T) {
 	// Content handlers don't use auth yet, so we can pass nil or a mock
-	srv := NewServer(nil)
+	srv := NewServer(nil, nil)
 	mux := http.NewServeMux()
 	srv.RegisterRoutes(mux)
 
@@ -101,7 +101,7 @@ func TestNewsListHandler(t *testing.T) {
 }
 
 func TestNewsDetailHandler(t *testing.T) {
-	srv := NewServer(nil)
+	srv := NewServer(nil, nil)
 	mux := http.NewServeMux()
 	srv.RegisterRoutes(mux)
 

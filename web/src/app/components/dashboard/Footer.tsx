@@ -20,7 +20,7 @@ export function DashboardFooter() {
 
                 {/* Tagline */}
                 <div style={taglineStyle}>
-                    "Where Ideas Meet the Steppe — and Grow with AI"
+                    &quot;Where Ideas Meet the Steppe — and Grow with AI&quot;
                 </div>
             </div>
         </footer>

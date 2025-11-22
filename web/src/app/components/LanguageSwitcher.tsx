@@ -45,38 +45,29 @@ export function LanguageSwitcher() {
 
             {isOpen && (
                 <div data-testid="language-switcher-dropdown" style={dropdownStyle}>
-                    {locales.map((loc) => (
-                        loc.code === 'en' ? (
+                    {locales.map((loc) => {
+                        const pathnameWithoutLocale = pathname.replace(/^\/(en|ru|kk)/, '') || '/';
+                        const href = loc.code === 'en' ? `/en${pathnameWithoutLocale}` : `/${loc.code}${pathnameWithoutLocale}`;
+
+                        return (
                             <a
                                 key={loc.code}
-                                href="/en"
+                                href={href}
+                                role={loc.code === 'en' ? 'link' : 'button'}
                                 style={{
                                     ...dropdownItemStyle,
                                     background: loc.code === locale ? '#EFF6FF' : 'transparent',
                                     color: loc.code === locale ? '#0066FF' : '#6B7280',
                                     textDecoration: 'none'
                                 }}
+                                onClick={() => setIsOpen(false)}
                             >
                                 <span style={{ fontSize: 16 }}>{loc.flag}</span>
                                 <span>{loc.name}</span>
                                 {loc.code === locale && <span style={{ marginLeft: 'auto', color: '#0066FF' }}>✓</span>}
                             </a>
-                        ) : (
-                            <button
-                                key={loc.code}
-                                onClick={() => onSelectChange(loc.code)}
-                                style={{
-                                    ...dropdownItemStyle,
-                                    background: loc.code === locale ? '#EFF6FF' : 'transparent',
-                                    color: loc.code === locale ? '#0066FF' : '#6B7280'
-                                }}
-                            >
-                                <span style={{ fontSize: 16 }}>{loc.flag}</span>
-                                <span>{loc.name}</span>
-                                {loc.code === locale && <span style={{ marginLeft: 'auto', color: '#0066FF' }}>✓</span>}
-                            </button>
-                        )
-                    ))}
+                        );
+                    })}
                 </div>
             )}
         </div>

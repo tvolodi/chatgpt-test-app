@@ -1,92 +1,68 @@
-"use client";
+'use client';
 
-import type { CSSProperties } from "react";
+import React, { useEffect, useState } from 'react';
+import Link from 'next/link';
+import TagList from '@/app/components/tags/TagList';
 
-export default function TagsPage() {
+interface Tag {
+    id: string;
+    code: string;
+    name: Record<string, string>;
+}
+
+export default function TagsPage({ params }: { params: { locale: string } }) {
+    const [tags, setTags] = useState<Tag[]>([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState('');
+
+    useEffect(() => {
+        fetchTags();
+    }, []);
+
+    const fetchTags = async () => {
+        try {
+            const res = await fetch('http://localhost:4000/api/tags');
+            if (!res.ok) throw new Error('Failed to fetch tags');
+            const data = await res.json();
+            setTags(data || []);
+        } catch (err) {
+            setError('Error loading tags');
+            console.error(err);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleDelete = async (code: string) => {
+        if (!confirm('Are you sure you want to delete this tag?')) return;
+        try {
+            const res = await fetch(`http://localhost:4000/api/tags/${code}`, { method: 'DELETE' });
+            // Note: API returns 204 on success
+            if (!res.ok && res.status !== 404) throw new Error('Failed to delete tag');
+
+            // Optimistic update
+            setTags(tags.filter(t => t.code !== code));
+        } catch (err) {
+            console.error(err);
+            alert('Failed to delete tag');
+        }
+    };
+
+    if (loading) return <div>Loading...</div>;
+    if (error) return <div className="text-red-600">{error}</div>;
+
     return (
-        <div style={containerStyle}>
-            {/* Page Header */}
-            <div style={headerStyle}>
-                <h1 style={headingStyle}>Tags</h1>
-                <p style={subtitleStyle}>Manage content tags</p>
+        <div className="p-6">
+            <div className="flex justify-between items-center mb-6">
+                <h1 className="text-2xl font-bold text-gray-900">Tags</h1>
+                <Link
+                    href={`/${params.locale}/dashboard/tags/create`}
+                    className="px-4 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700"
+                >
+                    Create Tag
+                </Link>
             </div>
-
-            {/* Empty State */}
-            <div style={emptyStateStyle}>
-                <div style={iconStyle}>🏷️</div>
-                <h2 style={emptyHeadingStyle}>No Tags Yet</h2>
-                <p style={emptyTextStyle}>
-                    Tag management functionality will be added in a future update.
-                </p>
-                <div style={infoBoxStyle}>
-                    <p style={{ margin: 0, fontSize: "14px" }}>
-                        <strong>Coming Soon:</strong> Create, edit, and organize tags for better content discovery.
-                    </p>
-                </div>
-            </div>
+            <TagList tags={tags} onDelete={handleDelete} locale={params.locale} />
         </div>
     );
 }
-
-const containerStyle: CSSProperties = {
-    maxWidth: "1200px",
-    margin: "0 auto"
-};
-
-const headerStyle: CSSProperties = {
-    marginBottom: 32
-};
-
-const headingStyle: CSSProperties = {
-    fontSize: "32px",
-    fontWeight: 700,
-    color: "#0A1929",
-    margin: "0 0 8px"
-};
-
-const subtitleStyle: CSSProperties = {
-    fontSize: "16px",
-    color: "#6B7280",
-    margin: 0
-};
-
-const emptyStateStyle: CSSProperties = {
-    background: "#FFFFFF",
-    borderRadius: 16,
-    padding: "64px 40px",
-    boxShadow: "0 10px 30px rgba(0, 0, 0, 0.08), 0 4px 12px rgba(0, 0, 0, 0.04)",
-    border: "1px solid rgba(0, 0, 0, 0.05)",
-    textAlign: "center"
-};
-
-const iconStyle: CSSProperties = {
-    fontSize: 64,
-    marginBottom: 24
-};
-
-const emptyHeadingStyle: CSSProperties = {
-    fontSize: "24px",
-    fontWeight: 700,
-    color: "#0A1929",
-    margin: "0 0 12px"
-};
-
-const emptyTextStyle: CSSProperties = {
-    fontSize: "16px",
-    color: "#6B7280",
-    margin: "0 0 24px",
-    maxWidth: 500,
-    marginLeft: "auto",
-    marginRight: "auto"
-};
-
-const infoBoxStyle: CSSProperties = {
-    background: "#EFF6FF",
-    border: "1px solid #0066FF",
-    borderRadius: 12,
-    padding: "16px 20px",
-    color: "#0A1929",
-    maxWidth: 600,
-    marginLeft: "auto",
-    marginRight: "auto"
-};
