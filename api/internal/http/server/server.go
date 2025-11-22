@@ -6,19 +6,22 @@ import (
 	"net/http"
 
 	"github.com/ai-dala/api/internal/auth"
+	"github.com/ai-dala/api/internal/modules/categories"
 	"github.com/ai-dala/api/internal/modules/tags"
 	"github.com/google/uuid"
 )
 
 type Server struct {
-	auth        auth.Service
-	tagsHandler *tags.Handler
+	auth              auth.Service
+	tagsHandler       *tags.Handler
+	categoriesHandler *categories.Handler
 }
 
-func NewServer(authService auth.Service, tagsHandler *tags.Handler) *Server {
+func NewServer(authService auth.Service, tagsHandler *tags.Handler, categoriesHandler *categories.Handler) *Server {
 	return &Server{
-		auth:        authService,
-		tagsHandler: tagsHandler,
+		auth:              authService,
+		tagsHandler:       tagsHandler,
+		categoriesHandler: categoriesHandler,
 	}
 }
 
@@ -71,6 +74,15 @@ func (s *Server) RegisterRoutes(mux *http.ServeMux) {
 		mux.HandleFunc("POST /api/tags", s.tagsHandler.CreateTag)
 		mux.HandleFunc("PUT /api/tags/{code}", s.tagsHandler.UpdateTag)
 		mux.HandleFunc("DELETE /api/tags/{code}", s.tagsHandler.DeleteTag)
+	}
+
+	// Categories routes
+	if s.categoriesHandler != nil {
+		mux.HandleFunc("GET /api/categories", s.categoriesHandler.ListCategories)
+		mux.HandleFunc("POST /api/categories", s.categoriesHandler.CreateCategory)
+		mux.HandleFunc("GET /api/categories/{id}", s.categoriesHandler.GetCategory)
+		mux.HandleFunc("PUT /api/categories/{id}", s.categoriesHandler.UpdateCategory)
+		mux.HandleFunc("DELETE /api/categories/{id}", s.categoriesHandler.DeleteCategory)
 	}
 
 	// Protected routes

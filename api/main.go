@@ -9,7 +9,9 @@ import (
 	"github.com/ai-dala/api/internal/auth"
 	"github.com/ai-dala/api/internal/database"
 	"github.com/ai-dala/api/internal/http/server"
+	"github.com/ai-dala/api/internal/modules/categories"
 	"github.com/ai-dala/api/internal/modules/tags"
+	"github.com/jmoiron/sqlx"
 	"github.com/joho/godotenv"
 	_ "github.com/lib/pq"
 )
@@ -51,8 +53,14 @@ func main() {
 	tagsService := tags.NewService(tagsRepo)
 	tagsHandler := tags.NewHandler(tagsService)
 
+	// Initialize Categories Module
+	dbx := sqlx.NewDb(db, "postgres")
+	categoriesRepo := categories.NewRepository(dbx)
+	categoriesService := categories.NewService(categoriesRepo)
+	categoriesHandler := categories.NewHandler(categoriesService)
+
 	// Initialize Server
-	srv := server.NewServer(authService, tagsHandler)
+	srv := server.NewServer(authService, tagsHandler, categoriesHandler)
 
 	mux := http.NewServeMux()
 	srv.RegisterRoutes(mux)
