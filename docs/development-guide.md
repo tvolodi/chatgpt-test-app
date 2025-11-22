@@ -130,13 +130,21 @@ test.describe('Feature E2E', () => {
 ## 4. Workflow Summary
 
 1.  **Plan**: Define requirements and data model.
+    *   Analyze requirements for fullness, logical correctness, and readiness for development. Propose recommendation options if any.
+    *   Analyze data model. Make audit and propose recommendation options if appropriate.
+    *   **Define API Interface**: List endpoints, request/response JSON examples, and error codes to align Backend and Frontend.
 2.  **Backend**:
     *   Create Migration.
     *   Implement Repository + Integration Tests (Test Containers).
     *   Implement Service & Handler.
+    *   Run tests for backend and correct issues.
+    *   **Commit Backend**: Create a checkpoint commit (e.g., `feat(backend): implement [feature] core logic`).
 3.  **Frontend**:
     *   Create Components (Table, Form) using Tailwind.
     *   Implement Pages (List, Create, Edit).
 4.  **Verify**:
     *   Write E2E tests (Real API + DB).
-    *   Run `npm run test:e2e`.
+    *   Run `npm run test:e2e`. Correct any issues.
+    *   **Commit Full Feature**: Final commit with UI and tests (e.g., `feat: complete [feature] with UI and E2E tests`).
+5.  **Documents**:
+    *   Update requirement detail specification with implementation information.
