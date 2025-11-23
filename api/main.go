@@ -9,6 +9,7 @@ import (
 	"github.com/ai-dala/api/internal/auth"
 	"github.com/ai-dala/api/internal/database"
 	"github.com/ai-dala/api/internal/http/server"
+	"github.com/ai-dala/api/internal/modules/articles"
 	"github.com/ai-dala/api/internal/modules/categories"
 	"github.com/ai-dala/api/internal/modules/tags"
 	"github.com/jmoiron/sqlx"
@@ -59,8 +60,13 @@ func main() {
 	categoriesService := categories.NewService(categoriesRepo)
 	categoriesHandler := categories.NewHandler(categoriesService)
 
+	// Initialize Articles Module
+	articlesRepo := articles.NewRepository(dbx)
+	articlesService := articles.NewService(articlesRepo)
+	articlesHandler := articles.NewHandler(articlesService)
+
 	// Initialize Server
-	srv := server.NewServer(authService, tagsHandler, categoriesHandler)
+	srv := server.NewServer(authService, tagsHandler, categoriesHandler, articlesHandler)
 
 	mux := http.NewServeMux()
 	srv.RegisterRoutes(mux)

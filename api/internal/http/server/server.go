@@ -6,6 +6,7 @@ import (
 	"net/http"
 
 	"github.com/ai-dala/api/internal/auth"
+	"github.com/ai-dala/api/internal/modules/articles"
 	"github.com/ai-dala/api/internal/modules/categories"
 	"github.com/ai-dala/api/internal/modules/tags"
 	"github.com/google/uuid"
@@ -15,13 +16,15 @@ type Server struct {
 	auth              auth.Service
 	tagsHandler       *tags.Handler
 	categoriesHandler *categories.Handler
+	articlesHandler   *articles.Handler
 }
 
-func NewServer(authService auth.Service, tagsHandler *tags.Handler, categoriesHandler *categories.Handler) *Server {
+func NewServer(authService auth.Service, tagsHandler *tags.Handler, categoriesHandler *categories.Handler, articlesHandler *articles.Handler) *Server {
 	return &Server{
 		auth:              authService,
 		tagsHandler:       tagsHandler,
 		categoriesHandler: categoriesHandler,
+		articlesHandler:   articlesHandler,
 	}
 }
 
@@ -83,6 +86,11 @@ func (s *Server) RegisterRoutes(mux *http.ServeMux) {
 		mux.HandleFunc("GET /api/categories/{id}", s.categoriesHandler.GetCategory)
 		mux.HandleFunc("PUT /api/categories/{id}", s.categoriesHandler.UpdateCategory)
 		mux.HandleFunc("DELETE /api/categories/{id}", s.categoriesHandler.DeleteCategory)
+	}
+
+	// Articles routes
+	if s.articlesHandler != nil {
+		s.articlesHandler.RegisterRoutes(mux)
 	}
 
 	// Protected routes
