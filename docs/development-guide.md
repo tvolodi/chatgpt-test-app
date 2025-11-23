@@ -1,26 +1,87 @@
-# Development Guide: Feature Implementation Standard
+# AI Agent Development Directives & Guide
 
-This guide outlines the standard workflow for implementing new features in the AI-Dala project, based on the successful implementation of the Tag Management system.
-
-## Core Principles
-
-1.  **Real Integration Testing**: We prioritize full E2E tests with real backend/database over mocked tests.
-2.  **Modern UI/UX**: We use Tailwind CSS for consistent, modern, and responsive design.
-3.  **Type Safety**: Full TypeScript support across the stack.
+**Version**: 2.0
+**Status**: Active
+**Purpose**: This is the **Single Source of Truth** for AI Agents (and humans) working on the AI-Dala project. It consolidates development standards, workflows, and role-specific instructions.
 
 ---
 
-## 1. Backend Implementation (Go)
+## 1. Core Directives & Principles
 
-### 1.1. Repository Layer
-Implement data access with `sqlx` and `squirrel` (if needed).
+### 1.1. The "AI Agent" Mindset
+You are an expert full-stack developer and QA engineer. You own the feature from **Requirement Analysis** to **Production-Ready Code**.
+*   **Traceability-First**: Every line of code and every test must trace back to a Requirement (`REQ-*`) and a Module Specification (`MOD-*`).
+*   **Contract-First**: Never write backend code without a defined API contract (`openapi.yaml` or Module Spec). Never write frontend code without a backend contract.
+*   **Documentation-Driven**: Code is transient; Documentation is the source of truth. Update docs *before* or *alongside* code, never after.
 
-**Key Requirement**: Use **Test Containers** for integration testing.
+### 1.2. Technical Principles
+1.  **Real Integration Testing**: Prioritize full E2E tests (Playwright) and Integration tests (Test Containers) over mocks. Test the **Real System**.
+2.  **Modern UI/UX**: Use **Tailwind CSS** exclusively. No custom CSS files. Follow the "Master-Detail" and "Clean Card" aesthetic.
+3.  **Type Safety**: Strict TypeScript in Frontend. Strong typing in Go.
+4.  **Observability**: Every feature must emit structured logs and metrics.
 
-*   **File**: `internal/modules/[module]/repository.go`
-*   **Test File**: `internal/modules/[module]/repository_integration_test.go`
+---
 
-**Integration Test Pattern:**
+## 2. Standard Development Workflow
+
+Follow this cycle for every feature request:
+
+### Phase 1: Planning & Analysis
+*   **Input**: Read `docs/requirements/REQ-*`.
+*   **Action**:
+    *   Analyze requirements for completeness and ambiguity.
+    *   **Update Docs First**: Create/Update Module Specs (`docs/modules/`) and API Contracts.
+    *   Define the **API Interface** (Endpoints, Request/Response models).
+    *   Plan the **Data Model** changes.
+
+### Phase 2: Backend Implementation (Go)
+*   **Database**:
+    *   Create SQL migrations in `api/internal/database/migrations`.
+    *   Use `sqlx` for data access.
+*   **Repository Layer**:
+    *   Implement `internal/modules/[module]/repository.go`.
+    *   **MANDATORY**: Write Integration Tests in `internal/modules/[module]/repository_integration_test.go` using **Test Containers**.
+*   **Service & Handler**:
+    *   Implement business logic and HTTP handlers.
+    *   Register routes in `internal/http/server/server.go`.
+*   **Checkpoint Commit**:
+    *   `feat(backend): implement [feature] core logic`
+
+### Phase 3: Frontend Implementation (Next.js + Tailwind)
+*   **Design**:
+    *   Use Tailwind CSS utility classes.
+    *   **Pattern**: Container (`bg-white shadow-sm`), Header (`bg-gray-50`), Interactive Rows (`hover:bg-gray-50`).
+*   **Components**:
+    *   Create reusable components in `src/app/components/[module]/`.
+    *   Use `fetch` for API calls. Handle `loading` and `error` states explicitly.
+*   **Pages**:
+    *   Implement pages in `src/app/[locale]/dashboard/[module]/page.tsx`.
+
+### Phase 4: Verification (E2E Testing)
+*   **Tool**: Playwright (`web/tests/`).
+*   **Philosophy**: **No Mocks**. Run against the real Go Backend and Postgres Database.
+*   **Workflow**:
+    1.  Ensure `docker compose up db`, `go run main.go`, and `npm run dev` are running.
+    2.  Write `tests/[feature].spec.ts`.
+    3.  **Pattern**:
+        *   Generate unique test data (e.g., `const code = 'test-' + Date.now()`).
+        *   Perform Actions (UI or API).
+        *   Verify State (UI visibility AND Backend API checks).
+        *   Clean up resources (if necessary, though unique IDs mitigate this).
+
+### Phase 5: Documentation & Handoff
+*   **Integrity Check**:
+    *   Update `REQ-*` status to `implemented`.
+    *   Link new Tests and Code files in the `REQ-*` Traceability section.
+    *   Update `task.md` and `implementation_plan.md`.
+*   **Final Commit**:
+    *   `feat: complete [feature] with UI and E2E tests`
+
+---
+
+## 3. Implementation Details & Snippets
+
+### 3.1. Backend Integration Test Pattern
 ```go
 func TestRepository_Integration(t *testing.T) {
     // 1. Setup real database container
@@ -36,115 +97,68 @@ func TestRepository_Integration(t *testing.T) {
 }
 ```
 
-### 1.2. Service & Handler Layers
-Implement business logic and HTTP handlers.
-*   Register routes in `internal/http/server/server.go`.
-*   Unit tests (optional for simple CRUD, required for complex logic).
+### 3.2. Frontend Data Table Pattern
+```tsx
+<div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+    <div className="bg-gray-50 px-6 py-3 border-b border-gray-100">
+        <h3 className="text-xs font-medium text-gray-500 uppercase tracking-wider">Name</h3>
+    </div>
+    <ul className="divide-y divide-gray-100">
+        {items.map(item => (
+            <li key={item.id} className="hover:bg-gray-50 transition-colors duration-150">
+                <div className="px-6 py-4 flex items-center justify-between">
+                    {/* Content */}
+                </div>
+            </li>
+        ))}
+    </ul>
+</div>
+```
 
----
-
-## 2. Frontend Implementation (Next.js + Tailwind)
-
-### 2.1. Component Design
-Use **Tailwind CSS** for styling. Avoid custom CSS files.
-
-**Standard Data Table Pattern (`TagList.tsx` example):**
-*   **Container**: `bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden`
-*   **Header**: `bg-gray-50 text-xs font-medium text-gray-500 uppercase`
-*   **Rows**: `hover:bg-gray-50 transition-colors duration-150`
-*   **Badges**: `inline-flex items-center px-2.5 py-0.5 rounded-md text-xs font-medium bg-gray-100 text-gray-800`
-*   **Action Buttons**:
-    *   Edit: `text-indigo-600 hover:text-indigo-900` (or outlined button)
-    *   Delete: `text-red-600 hover:text-red-900` (or outlined button)
-
-**Standard Form Pattern (`TagForm.tsx` example):**
-*   **Layout**: Grid-based or Stacked.
-*   **Container**: `bg-white rounded-lg shadow-sm border border-gray-200`
-*   **Inputs**: `block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500`
-*   **Actions**: Footer with "Cancel" (secondary) and "Save" (primary) buttons.
-
-### 2.2. Page Implementation
-*   Use `fetch` for API calls to the Go backend (`http://localhost:4000/api/...`).
-*   Handle loading and error states.
-*   Use `next/navigation` for routing (`useRouter`).
-
----
-
-## 3. End-to-End Testing (Playwright)
-
-**Philosophy**: Test the **Real System**. Do not mock the API or Database.
-
-### 3.1. Test Setup
-Ensure all services are running before testing:
-1.  **Database**: `docker compose up -d db`
-2.  **Backend**: `go run main.go`
-3.  **Frontend**: `npm run dev`
-
-### 3.2. Test Structure (`tests/[feature].spec.ts`)
-
-**Pattern:**
-1.  **Unique Test Data**: Generate unique IDs/codes (e.g., `test-item-${Date.now()}`) to avoid collisions.
-2.  **Real API Calls**: Use `fetch` in `test.beforeAll` or inside tests to setup/verify state directly in the backend.
-3.  **Cleanup**: Delete created data in `test.afterEach` or `test.afterAll`.
-
-**Example:**
+### 3.3. E2E Test Pattern
 ```typescript
-test.describe('Feature E2E', () => {
-    const testCode = `e2e-${Date.now()}`;
+test('Feature Flow', async ({ page }) => {
+    const uniqueId = `item-${Date.now()}`;
+    
+    // 1. Create via UI
+    await page.goto('/dashboard/items/new');
+    await page.fill('input[name="code"]', uniqueId);
+    await page.click('button[type="submit"]');
 
-    test('Create Item', async ({ page }) => {
-        await page.goto('/dashboard/items/create');
-        await page.fill('input[name="code"]', testCode);
-        await page.click('button[type="submit"]');
-        
-        // Verify UI redirect
-        await expect(page).toHaveURL(/\/dashboard\/items$/);
-        
-        // Verify Item exists in list
-        await expect(page.getByText(testCode)).toBeVisible();
-    });
-
-    test('Delete Item', async ({ page }) => {
-        // 1. Create item via API first
-        await fetch('http://localhost:4000/api/items', {
-            method: 'POST',
-            body: JSON.stringify({ code: testCode, ... })
-        });
-
-        // 2. Delete via UI
-        await page.goto('/dashboard/items');
-        await page.click(`button[data-delete="${testCode}"]`);
-
-        // 3. Verify UI update
-        await expect(page.getByText(testCode)).not.toBeVisible();
-
-        // 4. Verify Backend deletion (Double Check)
-        const res = await fetch(`http://localhost:4000/api/items/${testCode}`);
-        expect(res.status).toBe(404);
-    });
+    // 2. Verify via API (Double Check)
+    const res = await fetch(`http://localhost:4000/api/items/${uniqueId}`);
+    expect(res.ok).toBeTruthy();
 });
 ```
 
 ---
 
-## 4. Workflow Summary
+## 4. Role-Specific Checklists
 
-1.  **Plan**: Define requirements and data model.
-    *   Analyze requirements for fullness, logical correctness, and readiness for development. Propose recommendation options if any.
-    *   Analyze data model. Make audit and propose recommendation options if appropriate.
-    *   **Define API Interface**: List endpoints, request/response JSON examples, and error codes to align Backend and Frontend.
-2.  **Backend**:
-    *   Create Migration.
-    *   Implement Repository + Integration Tests (Test Containers).
-    *   Implement Service & Handler.
-    *   Run tests for backend and correct issues.
-    *   **Commit Backend**: Create a checkpoint commit (e.g., `feat(backend): implement [feature] core logic`).
-3.  **Frontend**:
-    *   Create Components (Table, Form) using Tailwind.
-    *   Implement Pages (List, Create, Edit).
-4.  **Verify**:
-    *   Write E2E tests (Real API + DB).
-    *   Run `npm run test:e2e`. Correct any issues.
-    *   **Commit Full Feature**: Final commit with UI and tests (e.g., `feat: complete [feature] with UI and E2E tests`).
-5.  **Documents**:
-    *   Update requirement detail specification with implementation information.
+### 4.1. For "Developer" Mode
+*   [ ] Did you read the REQ and Module Spec?
+*   [ ] Did you update the API Contract (`openapi.yaml`) before coding?
+*   [ ] Did you write a Repository Integration Test (Test Containers)?
+*   [ ] Did you use Tailwind for all styling?
+*   [ ] Did you handle Loading and Error states in the UI?
+
+### 4.2. For "QA/Tester" Mode
+*   [ ] Did you map the test to a REQ ID?
+*   [ ] Are you testing against the REAL backend (no mocks)?
+*   [ ] Did you cover Happy Path, Edge Cases, and Error States?
+*   [ ] Is the test deterministic (uses unique data)?
+
+### 4.3. For "Product Owner/BA" Mode
+*   [ ] Does the REQ have Acceptance Criteria?
+*   [ ] Is the REQ linked to a Module and Test?
+*   [ ] Are NFRs (Performance, Security) defined?
+
+---
+
+## 5. Directory Structure Reference
+*   `docs/requirements/`: Feature Requirements (`REQ-*`).
+*   `docs/modules/`: Technical Specs (`MOD-*`).
+*   `docs/contracts/`: API Contracts (`openapi.yaml`).
+*   `api/internal/modules/`: Backend Code.
+*   `web/src/app/`: Frontend Code.
+*   `web/tests/`: E2E Tests.
