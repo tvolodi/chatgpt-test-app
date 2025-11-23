@@ -11,6 +11,7 @@ import (
 type Article struct {
 	ID          string     `db:"id" json:"id"`
 	Title       string     `db:"title" json:"title"`
+	Slug        string     `db:"slug" json:"slug"`
 	Body        string     `db:"body" json:"body"`
 	CategoryID  *string    `db:"category_id" json:"category_id"`
 	AuthorID    string     `db:"author_id" json:"author_id"`
@@ -32,13 +33,14 @@ func NewRepository(db *sqlx.DB) *Repository {
 // Create inserts a new article
 func (r *Repository) Create(article *Article) error {
 	query := `
-		INSERT INTO articles (title, body, category_id, author_id, status)
-		VALUES ($1, $2, $3, $4, $5)
+		INSERT INTO articles (title, slug, body, category_id, author_id, status)
+		VALUES ($1, $2, $3, $4, $5, $6)
 		RETURNING id, created_at, updated_at
 	`
 	return r.db.QueryRow(
 		query,
 		article.Title,
+		article.Slug,
 		article.Body,
 		article.CategoryID,
 		article.AuthorID,
@@ -50,7 +52,7 @@ func (r *Repository) Create(article *Article) error {
 func (r *Repository) FindByID(id string) (*Article, error) {
 	var article Article
 	query := `
-		SELECT id, title, body, category_id, author_id, status, published_at, created_at, updated_at, deleted_at
+		SELECT id, title, slug, body, category_id, author_id, status, published_at, created_at, updated_at, deleted_at
 		FROM articles
 		WHERE id = $1 AND deleted_at IS NULL
 	`
@@ -61,10 +63,25 @@ func (r *Repository) FindByID(id string) (*Article, error) {
 	return &article, err
 }
 
+// FindBySlug retrieves an article by slug (excluding soft-deleted)
+func (r *Repository) FindBySlug(slug string) (*Article, error) {
+	var article Article
+	query := `
+		SELECT id, title, slug, body, category_id, author_id, status, published_at, created_at, updated_at, deleted_at
+		FROM articles
+		WHERE slug = $1 AND deleted_at IS NULL
+	`
+	err := r.db.Get(&article, query, slug)
+	if err == sql.ErrNoRows {
+		return nil, nil
+	}
+	return &article, err
+}
+
 // FindAll retrieves all active articles with optional filters
 func (r *Repository) FindAll(status, categoryID, authorID string, limit, offset int) ([]Article, error) {
 	query := `
-		SELECT id, title, body, category_id, author_id, status, published_at, created_at, updated_at
+		SELECT id, title, slug, body, category_id, author_id, status, published_at, created_at, updated_at
 		FROM articles
 		WHERE deleted_at IS NULL
 	`
@@ -99,13 +116,14 @@ func (r *Repository) FindAll(status, categoryID, authorID string, limit, offset 
 func (r *Repository) Update(id string, article *Article) error {
 	query := `
 		UPDATE articles
-		SET title = $1, body = $2, category_id = $3, status = $4, published_at = $5, updated_at = NOW()
-		WHERE id = $6 AND deleted_at IS NULL
+		SET title = $1, slug = $2, body = $3, category_id = $4, status = $5, published_at = $6, updated_at = NOW()
+		WHERE id = $7 AND deleted_at IS NULL
 		RETURNING updated_at
 	`
 	return r.db.QueryRow(
 		query,
 		article.Title,
+		article.Slug,
 		article.Body,
 		article.CategoryID,
 		article.Status,

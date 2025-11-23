@@ -1,120 +1,134 @@
-import type { Metadata } from "next";
-import Image from "next/image";
-import { notFound } from "next/navigation";
-import { fetchNewsItem } from "../services";
+'use client';
 
-export const dynamic = 'force-dynamic'; // Force dynamic rendering
-export const revalidate = 1800; // 30m
+import { useState, useEffect } from 'react';
+import Link from 'next/link';
+import { useParams } from 'next/navigation';
+import { format } from 'date-fns';
+import { marked } from 'marked';
 
-type Params = { slug: string };
+interface Article {
+  id: string;
+  title: string;
+  slug: string;
+  body: string;
+  published_at: string;
+  author_id: string;
+  tags: string[];
+}
 
+export default function NewsDetailPage() {
+  const params = useParams();
+  const slug = params.slug as string;
 
-export async function generateMetadata({ params }: { params: Params }): Promise<Metadata> {
-  const item = await fetchNewsItem(params.slug);
-  if (!item) return {};
+  const [article, setArticle] = useState<Article | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  const title = `AI-Dala News | ${item.title}`;
-  const description = item.summary;
-  const canonical = `https://ai-dala.com/news/${item.slug}`;
-  const image = item.image ?? "/AI-Dala-logo.png";
+  useEffect(() => {
+    if (slug) {
+      fetchArticle();
+    }
+  }, [slug]);
 
-  return {
-    title,
-    description,
-    metadataBase: new URL("https://ai-dala.com"),
-    alternates: { canonical: `/news/${item.slug}` },
-    openGraph: {
-      title,
-      description,
-      url: canonical,
-      type: "article",
-      images: [{ url: image }]
-    },
-    twitter: {
-      card: "summary_large_image",
-      title,
-      description,
-      images: [image]
+  const fetchArticle = async () => {
+    try {
+      const response = await fetch(`http://localhost:4000/api/articles/slug/${slug}`);
+      if (!response.ok) {
+        if (response.status === 404) throw new Error('Article not found');
+        throw new Error('Failed to fetch article');
+      }
+      const data = await response.json();
+      setArticle({ ...data.article, tags: data.tags });
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'An error occurred');
+    } finally {
+      setLoading(false);
     }
   };
-}
 
-export default async function NewsDetail({ params }: { params: Params }) {
-  const item = await fetchNewsItem(params.slug);
-  if (!item) {
-    return notFound();
+  if (loading) {
+    return (
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <div className="animate-pulse space-y-8">
+          <div className="h-8 bg-gray-200 rounded w-3/4"></div>
+          <div className="h-4 bg-gray-200 rounded w-1/4"></div>
+          <div className="space-y-4">
+            <div className="h-4 bg-gray-200 rounded w-full"></div>
+            <div className="h-4 bg-gray-200 rounded w-full"></div>
+            <div className="h-4 bg-gray-200 rounded w-5/6"></div>
+          </div>
+        </div>
+      </div>
+    );
   }
 
-  const schema = {
-    "@context": "https://schema.org",
-    "@type": "NewsArticle",
-    headline: item.title,
-    datePublished: item.published_at,
-    dateModified: item.published_at,
-    author: { "@type": "Organization", name: "AI-Dala" },
-    mainEntityOfPage: `https://ai-dala.com/news/${item.slug}`,
-    image: item.image ? [item.image] : undefined
-  };
-
-  return (
-    <main style={containerStyle}>
-      <p style={{ color: "#3A9BDC", fontWeight: 700, margin: "0 0 8px" }}>AI-Dala News</p>
-      <h1 style={{ margin: "0 0 12px", fontSize: "32px", color: "#2B2B2B" }}>{item.title}</h1>
-      <p style={{ margin: "0 0 16px", color: "#4B5563" }}>{formatDate(item.published_at)}</p>
-      {item.image && (
-        <div style={{ marginBottom: 16 }}>
-          <Image src={item.image} alt={item.title} width={800} height={450} style={{ width: "100%", height: "auto" }} />
-        </div>
-      )}
-      <article
-        style={{ lineHeight: 1.7, fontSize: "16px", color: "#2B2B2B", marginBottom: 24 }}
-        dangerouslySetInnerHTML={{ __html: item.bodyHtml }}
-      />
-      <div style={{ display: "flex", gap: 12, flexWrap: "wrap" }}>
-        <ShareLink href={`https://t.me/share/url?url=https://ai-dala.com/news/${item.slug}`} label="Telegram" />
-        <ShareLink
-          href={`https://www.linkedin.com/sharing/share-offsite/?url=https://ai-dala.com/news/${item.slug}`}
-          label="LinkedIn"
-        />
+  if (error || !article) {
+    return (
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12 text-center">
+        <h1 className="text-2xl font-bold text-gray-900 mb-4">
+          {error === 'Article not found' ? 'Article Not Found' : 'Error'}
+        </h1>
+        <p className="text-gray-600 mb-8">
+          {error === 'Article not found'
+            ? "The article you're looking for doesn't exist or has been removed."
+            : error}
+        </p>
+        <Link href="/news" className="text-indigo-600 hover:text-indigo-800 font-medium">
+          ← Back to News
+        </Link>
       </div>
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }} />
-    </main>
-  );
-}
+    );
+  }
 
-function ShareLink({ href, label }: { href: string; label: string }) {
   return (
-    <a
-      href={href}
-      style={{
-        display: "inline-block",
-        padding: "10px 14px",
-        borderRadius: 10,
-        background: "#E6C68E",
-        color: "#2B2B2B",
-        fontWeight: 700,
-        textDecoration: "none",
-        minWidth: 120,
-        textAlign: "center"
-      }}
-      aria-label={`Share on ${label}`}
-    >
-      Share on {label}
-    </a>
+    <div className="bg-white min-h-screen">
+      <article className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <header className="mb-10">
+          <div className="flex items-center space-x-2 text-sm text-gray-500 mb-4">
+            <Link href="/news" className="hover:text-indigo-600 transition-colors">
+              News
+            </Link>
+            <span>/</span>
+            <span className="text-gray-900 truncate max-w-[200px]">{article.title}</span>
+          </div>
+
+          <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6 leading-tight">
+            {article.title}
+          </h1>
+
+          <div className="flex items-center justify-between border-b border-gray-100 pb-6">
+            <div className="flex items-center space-x-4">
+              <div className="text-sm">
+                <p className="font-medium text-gray-900">AI-Dala Team</p>
+                <p className="text-gray-500">
+                  {format(new Date(article.published_at), 'MMMM d, yyyy')}
+                </p>
+              </div>
+            </div>
+
+            {/* Share buttons could go here */}
+          </div>
+        </header>
+
+        <div className="prose prose-lg max-w-none prose-indigo">
+          <div dangerouslySetInnerHTML={{ __html: marked(article.body) as string }} />
+        </div>
+
+        {article.tags && article.tags.length > 0 && (
+          <div className="mt-12 pt-8 border-t border-gray-100">
+            <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-4">
+              Tags
+            </h3>
+            <div className="flex flex-wrap gap-2">
+              {article.tags.map(tag => (
+                <span key={tag} className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-gray-100 text-gray-800">
+                  {tag}
+                </span>
+              ))}
+            </div>
+          </div>
+        )}
+      </article>
+    </div>
   );
-}
-
-const containerStyle: React.CSSProperties = {
-  maxWidth: "800px",
-  margin: "0 auto",
-  padding: "24px 16px",
-  fontFamily: "Inter, system-ui, sans-serif"
-};
-
-function formatDate(iso: string) {
-  return new Date(iso).toLocaleDateString(undefined, {
-    month: "short",
-    day: "numeric",
-    year: "numeric"
-  });
 }

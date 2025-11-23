@@ -22,6 +22,7 @@ func (h *Handler) RegisterRoutes(mux *http.ServeMux) {
 	mux.HandleFunc("PUT /api/articles/{id}", h.handleUpdate)
 	mux.HandleFunc("POST /api/articles/{id}/publish", h.handlePublish)
 	mux.HandleFunc("DELETE /api/articles/{id}", h.handleDelete)
+	mux.HandleFunc("GET /api/articles/slug/{slug}", h.handleGetBySlug)
 	mux.HandleFunc("POST /api/articles/{id}/tags", h.handleAddTags)
 	mux.HandleFunc("DELETE /api/articles/{id}/tags", h.handleRemoveTags)
 }
@@ -100,6 +101,35 @@ func (h *Handler) handleGet(w http.ResponseWriter, r *http.Request) {
 
 	// Get tags
 	tags, err := h.service.GetTags(id)
+	if err != nil {
+		tags = []string{}
+	}
+
+	response := map[string]interface{}{
+		"article": article,
+		"tags":    tags,
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(response)
+}
+
+// handleGetBySlug retrieves a single article by slug
+func (h *Handler) handleGetBySlug(w http.ResponseWriter, r *http.Request) {
+	slug := r.PathValue("slug")
+
+	article, err := h.service.FindBySlug(slug)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	if article == nil {
+		http.Error(w, "article not found", http.StatusNotFound)
+		return
+	}
+
+	// Get tags
+	tags, err := h.service.GetTags(article.ID)
 	if err != nil {
 		tags = []string{}
 	}

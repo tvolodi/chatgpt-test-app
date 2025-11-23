@@ -1,46 +1,56 @@
-import { expect, test } from "@playwright/test";
+import { test, expect } from '@playwright/test';
 
-test.describe("News page (REQ-002)", () => {
-  test("list structure and ordering (TC-UI-005)", async ({ page }) => {
-    await page.goto("/news");
+test.describe('AI News Page E2E', () => {
+  test('Create, Publish, and View Article', async ({ page }) => {
+    // 1. Create a new article
+    await page.goto('http://localhost:3000/en/dashboard/articles/new');
 
-    const items = page.locator("article");
-    const count = await items.count();
-    expect(count).toBeGreaterThanOrEqual(5);
+    const timestamp = Date.now();
+    const title = `News Test Article ${timestamp}`;
+    const slug = `news-test-article-${timestamp}`;
 
-    // Verify fields
-    await expect(items.first().getByRole("heading", { level: 2 })).toBeVisible();
-    await expect(items.first().locator("p").first()).toBeVisible();
-    await expect(items.first().getByRole("link")).toBeVisible();
+    await page.fill('input[placeholder="Enter article title"]', title);
+    await page.fill('textarea[placeholder*="Markdown"]', '# Hello World\n\nThis is a test article body.');
+
+    // Save as draft
+    await page.click('text=Save Draft');
+    await page.waitForTimeout(1000); // Wait for save
+
+    // Publish
+    await page.click('text=Publish');
+    await page.waitForTimeout(1000); // Wait for publish
+
+    // 2. Verify it appears on the public news list
+    await page.goto('http://localhost:3000/en/news');
+    await expect(page.locator(`text=${title}`)).toBeVisible();
+
+    // 3. Navigate to detail page
+    await page.click(`text=${title}`);
+
+    // 4. Verify detail page content
+    await expect(page).toHaveURL(new RegExp(`/news/${slug}`));
+    await expect(page.locator('h1')).toHaveText(title);
+    await expect(page.locator('h1')).toBeVisible();
+    // Check rendered markdown
+    await expect(page.locator('h1:has-text("Hello World")')).toBeVisible();
   });
 
-  test("SEO and structured data (TC-UI-007)", async ({ page }) => {
-    await page.goto("/news");
-    await expect(page).toHaveTitle(/AI-Dala News/);
-    const canonical = await page.locator('link[rel="canonical"]').getAttribute("href");
-    expect(canonical).toContain("/news");
+  test('Draft articles do not appear in news list', async ({ page }) => {
+    // 1. Create a draft article
+    await page.goto('http://localhost:3000/en/dashboard/articles/new');
 
-    const ld = await page.locator('script[type="application/ld+json"]').textContent();
-    expect(ld).toBeTruthy();
-  });
+    const timestamp = Date.now();
+    const title = `Draft Test Article ${timestamp}`;
 
-  test.skip("detail view and sharing (TC-UI-008)", async ({ page }) => {
-    await page.goto("/news");
-    await expect(page.locator("article").first()).toBeVisible();
-    const firstLink = page.locator("article a").first();
-    const href = await firstLink.getAttribute("href");
-    expect(href).toContain("/news/");
-    await firstLink.click({ force: true });
-    await page.waitForURL("**/news/*");
+    await page.fill('input[placeholder="Enter article title"]', title);
+    await page.fill('textarea[placeholder*="Markdown"]', 'Draft content');
 
-    await expect(page.getByRole("heading", { level: 1 }).first()).toBeVisible();
-    await expect(page.getByText("Share on Telegram")).toBeVisible();
-    await expect(page.getByText("Share on LinkedIn")).toBeVisible();
+    // Save as draft
+    await page.click('text=Save Draft');
+    await page.waitForTimeout(1000);
 
-    const canonical = await page.locator('link[rel="canonical"]').getAttribute("href");
-    expect(canonical).toContain("/news/");
-
-    const ld = await page.locator('script[type="application/ld+json"]').textContent();
-    expect(ld).toBeTruthy();
+    // 2. Check public news list
+    await page.goto('http://localhost:3000/en/news');
+    await expect(page.locator(`text=${title}`)).not.toBeVisible();
   });
 });

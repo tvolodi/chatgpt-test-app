@@ -1,0 +1,3 @@
+DROP INDEX IF EXISTS idx_articles_slug;
+ALTER TABLE articles DROP CONSTRAINT IF EXISTS articles_slug_key;
+ALTER TABLE articles DROP COLUMN IF NOT EXISTS slug;
