@@ -14,31 +14,33 @@ interface Article {
   tags: string[];
 }
 
+export type Category = string;
+
 export default function NewsListPage() {
   const [articles, setArticles] = useState<Article[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
+    const fetchArticles = async () => {
+      try {
+        // Fetch only published articles
+        const response = await fetch('http://localhost:4000/api/articles?status=PUBLISHED');
+        if (!response.ok) throw new Error('Failed to fetch news');
+        const data = await response.json();
+
+        // Transform data to include tags directly in article object if needed, 
+        // but our API returns { articles: [{...article, tags: []}], ... }
+        setArticles(data.articles || []);
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'An error occurred');
+      } finally {
+        setLoading(false);
+      }
+    };
+
     fetchArticles();
   }, []);
-
-  const fetchArticles = async () => {
-    try {
-      // Fetch only published articles
-      const response = await fetch('http://localhost:4000/api/articles?status=PUBLISHED');
-      if (!response.ok) throw new Error('Failed to fetch news');
-      const data = await response.json();
-
-      // Transform data to include tags directly in article object if needed, 
-      // but our API returns { articles: [{...article, tags: []}], ... }
-      setArticles(data.articles || []);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'An error occurred');
-    } finally {
-      setLoading(false);
-    }
-  };
 
   if (loading) {
     return (

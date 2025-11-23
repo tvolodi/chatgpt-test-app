@@ -1,6 +1,6 @@
 # AI Agent Development Directives & Guide
 
-**Version**: 2.0
+**Version**: 2.1
 **Status**: Active
 **Purpose**: This is the **Single Source of Truth** for AI Agents (and humans) working on the AI-Dala project. It consolidates development standards, workflows, and role-specific instructions.
 
@@ -19,6 +19,7 @@ You are an expert full-stack developer and QA engineer. You own the feature from
 2.  **Modern UI/UX**: Use **Tailwind CSS** exclusively. No custom CSS files. Follow the "Master-Detail" and "Clean Card" aesthetic.
 3.  **Type Safety**: Strict TypeScript in Frontend. Strong typing in Go.
 4.  **Observability**: Every feature must emit structured logs and metrics.
+5.  **Self-Start Services**: Agents must start required local services (DB, API, frontend) without prompting whenever tests or code need them.
 
 ---
 
@@ -33,6 +34,8 @@ Follow this cycle for every feature request:
     *   **Update Docs First**: Create/Update Module Specs (`docs/modules/`) and API Contracts.
     *   Define the **API Interface** (Endpoints, Request/Response models).
     *   Plan the **Data Model** changes.
+    *   Draft a **Test Plan** mapped to REQ IDs (E2E + integration); pre-name target files (e.g., `web/tests/req-011-paste.spec.ts`).
+    *   Assume local execution: plan to start services (DB/API/frontend) automatically for testing.
 
 ### Phase 2: Backend Implementation (Go)
 *   **Database**:
@@ -60,10 +63,12 @@ Follow this cycle for every feature request:
 ### Phase 4: Verification (E2E Testing)
 *   **Tool**: Playwright (`web/tests/`).
 *   **Philosophy**: **No Mocks**. Run against the real Go Backend and Postgres Database.
+*   **Mandate**: Create or update an E2E test **per REQ** (include REQ ID in filename/test title) and **run it locally** before completion.
 *   **Workflow**:
-    1.  Ensure `docker compose up db`, `go run main.go`, and `npm run dev` are running.
-    2.  Write `tests/[feature].spec.ts`.
-    3.  **Pattern**:
+    1.  Auto-start stack if not running: `docker compose up -d db`, `cd api && go run main.go`, `cd web && npm run dev`.
+    2.  Write `tests/[feature].spec.ts` (or `tests/req-xxx-*.spec.ts`).
+    3.  Execute: `cd web && npm run test:e2e -- <filter>` and record the result.
+    4.  **Pattern**:
         *   Generate unique test data (e.g., `const code = 'test-' + Date.now()`).
         *   Perform Actions (UI or API).
         *   Verify State (UI visibility AND Backend API checks).
@@ -141,17 +146,31 @@ test('Feature Flow', async ({ page }) => {
 *   [ ] Did you write a Repository Integration Test (Test Containers)?
 *   [ ] Did you use Tailwind for all styling?
 *   [ ] Did you handle Loading and Error states in the UI?
+*   [ ] Did you create and run an E2E test mapped to the REQ ID (Playwright)?
+*   [ ] Did you auto-start the required services (DB/API/frontend) before running tests?
 
 ### 4.2. For "QA/Tester" Mode
 *   [ ] Did you map the test to a REQ ID?
 *   [ ] Are you testing against the REAL backend (no mocks)?
 *   [ ] Did you cover Happy Path, Edge Cases, and Error States?
 *   [ ] Is the test deterministic (uses unique data)?
+*   [ ] Did you execute the REQ-linked E2E locally and record the outcome?
+*   [ ] Did you verify services were started automatically for test execution?
 
 ### 4.3. For "Product Owner/BA" Mode
 *   [ ] Does the REQ have Acceptance Criteria?
 *   [ ] Is the REQ linked to a Module and Test?
 *   [ ] Are NFRs (Performance, Security) defined?
+
+---
+
+## 5. Definition of Done
+*   REQ status updated and linked to Module + tests.
+*   REQ-linked E2E test exists (Playwright) and was run locally with recorded result.
+*   Backend integration tests exist and run for repository changes.
+*   Any skipped/failed tests are explicitly noted with a reason.
+*   Documentation updated alongside code (Module Spec, REQ trace).
+*   Required services (DB/API/frontend) were started automatically to execute tests; no pending approvals expected for standard local runs.
 
 ---
 
@@ -162,3 +181,8 @@ test('Feature Flow', async ({ page }) => {
 *   `api/internal/modules/`: Backend Code.
 *   `web/src/app/`: Frontend Code.
 *   `web/tests/`: E2E Tests.
+
+## 6. Test Environment Strategy
+*   **Startup cadence**: Start the dockerized stack once per test run (db + API + frontend) for speed; avoid per-test container churn.
+*   **Isolation**: Use unique test data (timestamps/UUIDs) and clean up/reset between suites if needed; tests must not rely on shared state.
+*   **Determinism**: If state bleed is detected, add lightweight reset hooks (e.g., truncate/fixtures) between tests rather than rebuilding containers.

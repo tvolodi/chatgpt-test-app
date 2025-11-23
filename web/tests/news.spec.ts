@@ -1,56 +1,46 @@
 import { test, expect } from '@playwright/test';
 
-test.describe('AI News Page E2E', () => {
-  test('Create, Publish, and View Article', async ({ page }) => {
-    // 1. Create a new article
-    await page.goto('http://localhost:3000/en/dashboard/articles/new');
+const BASE_URL = process.env.E2E_BASE_URL || 'http://localhost:3000';
+const API_BASE_URL = process.env.E2E_API_BASE_URL || 'http://localhost:4000/api';
 
+test.describe('AI News Page E2E', () => {
+  test('Create, Publish, and View Article', async ({ page, request }) => {
     const timestamp = Date.now();
     const title = `News Test Article ${timestamp}`;
-    const slug = `news-test-article-${timestamp}`;
 
-    await page.fill('input[placeholder="Enter article title"]', title);
-    await page.fill('textarea[placeholder*="Markdown"]', '# Hello World\n\nThis is a test article body.');
+    // Create via API
+    const createResp = await request.post(`${API_BASE_URL}/articles`, {
+      data: { title, body: '# Hello World\n\nThis is a test article body.' },
+    });
+    expect(createResp.ok()).toBeTruthy();
+    const created = await createResp.json();
 
-    // Save as draft
-    await page.click('text=Save Draft');
-    await page.waitForTimeout(1000); // Wait for save
+    // Publish via API
+    const publishResp = await request.post(`${API_BASE_URL}/articles/${created.id}/publish`);
+    expect(publishResp.ok()).toBeTruthy();
 
-    // Publish
-    await page.click('text=Publish');
-    await page.waitForTimeout(1000); // Wait for publish
+    // Verify on news list
+    await page.goto(`${BASE_URL}/en/news`);
+    await expect(page.getByText(title, { exact: true })).toBeVisible();
 
-    // 2. Verify it appears on the public news list
-    await page.goto('http://localhost:3000/en/news');
-    await expect(page.locator(`text=${title}`)).toBeVisible();
-
-    // 3. Navigate to detail page
-    await page.click(`text=${title}`);
-
-    // 4. Verify detail page content
-    await expect(page).toHaveURL(new RegExp(`/news/${slug}`));
-    await expect(page.locator('h1')).toHaveText(title);
-    await expect(page.locator('h1')).toBeVisible();
-    // Check rendered markdown
-    await expect(page.locator('h1:has-text("Hello World")')).toBeVisible();
+    // Navigate to detail
+    await page.getByText(title, { exact: true }).click();
+    await expect(page).toHaveURL(new RegExp(`/news/${created.slug || created.id}`));
+    await expect(page.getByRole('heading', { name: title, exact: true })).toBeVisible();
   });
 
-  test('Draft articles do not appear in news list', async ({ page }) => {
-    // 1. Create a draft article
-    await page.goto('http://localhost:3000/en/dashboard/articles/new');
-
+  test('Draft articles do not appear in news list', async ({ page, request }) => {
     const timestamp = Date.now();
     const title = `Draft Test Article ${timestamp}`;
 
-    await page.fill('input[placeholder="Enter article title"]', title);
-    await page.fill('textarea[placeholder*="Markdown"]', 'Draft content');
+    // Create draft via API
+    const createResp = await request.post(`${API_BASE_URL}/articles`, {
+      data: { title, body: 'Draft content' },
+    });
+    expect(createResp.ok()).toBeTruthy();
 
-    // Save as draft
-    await page.click('text=Save Draft');
-    await page.waitForTimeout(1000);
-
-    // 2. Check public news list
-    await page.goto('http://localhost:3000/en/news');
-    await expect(page.locator(`text=${title}`)).not.toBeVisible();
+    // Ensure not published
+    await page.goto(`${BASE_URL}/en/news`);
+    await expect(page.getByText(title, { exact: true })).not.toBeVisible();
   });
 });

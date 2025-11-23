@@ -158,8 +158,8 @@ func (h *Handler) handleCreate(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// TODO: Get author_id from auth context
-	// For now, use a hardcoded value
-	authorID := "test-author-123"
+	// For now, use a fixed UUID to satisfy DB constraints
+	authorID := "00000000-0000-0000-0000-000000000001"
 
 	article := &Article{
 		Title:      req.Title,

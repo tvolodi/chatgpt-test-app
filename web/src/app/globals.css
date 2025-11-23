@@ -1,3 +1,5 @@
+@import "prosemirror-view/style/prosemirror.css";
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -24,4 +26,22 @@ body {
       rgb(var(--background-end-rgb))
     )
     rgb(var(--background-start-rgb));
+}
+
+.ProseMirror {
+  outline: none;
+  min-height: 300px;
+}
+
+.ProseMirror img {
+  max-width: 100%;
+  height: auto;
+}
+
+.ProseMirror p.is-editor-empty:first-child::before {
+  color: #9ca3af;
+  content: attr(data-placeholder);
+  float: left;
+  height: 0;
+  pointer-events: none;
 }

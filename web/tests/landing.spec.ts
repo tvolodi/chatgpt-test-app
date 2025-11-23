@@ -23,9 +23,9 @@ test.describe('Landing Page E2E', () => {
 
   test('Feature section is present', async ({ page }) => {
     await expect(page.locator('text=What is AI-Dala?')).toBeVisible();
-    await expect(page.locator('text=Headless CMS')).toBeVisible();
-    await expect(page.locator('text=AI Search')).toBeVisible();
-    await expect(page.locator('text=Secure Auth')).toBeVisible();
+    await expect(page.locator('text=Headless CMS').first()).toBeVisible();
+    await expect(page.locator('text=AI Search').first()).toBeVisible();
+    await expect(page.locator('text=Secure Auth').first()).toBeVisible();
   });
 
   test('Latest content section loads', async ({ page }) => {

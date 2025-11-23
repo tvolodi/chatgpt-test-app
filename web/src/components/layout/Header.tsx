@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import { usePathname } from 'next/navigation';
+import { LanguageSwitcher } from '@/app/components/LanguageSwitcher';
 
 export default function Header() {
     const pathname = usePathname();
@@ -46,11 +47,14 @@ export default function Header() {
                                 Articles
                             </Link>
                         </div>
+                </div>
+                <div className="hidden sm:ml-6 sm:flex sm:items-center">
+                    <div className="mr-3">
+                        <LanguageSwitcher />
                     </div>
-                    <div className="hidden sm:ml-6 sm:flex sm:items-center">
-                        <Link
-                            href="/dashboard"
-                            className="text-gray-500 hover:text-gray-700 px-3 py-2 rounded-md text-sm font-medium"
+                    <Link
+                        href="/dashboard"
+                        className="text-gray-500 hover:text-gray-700 px-3 py-2 rounded-md text-sm font-medium"
                         >
                             Sign in
                         </Link>

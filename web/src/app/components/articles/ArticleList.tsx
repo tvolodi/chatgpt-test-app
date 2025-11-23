@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 
 interface Article {
@@ -30,11 +30,7 @@ export default function ArticleList({ onDelete }: ArticleListProps) {
     const [total, setTotal] = useState(0);
     const limit = 20;
 
-    useEffect(() => {
-        fetchArticles();
-    }, [statusFilter, page]);
-
-    const fetchArticles = async () => {
+    const fetchArticles = useCallback(async () => {
         try {
             setLoading(true);
             const params = new URLSearchParams();
@@ -54,7 +50,11 @@ export default function ArticleList({ onDelete }: ArticleListProps) {
         } finally {
             setLoading(false);
         }
-    };
+    }, [statusFilter, page]);
+
+    useEffect(() => {
+        fetchArticles();
+    }, [fetchArticles]);
 
     const handleDelete = async (id: string) => {
         if (!confirm('Are you sure you want to delete this article?')) return;
@@ -166,10 +166,10 @@ export default function ArticleList({ onDelete }: ArticleListProps) {
                                     <td className="px-6 py-4">
                                         <span
                                             className={`inline-flex items-center px-2.5 py-0.5 rounded-md text-xs font-medium ${article.status === 'PUBLISHED'
-                                                    ? 'bg-green-100 text-green-800'
-                                                    : article.status === 'DRAFT'
-                                                        ? 'bg-yellow-100 text-yellow-800'
-                                                        : 'bg-gray-100 text-gray-800'
+                                                ? 'bg-green-100 text-green-800'
+                                                : article.status === 'DRAFT'
+                                                    ? 'bg-yellow-100 text-yellow-800'
+                                                    : 'bg-gray-100 text-gray-800'
                                                 }`}
                                         >
                                             {article.status}

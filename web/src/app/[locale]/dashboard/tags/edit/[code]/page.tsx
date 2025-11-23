@@ -11,22 +11,22 @@ export default function EditTagPage({ params }: { params: { locale: string; code
     const [error, setError] = useState('');
 
     useEffect(() => {
+        const fetchTag = async () => {
+            try {
+                const res = await fetch(`http://localhost:4000/api/tags/${params.code}`);
+                if (!res.ok) throw new Error('Failed to fetch tag');
+                const data = await res.json();
+                setTag(data);
+            } catch (err) {
+                setError('Error loading tag');
+                console.error(err);
+            } finally {
+                setLoading(false);
+            }
+        };
+
         fetchTag();
     }, [params.code]);
-
-    const fetchTag = async () => {
-        try {
-            const res = await fetch(`http://localhost:4000/api/tags/${params.code}`);
-            if (!res.ok) throw new Error('Failed to fetch tag');
-            const data = await res.json();
-            setTag(data);
-        } catch (err) {
-            setError('Error loading tag');
-            console.error(err);
-        } finally {
-            setLoading(false);
-        }
-    };
 
     const handleSubmit = async (data: { code: string; name: Record<string, string> }) => {
         try {
