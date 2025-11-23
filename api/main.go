@@ -12,6 +12,7 @@ import (
 	"github.com/ai-dala/api/internal/modules/articles"
 	"github.com/ai-dala/api/internal/modules/categories"
 	"github.com/ai-dala/api/internal/modules/tags"
+	"github.com/ai-dala/api/internal/modules/uploads"
 	"github.com/jmoiron/sqlx"
 	"github.com/joho/godotenv"
 	_ "github.com/lib/pq"
@@ -65,8 +66,11 @@ func main() {
 	articlesService := articles.NewService(articlesRepo)
 	articlesHandler := articles.NewHandler(articlesService)
 
+	// Initialize Uploads Module
+	uploadsHandler := uploads.NewHandler("./uploads/images")
+
 	// Initialize Server
-	srv := server.NewServer(authService, tagsHandler, categoriesHandler, articlesHandler)
+	srv := server.NewServer(authService, tagsHandler, categoriesHandler, articlesHandler, uploadsHandler)
 
 	mux := http.NewServeMux()
 	srv.RegisterRoutes(mux)

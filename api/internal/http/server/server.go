@@ -9,6 +9,7 @@ import (
 	"github.com/ai-dala/api/internal/modules/articles"
 	"github.com/ai-dala/api/internal/modules/categories"
 	"github.com/ai-dala/api/internal/modules/tags"
+	"github.com/ai-dala/api/internal/modules/uploads"
 	"github.com/google/uuid"
 )
 
@@ -17,14 +18,16 @@ type Server struct {
 	tagsHandler       *tags.Handler
 	categoriesHandler *categories.Handler
 	articlesHandler   *articles.Handler
+	uploadsHandler    *uploads.Handler
 }
 
-func NewServer(authService auth.Service, tagsHandler *tags.Handler, categoriesHandler *categories.Handler, articlesHandler *articles.Handler) *Server {
+func NewServer(authService auth.Service, tagsHandler *tags.Handler, categoriesHandler *categories.Handler, articlesHandler *articles.Handler, uploadsHandler *uploads.Handler) *Server {
 	return &Server{
 		auth:              authService,
 		tagsHandler:       tagsHandler,
 		categoriesHandler: categoriesHandler,
 		articlesHandler:   articlesHandler,
+		uploadsHandler:    uploadsHandler,
 	}
 }
 
@@ -91,6 +94,11 @@ func (s *Server) RegisterRoutes(mux *http.ServeMux) {
 	// Articles routes
 	if s.articlesHandler != nil {
 		s.articlesHandler.RegisterRoutes(mux)
+	}
+
+	// Uploads routes
+	if s.uploadsHandler != nil {
+		s.uploadsHandler.RegisterRoutes(mux)
 	}
 
 	// Protected routes
