@@ -1,7 +1,8 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
+import TurndownService from 'turndown';
 
 interface Article {
     id?: string;
@@ -30,6 +31,8 @@ export default function ArticleEditor({ articleId }: ArticleEditorProps) {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [showPreview, setShowPreview] = useState(false);
+    const textareaRef = useRef<HTMLTextAreaElement>(null);
+    const fileInputRef = useRef<HTMLInputElement>(null);
 
     useEffect(() => {
         fetchCategories();
@@ -141,6 +144,95 @@ export default function ArticleEditor({ articleId }: ArticleEditorProps) {
         }));
     };
 
+    // Upload image and return URL
+    const uploadImage = async (file: File): Promise<string> => {
+        const formData = new FormData();
+        formData.append('images', file);
+
+        const response = await fetch('http://localhost:4000/api/uploads/images', {
+            method: 'POST',
+            body: formData,
+        });
+
+        if (!response.ok) throw new Error('Failed to upload image');
+        const data = await response.json();
+        return data.urls[0];
+    };
+
+    // Handle image upload button
+    const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const files = e.target.files;
+        if (!files || files.length === 0) return;
+
+        try {
+            const file = files[0];
+            const url = await uploadImage(file);
+            const markdown = `![${file.name}](${url})`;
+
+            // Insert at cursor position
+            const textarea = textareaRef.current;
+            if (textarea) {
+                const start = textarea.selectionStart;
+                const end = textarea.selectionEnd;
+                const newBody = article.body.substring(0, start) + markdown + article.body.substring(end);
+                setArticle({ ...article, body: newBody });
+            } else {
+                setArticle({ ...article, body: article.body + '\n' + markdown });
+            }
+        } catch (err) {
+            alert('Failed to upload image: ' + (err instanceof Error ? err.message : 'Unknown error'));
+        }
+    };
+
+    // Handle paste from Word
+    const handlePaste = async (e: React.ClipboardEvent<HTMLTextAreaElement>) => {
+        const html = e.clipboardData.getData('text/html');
+        if (!html) return; // No HTML content, let default paste happen
+
+        e.preventDefault();
+
+        try {
+            // Convert HTML to Markdown
+            const turndownService = new TurndownService();
+            let markdown = turndownService.turndown(html);
+
+            // Extract base64 images from HTML
+            const imgRegex = /<img[^>]+src="data:image\/([^;]+);base64,([^"]+)"[^>]*>/g;
+            const matches = Array.from(html.matchAll(imgRegex));
+
+            // Upload each image and replace in markdown
+            for (const match of matches) {
+                const [fullMatch, format, base64Data] = match;
+
+                // Convert base64 to blob
+                const byteString = atob(base64Data);
+                const ab = new ArrayBuffer(byteString.length);
+                const ia = new Uint8Array(ab);
+                for (let i = 0; i < byteString.length; i++) {
+                    ia[i] = byteString.charCodeAt(i);
+                }
+                const blob = new Blob([ab], { type: `image/${format}` });
+                const file = new File([blob], `pasted-image.${format}`, { type: `image/${format}` });
+
+                // Upload and get URL
+                const url = await uploadImage(file);
+
+                // Replace in markdown (find the placeholder and replace with URL)
+                markdown = markdown.replace(/!\[\]\([^)]*\)/, `![](${url})`);
+            }
+
+            // Insert markdown at cursor position
+            const textarea = e.currentTarget;
+            const start = textarea.selectionStart;
+            const end = textarea.selectionEnd;
+            const newBody = article.body.substring(0, start) + markdown + article.body.substring(end);
+            setArticle({ ...article, body: newBody });
+        } catch (err) {
+            console.error('Paste error:', err);
+            // If conversion fails, let default paste happen
+        }
+    };
+
     if (error) {
         return <div className="text-center py-8 text-red-600">Error: {error}</div>;
     }
@@ -225,8 +317,8 @@ export default function ArticleEditor({ articleId }: ArticleEditorProps) {
                                 type="button"
                                 onClick={() => toggleTagSelection(tag.id)}
                                 className={`px-3 py-1 rounded-md text-sm font-medium transition-colors ${article.tags.includes(tag.id)
-                                        ? 'bg-indigo-600 text-white'
-                                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                                    ? 'bg-indigo-600 text-white'
+                                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                                     }`}
                             >
                                 {tag.name.en || tag.code}
@@ -241,29 +333,47 @@ export default function ArticleEditor({ articleId }: ArticleEditorProps) {
                         <label className="block text-sm font-medium text-gray-700">
                             Content (Markdown) *
                         </label>
-                        <button
-                            type="button"
-                            onClick={() => setShowPreview(!showPreview)}
-                            className="text-sm text-indigo-600 hover:text-indigo-800"
-                        >
-                            {showPreview ? 'Edit' : 'Preview'}
-                        </button>
+                        <div className="flex space-x-2">
+                            <button
+                                type="button"
+                                onClick={() => fileInputRef.current?.click()}
+                                className="text-sm text-indigo-600 hover:text-indigo-800"
+                            >
+                                📷 Upload Image
+                            </button>
+                            <button
+                                type="button"
+                                onClick={() => setShowPreview(!showPreview)}
+                                className="text-sm text-indigo-600 hover:text-indigo-800"
+                            >
+                                {showPreview ? 'Edit' : 'Preview'}
+                            </button>
+                        </div>
                     </div>
+                    <input
+                        ref={fileInputRef}
+                        type="file"
+                        accept="image/*"
+                        onChange={handleImageUpload}
+                        className="hidden"
+                    />
                     {showPreview ? (
                         <div className="prose max-w-none border border-gray-300 rounded-md p-4 min-h-[400px] bg-gray-50">
                             <div dangerouslySetInnerHTML={{ __html: article.body }} />
                         </div>
                     ) : (
                         <textarea
+                            ref={textareaRef}
                             value={article.body}
                             onChange={(e) => setArticle({ ...article, body: e.target.value })}
+                            onPaste={handlePaste}
                             rows={20}
                             className="block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 font-mono text-sm"
-                            placeholder="Write your article content in Markdown..."
+                            placeholder="Write your article content in Markdown... (Paste from Word supported)"
                         />
                     )}
                     <p className="mt-1 text-sm text-gray-500">
-                        Use Markdown syntax for formatting. Images: <code>![alt](url)</code>
+                        Use Markdown syntax. Upload images or paste from Word (images auto-uploaded).
                     </p>
                 </div>
 
