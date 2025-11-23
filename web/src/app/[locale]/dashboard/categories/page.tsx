@@ -1,92 +1,140 @@
-"use client";
+'use client';
 
-import type { CSSProperties } from "react";
+import React, { useState, useEffect } from 'react';
+import CategoryTree, { Category } from '@/app/components/categories/CategoryTree';
+import CategoryForm from '@/app/components/categories/CategoryForm';
 
-export default function CategoriesPage() {
+export default function CategoriesPage({ params }: { params: { locale: string } }) {
+    const [categories, setCategories] = useState<Category[]>([]);
+    const [selectedCategory, setSelectedCategory] = useState<Category | null>(null);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState('');
+
+    const fetchCategories = async () => {
+        try {
+            const res = await fetch('http://localhost:4000/api/categories');
+            if (!res.ok) throw new Error('Failed to fetch categories');
+            const data = await res.json();
+            setCategories(data || []);
+        } catch (err) {
+            console.error(err);
+            setError('Failed to load categories');
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    useEffect(() => {
+        fetchCategories();
+    }, []);
+
+    const handleCreateOrUpdate = async (data: any) => {
+        try {
+            const isUpdate = !!data.id;
+            const url = isUpdate
+                ? `http://localhost:4000/api/categories/${data.id}`
+                : 'http://localhost:4000/api/categories';
+
+            const method = isUpdate ? 'PUT' : 'POST';
+
+            const res = await fetch(url, {
+                method,
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data),
+            });
+
+            if (!res.ok) {
+                const text = await res.text();
+                throw new Error(text || 'Operation failed');
+            }
+
+            // Refresh list
+            await fetchCategories();
+            // Clear selection if created new, or keep if updated
+            if (!isUpdate) setSelectedCategory(null);
+            alert(isUpdate ? 'Category updated!' : 'Category created!');
+        } catch (err: any) {
+            console.error(err);
+            alert(err.message);
+        }
+    };
+
+    const handleDelete = async (id: string) => {
+        if (!confirm('Are you sure you want to delete this category?')) return;
+
+        try {
+            const res = await fetch(`http://localhost:4000/api/categories/${id}`, {
+                method: 'DELETE',
+            });
+
+            if (!res.ok) {
+                if (res.status === 409) {
+                    throw new Error('Cannot delete category with active children.');
+                }
+                throw new Error('Failed to delete category');
+            }
+
+            await fetchCategories();
+            setSelectedCategory(null);
+        } catch (err: any) {
+            console.error(err);
+            alert(err.message);
+        }
+    };
+
+    const handleCreateNew = (parentId: string | null) => {
+        setSelectedCategory({
+            id: '', // Empty ID signals create mode
+            code: '',
+            name: { en: '', ru: '', kk: '' },
+            parent_id: parentId,
+            children: []
+        });
+    };
+
     return (
-        <div style={containerStyle}>
-            {/* Page Header */}
-            <div style={headerStyle}>
-                <h1 style={headingStyle}>Categories</h1>
-                <p style={subtitleStyle}>Manage content categories</p>
+        <div className="space-y-6">
+            <div className="flex justify-between items-center">
+                <h1 className="text-2xl font-bold text-gray-900">Categories</h1>
             </div>
 
-            {/* Empty State */}
-            <div style={emptyStateStyle}>
-                <div style={iconStyle}>📁</div>
-                <h2 style={emptyHeadingStyle}>No Categories Yet</h2>
-                <p style={emptyTextStyle}>
-                    Category management functionality will be added in a future update.
-                </p>
-                <div style={infoBoxStyle}>
-                    <p style={{ margin: 0, fontSize: "14px" }}>
-                        <strong>Coming Soon:</strong> Create, edit, and organize categories for your content.
-                    </p>
+            {error && (
+                <div className="bg-red-50 border-l-4 border-red-400 p-4">
+                    <div className="flex">
+                        <div className="ml-3">
+                            <p className="text-sm text-red-700">{error}</p>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                {/* Left Column: Tree View */}
+                <div className="lg:col-span-1">
+                    {loading ? (
+                        <div className="animate-pulse bg-gray-100 h-64 rounded-lg"></div>
+                    ) : (
+                        <CategoryTree
+                            categories={categories}
+                            selectedId={selectedCategory?.id || null}
+                            onSelect={setSelectedCategory}
+                            onCreate={handleCreateNew}
+                            locale={params.locale}
+                        />
+                    )}
+                </div>
+
+                {/* Right Column: Form */}
+                <div className="lg:col-span-2">
+                    <CategoryForm
+                        initialData={selectedCategory}
+                        categories={categories}
+                        onSubmit={handleCreateOrUpdate}
+                        onDelete={handleDelete}
+                        locale={params.locale}
+                    />
                 </div>
             </div>
         </div>
     );
 }
-
-const containerStyle: CSSProperties = {
-    maxWidth: "1200px",
-    margin: "0 auto"
-};
-
-const headerStyle: CSSProperties = {
-    marginBottom: 32
-};
-
-const headingStyle: CSSProperties = {
-    fontSize: "32px",
-    fontWeight: 700,
-    color: "#0A1929",
-    margin: "0 0 8px"
-};
-
-const subtitleStyle: CSSProperties = {
-    fontSize: "16px",
-    color: "#6B7280",
-    margin: 0
-};
-
-const emptyStateStyle: CSSProperties = {
-    background: "#FFFFFF",
-    borderRadius: 16,
-    padding: "64px 40px",
-    boxShadow: "0 10px 30px rgba(0, 0, 0, 0.08), 0 4px 12px rgba(0, 0, 0, 0.04)",
-    border: "1px solid rgba(0, 0, 0, 0.05)",
-    textAlign: "center"
-};
-
-const iconStyle: CSSProperties = {
-    fontSize: 64,
-    marginBottom: 24
-};
-
-const emptyHeadingStyle: CSSProperties = {
-    fontSize: "24px",
-    fontWeight: 700,
-    color: "#0A1929",
-    margin: "0 0 12px"
-};
-
-const emptyTextStyle: CSSProperties = {
-    fontSize: "16px",
-    color: "#6B7280",
-    margin: "0 0 24px",
-    maxWidth: 500,
-    marginLeft: "auto",
-    marginRight: "auto"
-};
-
-const infoBoxStyle: CSSProperties = {
-    background: "#EFF6FF",
-    border: "1px solid #0066FF",
-    borderRadius: 12,
-    padding: "16px 20px",
-    color: "#0A1929",
-    maxWidth: 600,
-    marginLeft: "auto",
-    marginRight: "auto"
-};
