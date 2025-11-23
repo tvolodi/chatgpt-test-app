@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import TurndownService from 'turndown';
+import { marked } from 'marked';
 
 interface Article {
     id?: string;
@@ -359,7 +360,7 @@ export default function ArticleEditor({ articleId }: ArticleEditorProps) {
                     />
                     {showPreview ? (
                         <div className="prose max-w-none border border-gray-300 rounded-md p-4 min-h-[400px] bg-gray-50">
-                            <div dangerouslySetInnerHTML={{ __html: article.body }} />
+                            <div dangerouslySetInnerHTML={{ __html: marked(article.body) as string }} />
                         </div>
                     ) : (
                         <textarea
