@@ -30,6 +30,32 @@ test.describe('Articles E2E', () => {
         await expect(page).toHaveURL(/\/dashboard\/articles(\/(new|[a-f0-9-]+))?$/);
     });
 
+    test('should display error when saving a draft fails', async ({ page }) => {
+        await page.goto('http://localhost:3000/en/dashboard/articles/new');
+
+        // Fill in the form
+        await page.fill('input[placeholder*="title"]', 'Test Error Article');
+        const editor = page.locator('.ProseMirror');
+        await editor.click();
+        await editor.fill('# Test Content');
+
+        // Mock a failed save API call
+        await page.route('**/api/articles', route => {
+            route.fulfill({
+                status: 500,
+                contentType: 'application/json',
+                body: JSON.stringify({ message: 'Internal Server Error' }),
+            });
+        });
+
+        // Save as draft
+        await page.click('text=Save Draft');
+
+        // Check for the error message
+        await expect(page.getByText('Error: Failed to save article')).toBeVisible();
+    });
+
+
     test('Edit an article', async ({ page, request }) => {
         // Ensure article exists
         const editTitle = `Test Article ${Date.now()}`;
@@ -56,6 +82,88 @@ test.describe('Articles E2E', () => {
         // Verify stays on edit or returns to list
         await expect(page).toHaveURL(/\/dashboard\/articles(\/[a-f0-9-]+)?$/);
     });
+
+    test('should display error when updating an article fails', async ({ page, request }) => {
+        // Ensure article exists
+        const editTitle = `Test Article ${Date.now()}`;
+        const createResp = await request.post('http://localhost:4000/api/articles', {
+            data: { title: editTitle, body: '# Content' },
+        });
+        expect(createResp.ok()).toBeTruthy();
+        const article = await createResp.json();
+
+        await page.goto(`http://localhost:3000/en/dashboard/articles/${article.id}`);
+
+        // Update title
+        const updatedTitle = `${editTitle} (Updated)`;
+        await page.fill('input[placeholder*="title"]', updatedTitle);
+
+        // Mock a failed save API call
+        await page.route(`**/api/articles/${article.id}`, route => {
+            route.fulfill({
+                status: 500,
+                contentType: 'application/json',
+                body: JSON.stringify({ message: 'Internal Server Error' }),
+            });
+        });
+
+        // Save
+        await page.click('text=Save Draft');
+
+        // Check for the error message
+        await expect(page.getByText('Error: Failed to save article')).toBeVisible();
+    });
+
+    test('should clear error message on subsequent successful save', async ({ page }) => {
+        await page.goto('http://localhost:3000/en/dashboard/articles/new');
+
+        // Fill in the form
+        await page.fill('input[placeholder*="title"]', 'Test Error Article');
+        const editor = page.locator('.ProseMirror');
+        await editor.click();
+        await editor.fill('# Test Content');
+
+        // Mock a failed save API call
+        await page.route('**/api/articles', route => {
+            console.log('Fulfilling with error');
+            route.fulfill({
+                status: 500,
+                contentType: 'application/json',
+                body: JSON.stringify({ message: 'Internal Server Error' }),
+            });
+        });
+
+        // Save as draft - should fail
+        console.log('Clicking save for the first time');
+        await page.click('text=Save Draft');
+
+        // Check for the error message
+        const errorMessage = page.getByText('Error: Failed to save article');
+        await expect(errorMessage).toBeVisible();
+        console.log('Error message is visible');
+
+        // Mock a successful save API call
+        await page.unroute('**/api/articles');
+        await page.route('**/api/articles', route => {
+            console.log('Fulfilling with success');
+            route.fulfill({
+                status: 200,
+                contentType: 'application/json',
+                body: JSON.stringify({ id: '123' }),
+            });
+        });
+
+        // Save as draft again - should succeed
+        console.log('Clicking save for the second time');
+        await page.click('text=Save Draft');
+        console.log('Clicked save for the second time');
+
+
+        // Check that the error message is gone
+        await expect(errorMessage).not.toBeVisible();
+    });
+
+
 
     test('Publish an article', async ({ page, request }) => {
         // Create a draft article via API
