@@ -20,3 +20,12 @@ bin/
 Thumbs.db
 .idea/
 .vscode/
+
+# Logs & Artifacts
+*.log
+api_run.log
+api_err.log
+web/test-results/
+api/uploads/
+
+
