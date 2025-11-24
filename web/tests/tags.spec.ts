@@ -110,13 +110,14 @@ test.describe('Tag Management E2E (REQ-008)', () => {
     });
 
     test('Delete Tag', async ({ page }) => {
+        const uniqueTagName = `Tag to Delete ${Date.now()}`;
         // First, create a tag to delete
         const createResponse = await fetch('http://localhost:4000/api/tags', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
                 code: testTagCode,
-                name: { en: 'Tag to Delete', ru: 'Тег для удаления', kk: 'Жою үшін тег' }
+                name: { en: uniqueTagName, ru: 'Тег для удаления', kk: 'Жою үшін тег' }
             })
         });
         expect(createResponse.ok).toBeTruthy();
@@ -125,7 +126,7 @@ test.describe('Tag Management E2E (REQ-008)', () => {
         await page.goto('/en/dashboard/tags');
 
         // Verify tag exists
-        await expect(page.getByText('Tag to Delete')).toBeVisible();
+        await expect(page.getByText(uniqueTagName)).toBeVisible();
 
         // Setup dialog handler
         page.on('dialog', dialog => dialog.accept());
@@ -138,7 +139,7 @@ test.describe('Tag Management E2E (REQ-008)', () => {
         await page.waitForTimeout(500);
 
         // Verify tag is removed from list
-        await expect(page.getByText('Tag to Delete')).not.toBeVisible();
+        await expect(page.getByText(uniqueTagName)).not.toBeVisible();
 
         // Verify tag is actually deleted from database
         const verifyResponse = await fetch(`http://localhost:4000/api/tags/${testTagCode}`);

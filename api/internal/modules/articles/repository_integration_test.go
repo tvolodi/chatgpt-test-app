@@ -1,6 +1,7 @@
 package articles
 
 import (
+	"fmt"
 	"testing"
 	"time"
 
@@ -20,8 +21,9 @@ func TestRepository_Integration(t *testing.T) {
 	t.Run("Create and FindByID", func(t *testing.T) {
 		article := &Article{
 			Title:    "Test Article",
+			Slug:     fmt.Sprintf("test-article-%d", time.Now().UnixNano()),
 			Body:     "# Test Content",
-			AuthorID: "test-author-123",
+			AuthorID: "123e4567-e89b-12d3-a456-426614174000",
 			Status:   "DRAFT",
 		}
 
@@ -39,8 +41,9 @@ func TestRepository_Integration(t *testing.T) {
 
 	t.Run("FindAll with filters", func(t *testing.T) {
 		// Create test articles
-		article1 := &Article{Title: "Article 1", Body: "Body 1", AuthorID: "author1", Status: "DRAFT"}
-		article2 := &Article{Title: "Article 2", Body: "Body 2", AuthorID: "author2", Status: "PUBLISHED"}
+		article1 := &Article{Title: "Article 1", Slug: fmt.Sprintf("article-1-%d", time.Now().UnixNano()), Body: "Body 1", AuthorID: "123e4567-e89b-12d3-a456-426614174000", Status: "DRAFT"}
+		time.Sleep(10 * time.Millisecond)
+		article2 := &Article{Title: "Article 2", Slug: fmt.Sprintf("article-2-%d", time.Now().UnixNano()), Body: "Body 2", AuthorID: "123e4567-e89b-12d3-a456-426614174000", Status: "PUBLISHED"}
 
 		require.NoError(t, repo.Create(article1))
 		require.NoError(t, repo.Create(article2))
@@ -57,10 +60,11 @@ func TestRepository_Integration(t *testing.T) {
 	})
 
 	t.Run("Update", func(t *testing.T) {
-		article := &Article{Title: "Original", Body: "Body", AuthorID: "author", Status: "DRAFT"}
+		article := &Article{Title: "Original", Slug: fmt.Sprintf("original-%d", time.Now().UnixNano()), Body: "Body", AuthorID: "123e4567-e89b-12d3-a456-426614174000", Status: "DRAFT"}
 		require.NoError(t, repo.Create(article))
 
 		article.Title = "Updated"
+		article.Slug = fmt.Sprintf("updated-%d", time.Now().UnixNano())
 		article.Status = "PUBLISHED"
 		now := time.Now()
 		article.PublishedAt = &now
@@ -76,7 +80,7 @@ func TestRepository_Integration(t *testing.T) {
 	})
 
 	t.Run("Soft Delete", func(t *testing.T) {
-		article := &Article{Title: "To Delete", Body: "Body", AuthorID: "author", Status: "DRAFT"}
+		article := &Article{Title: "To Delete", Slug: fmt.Sprintf("to-delete-%d", time.Now().UnixNano()), Body: "Body", AuthorID: "123e4567-e89b-12d3-a456-426614174000", Status: "DRAFT"}
 		require.NoError(t, repo.Create(article))
 
 		err := repo.Delete(article.ID)
@@ -90,43 +94,48 @@ func TestRepository_Integration(t *testing.T) {
 
 	t.Run("Tag Management", func(t *testing.T) {
 		// Create article
-		article := &Article{Title: "Tagged Article", Body: "Body", AuthorID: "author", Status: "DRAFT"}
+		article := &Article{Title: "Tagged Article", Slug: fmt.Sprintf("tagged-article-%d", time.Now().UnixNano()), Body: "Body", AuthorID: "123e4567-e89b-12d3-a456-426614174000", Status: "DRAFT"}
 		require.NoError(t, repo.Create(article))
 
-		// Create test tags
-		_, err := testDB.DB.Exec(`INSERT INTO tags (id, code, name) VALUES ($1, $2, $3)`, "tag1", "tag1", `{"en": "Tag 1"}`)
+		// Create test tags with UUIDs
+		tag1ID := "a1b2c3d4-e5f6-7788-9900-aabbccddeeff"
+		tag2ID := "f0e1d2c3-b4a5-6677-8899-aabbccddeeff"
+		_, err := testDB.DB.Exec(`INSERT INTO tags (id, code, name) VALUES ($1, $2, $3)`, tag1ID, "tag1", `{"en": "Tag 1"}`)
 		require.NoError(t, err)
-		_, err = testDB.DB.Exec(`INSERT INTO tags (id, code, name) VALUES ($1, $2, $3)`, "tag2", "tag2", `{"en": "Tag 2"}`)
-		require.NoError(t, err)
-
-		// Add tags
-		err = repo.AddTags(article.ID, []string{"tag1", "tag2"})
+		_, err = testDB.DB.Exec(`INSERT INTO tags (id, code, name) VALUES ($1, $2, $3)`, tag2ID, "tag2", `{"en": "Tag 2"}`)
 		require.NoError(t, err)
 
-		// Get tags
+		// Add tags by ID
+		err = repo.AddTags(article.ID, []string{tag1ID, tag2ID})
+		require.NoError(t, err)
+
+		// Get tags by ID
 		tags, err := repo.GetTags(article.ID)
 		require.NoError(t, err)
 		assert.Len(t, tags, 2)
-		assert.Contains(t, tags, "tag1")
-		assert.Contains(t, tags, "tag2")
+		assert.Contains(t, tags, tag1ID)
+		assert.Contains(t, tags, tag2ID)
 
-		// Remove one tag
-		err = repo.RemoveTags(article.ID, []string{"tag1"})
+		// Remove one tag by ID
+		err = repo.RemoveTags(article.ID, []string{tag1ID})
 		require.NoError(t, err)
 
 		tags, err = repo.GetTags(article.ID)
 		require.NoError(t, err)
 		assert.Len(t, tags, 1)
-		assert.Contains(t, tags, "tag2")
+		assert.Contains(t, tags, tag2ID)
 	})
 
 	t.Run("Count", func(t *testing.T) {
+		article := &Article{Title: "Count Test", Slug: fmt.Sprintf("count-test-%d", time.Now().UnixNano()), Body: "Body", AuthorID: "123e4567-e89b-12d3-a456-426614174000", Status: "DRAFT"}
+		require.NoError(t, repo.Create(article))
+
 		count, err := repo.Count("", "", "")
 		require.NoError(t, err)
 		assert.Greater(t, count, 0)
 
 		countDrafts, err := repo.Count("DRAFT", "", "")
 		require.NoError(t, err)
-		assert.GreaterOrEqual(t, countDrafts, 0)
+		assert.Greater(t, countDrafts, 0)
 	})
 }

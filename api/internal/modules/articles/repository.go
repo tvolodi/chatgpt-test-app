@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/jmoiron/sqlx"
+	"github.com/lib/pq"
 )
 
 type Article struct {
@@ -172,7 +173,7 @@ func (r *Repository) RemoveTags(articleID string, tagIDs []string) error {
 	}
 
 	query := `DELETE FROM article_tags WHERE article_id = $1 AND tag_id = ANY($2)`
-	_, err := r.db.Exec(query, articleID, tagIDs)
+	_, err := r.db.Exec(query, articleID, pq.Array(tagIDs))
 	return err
 }
 

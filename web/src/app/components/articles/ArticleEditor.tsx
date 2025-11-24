@@ -2,8 +2,6 @@
 
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
-import TurndownService from 'turndown';
-import { marked } from 'marked';
 import TiptapEditor from './TiptapEditor';
 
 interface Article {
@@ -19,6 +17,41 @@ interface ArticleEditorProps {
     articleId?: string;
 }
 
+const ArticleEditorSkeleton = () => (
+    <div className="max-w-5xl mx-auto space-y-6 animate-pulse">
+        <div className="flex justify-between items-center">
+            <div className="h-8 bg-gray-200 rounded-md w-48"></div>
+            <div className="flex space-x-2">
+                <div className="h-10 bg-gray-200 rounded-md w-24"></div>
+                <div className="h-10 bg-gray-200 rounded-md w-24"></div>
+            </div>
+        </div>
+        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 space-y-6">
+            <div className="space-y-2">
+                <div className="h-4 bg-gray-200 rounded w-1/4"></div>
+                <div className="h-10 bg-gray-200 rounded"></div>
+            </div>
+            <div className="space-y-2">
+                <div className="h-4 bg-gray-200 rounded w-1/4"></div>
+                <div className="h-10 bg-gray-200 rounded"></div>
+            </div>
+            <div className="space-y-2">
+                <div className="h-4 bg-gray-200 rounded w-1/4"></div>
+                <div className="flex flex-wrap gap-2">
+                    <div className="h-8 bg-gray-200 rounded-md w-20"></div>
+                    <div className="h-8 bg-gray-200 rounded-md w-24"></div>
+                    <div className="h-8 bg-gray-200 rounded-md w-16"></div>
+                </div>
+            </div>
+            <div className="space-y-2">
+                <div className="h-4 bg-gray-200 rounded w-1/4"></div>
+                <div className="h-40 bg-gray-200 rounded"></div>
+            </div>
+        </div>
+    </div>
+);
+
+
 export default function ArticleEditor({ articleId }: ArticleEditorProps) {
     const router = useRouter();
     const [article, setArticle] = useState<Article>({
@@ -30,60 +63,61 @@ export default function ArticleEditor({ articleId }: ArticleEditorProps) {
     });
     const [categories, setCategories] = useState<any[]>([]);
     const [tags, setTags] = useState<any[]>([]);
+    const [initialLoading, setInitialLoading] = useState(true);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
-    const [showPreview, setShowPreview] = useState(false);
-    const textareaRef = useRef<HTMLTextAreaElement>(null);
-    const fileInputRef = useRef<HTMLInputElement>(null);
-
-    const fetchArticle = useCallback(async () => {
-        try {
-            const response = await fetch(`http://localhost:4000/api/articles/${articleId}`);
-            if (!response.ok) throw new Error('Failed to fetch article');
-            const data = await response.json();
-            setArticle({
-                title: data.article.title,
-                body: data.article.body,
-                category_id: data.article.category_id,
-                status: data.article.status,
-                tags: data.tags || [],
-            });
-        } catch (err) {
-            setError(err instanceof Error ? err.message : 'Failed to load article');
-        }
-    }, [articleId]);
-
-    const fetchCategories = useCallback(async () => {
-        try {
-            const response = await fetch('http://localhost:4000/api/categories');
-            if (response.ok) {
-                const data = await response.json();
-                setCategories(data || []);
-            }
-        } catch (err) {
-            console.error('Failed to fetch categories:', err);
-        }
-    }, []);
-
-    const fetchTags = useCallback(async () => {
-        try {
-            const response = await fetch('http://localhost:4000/api/tags');
-            if (response.ok) {
-                const data = await response.json();
-                setTags(data || []);
-            }
-        } catch (err) {
-            console.error('Failed to fetch tags:', err);
-        }
-    }, []);
+    const [categoryError, setCategoryError] = useState<string | null>(null);
+    const [tagsError, setTagsError] = useState<string | null>(null);
 
     useEffect(() => {
-        fetchCategories();
-        fetchTags();
-        if (articleId) {
-            fetchArticle();
-        }
-    }, [articleId, fetchArticle, fetchCategories, fetchTags]);
+        const fetchInitialData = async () => {
+            setInitialLoading(true);
+
+            try {
+                const categoriesResponse = await fetch('http://localhost:4000/api/categories');
+                if (!categoriesResponse.ok) {
+                    throw new Error('Failed to load categories.');
+                }
+                const categoriesData = await categoriesResponse.json();
+                setCategories(categoriesData || []);
+            } catch (err) {
+                setCategoryError('Failed to load categories.');
+            }
+
+            try {
+                const tagsResponse = await fetch('http://localhost:4000/api/tags');
+                if (!tagsResponse.ok) {
+                    throw new Error('Failed to load tags.');
+                }
+                const tagsData = await tagsResponse.json();
+                setTags(tagsData || []);
+            } catch (err) {
+                setTagsError('Failed to load tags.');
+            }
+
+            if (articleId) {
+                try {
+                    const articleResponse = await fetch(`http://localhost:4000/api/articles/${articleId}`);
+                    if (!articleResponse.ok) throw new Error('Failed to fetch article');
+                    const articleData = await articleResponse.json();
+                    setArticle({
+                        title: articleData.article.title,
+                        body: articleData.article.body,
+                        category_id: articleData.article.category_id,
+                        status: articleData.article.status,
+                        tags: articleData.tags || [],
+                    });
+                } catch (err) {
+                    console.log('Article fetch error:', err);
+                    setError(err instanceof Error ? err.message : 'Failed to load article data');
+                }
+            }
+
+            setInitialLoading(false);
+        };
+
+        fetchInitialData();
+    }, [articleId]);
 
     const handleSave = async () => {
         try {
@@ -161,8 +195,13 @@ export default function ArticleEditor({ articleId }: ArticleEditorProps) {
         return data.urls[0];
     };
 
+    if (initialLoading) {
+        return <ArticleEditorSkeleton />;
+    }
+
     if (error) {
-        return <div className="text-center py-8 text-red-600">Error: {error}</div>;
+        console.log('Rendering error message:', error);
+        return <div data-testid="error-message" className="text-center py-8 text-red-600">Error: {error}</div>;
     }
 
     return (
@@ -202,10 +241,11 @@ export default function ArticleEditor({ articleId }: ArticleEditorProps) {
             <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 space-y-6">
                 {/* Title */}
                 <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                    <label htmlFor="article-title" className="block text-sm font-medium text-gray-700 mb-1">
                         Title *
                     </label>
                     <input
+                        id="article-title"
                         type="text"
                         value={article.title}
                         onChange={(e) => setArticle({ ...article, title: e.target.value })}
@@ -219,10 +259,12 @@ export default function ArticleEditor({ articleId }: ArticleEditorProps) {
                     <label className="block text-sm font-medium text-gray-700 mb-1">
                         Category
                     </label>
+                    {categoryError && <p className="text-sm text-red-600 mb-2">{categoryError}</p>}
                     <select
                         value={article.category_id || ''}
                         onChange={(e) => setArticle({ ...article, category_id: e.target.value || undefined })}
                         className="block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
+                        disabled={!!categoryError}
                     >
                         <option value="">No Category</option>
                         {categories.map((cat) => (
@@ -238,6 +280,7 @@ export default function ArticleEditor({ articleId }: ArticleEditorProps) {
                     <label className="block text-sm font-medium text-gray-700 mb-2">
                         Tags
                     </label>
+                    {tagsError && <p className="text-sm text-red-600 mb-2">{tagsError}</p>}
                     <div className="flex flex-wrap gap-2">
                         {tags.map((tag) => (
                             <button
@@ -248,6 +291,7 @@ export default function ArticleEditor({ articleId }: ArticleEditorProps) {
                                     ? 'bg-indigo-600 text-white'
                                     : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                                     }`}
+                                disabled={!!tagsError}
                             >
                                 {tag.name.en || tag.code}
                             </button>
