@@ -2,12 +2,15 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import type { CSSProperties } from "react";
+import { useNavigationGuard } from "../../context/NavigationGuardContext";
 
 export function DashboardSidebar() {
     const [collapsed, setCollapsed] = useState(false);
     const pathname = usePathname();
+    const router = useRouter();
+    const { confirmNavigation } = useNavigationGuard();
 
     // Load sidebar state from localStorage
     useEffect(() => {
@@ -33,6 +36,13 @@ export function DashboardSidebar() {
         { href: "/dashboard/settings", label: "Settings", icon: "⚙️" }
     ];
 
+    const handleNavigation = (e: React.MouseEvent, href: string) => {
+        e.preventDefault();
+        confirmNavigation(() => {
+            router.push(href);
+        });
+    };
+
     return (
         <aside style={{ ...sidebarStyle, width: collapsed ? 72 : 240 }}>
             {/* Toggle Button */}
@@ -48,6 +58,7 @@ export function DashboardSidebar() {
                         <Link
                             key={item.href}
                             href={item.href}
+                            onClick={(e) => handleNavigation(e, item.href)}
                             style={{
                                 ...navItemStyle,
                                 background: isActive ? "#0066FF" : "transparent",

@@ -3,7 +3,7 @@
 import { useEditor, EditorContent, type Editor } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import Image from '@tiptap/extension-image';
-import { useEffect, useMemo } from 'react';
+import { useEffect, useMemo, useReducer } from 'react';
 import TurndownService from 'turndown';
 import { marked } from 'marked';
 
@@ -34,6 +34,7 @@ const MenuBar = ({ editor, onImageUpload }: { editor: Editor | null, onImageUplo
         input.click();
     };
 
+    console.log('MenuBar render. Bold active:', editor?.isActive('bold'), 'Selection:', editor?.state.selection.from, editor?.state.selection.to);
     return (
         <div className="border-b border-gray-200 bg-gray-50 p-2 flex flex-wrap gap-2">
             <button
@@ -51,6 +52,14 @@ const MenuBar = ({ editor, onImageUpload }: { editor: Editor | null, onImageUplo
                 title="Italic"
             >
                 <em>I</em>
+            </button>
+            <button
+                onClick={() => editor.chain().focus().toggleStrike().run()}
+                disabled={!editor.can().chain().focus().toggleStrike().run()}
+                className={`p-1.5 rounded hover:bg-gray-200 ${editor.isActive('strike') ? 'bg-gray-200 text-black' : 'text-gray-600'}`}
+                title="Strikethrough"
+            >
+                <s>S</s>
             </button>
             <div className="w-px h-6 bg-gray-300 mx-1 self-center"></div>
             <button
@@ -104,6 +113,13 @@ const MenuBar = ({ editor, onImageUpload }: { editor: Editor | null, onImageUplo
             >
                 &lt;/&gt;
             </button>
+            <button
+                onClick={() => editor.chain().focus().clearNodes().run()}
+                className="p-1.5 rounded hover:bg-gray-200 text-gray-600"
+                title="Clear Formatting (Ctrl+M)"
+            >
+                ✕ Clear
+            </button>
             <div className="w-px h-6 bg-gray-300 mx-1 self-center"></div>
             <button
                 onClick={addImage}
@@ -119,8 +135,11 @@ const MenuBar = ({ editor, onImageUpload }: { editor: Editor | null, onImageUplo
 export default function TiptapEditor({ value, onChange, onImageUpload }: TiptapEditorProps) {
     const turndownService = useMemo(() => new TurndownService({
         headingStyle: 'atx',
-        codeBlockStyle: 'fenced'
+        codeBlockStyle: 'fenced',
+        bulletListMarker: '-'
     }), []);
+
+    const [, forceUpdate] = useReducer((x: number) => x + 1, 0);
 
     const sanitizePastedHtml = async (rawHtml: string) => {
         const parser = new DOMParser();
@@ -256,18 +275,26 @@ export default function TiptapEditor({ value, onChange, onImageUpload }: TiptapE
         },
     });
 
+    // Force re-render on transaction to update toolbar state
+    useEffect(() => {
+        if (!editor) return;
+
+        const handleTransaction = () => {
+            forceUpdate();
+        };
+
+        editor.on('transaction', handleTransaction);
+
+        return () => {
+            editor.off('transaction', handleTransaction);
+        };
+    }, [editor]);
+
     // Sync value (Markdown) to Editor (HTML) when value changes externally (e.g. initial load)
-    // We need to be careful not to create a loop.
-    // Only update if editor is empty or content is significantly different? 
-    // Actually, for a controlled component, we usually don't sync back on every keystroke.
-    // We only sync on mount or if the ID changes.
     useEffect(() => {
         if (editor && value && editor.isEmpty) {
-            // Convert Markdown to HTML
-            // marked is async in newer versions? No, marked.parse is synchronous usually, but check version.
-            // In package.json it is ^17.0.1.
             const html = marked.parse(value) as string;
-            editor.commands.setContent(html);
+            editor.commands.setContent(html, { emitUpdate: false });
         }
     }, [editor, value]);
 

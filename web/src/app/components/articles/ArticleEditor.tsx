@@ -1,8 +1,10 @@
 'use client';
 
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useLayoutEffect, useRef, useCallback } from 'react';
+import { flushSync } from 'react-dom';
 import { useRouter } from 'next/navigation';
 import TiptapEditor from './TiptapEditor';
+import { useNavigationGuard } from '../../context/NavigationGuardContext';
 
 interface Article {
     id?: string;
@@ -54,6 +56,8 @@ const ArticleEditorSkeleton = () => (
 
 export default function ArticleEditor({ articleId }: ArticleEditorProps) {
     const router = useRouter();
+    const { isDirty, setIsDirty, confirmNavigation } = useNavigationGuard();
+
     const [article, setArticle] = useState<Article>({
         title: '',
         body: '',
@@ -68,6 +72,12 @@ export default function ArticleEditor({ articleId }: ArticleEditorProps) {
     const [error, setError] = useState<string | null>(null);
     const [categoryError, setCategoryError] = useState<string | null>(null);
     const [tagsError, setTagsError] = useState<string | null>(null);
+
+    // Reset dirty state when component mounts or articleId changes
+    useEffect(() => {
+        setIsDirty(false);
+        return () => setIsDirty(false);
+    }, [articleId, setIsDirty]);
 
     useEffect(() => {
         const fetchInitialData = async () => {
@@ -108,7 +118,6 @@ export default function ArticleEditor({ articleId }: ArticleEditorProps) {
                         tags: articleData.tags || [],
                     });
                 } catch (err) {
-                    console.log('Article fetch error:', err);
                     setError(err instanceof Error ? err.message : 'Failed to load article data');
                 }
             }
@@ -122,6 +131,7 @@ export default function ArticleEditor({ articleId }: ArticleEditorProps) {
     const handleSave = async () => {
         try {
             setLoading(true);
+            setError(null);
             const url = articleId
                 ? `http://localhost:4000/api/articles/${articleId}`
                 : 'http://localhost:4000/api/articles';
@@ -135,18 +145,48 @@ export default function ArticleEditor({ articleId }: ArticleEditorProps) {
                     title: article.title,
                     body: article.body,
                     category_id: article.category_id || null,
-                    tag_ids: article.tags,
+                    status: article.status,
+                    tag_ids: article.tags.map((t: any) => (typeof t === 'string' ? t : t.id)),
                 }),
             });
 
-            if (!response.ok) throw new Error('Failed to save article');
+            if (!response.ok) {
+                const text = await response.text();
+                let errorMessage = 'Failed to save article';
+                try {
+                    const errorData = JSON.parse(text);
+                    errorMessage = errorData.error || errorData.message || errorMessage;
+                } catch (e) {
+                    // Not JSON, use text directly
+                    if (text) errorMessage = text;
+                }
+                throw new Error(errorMessage);
+            }
 
-            router.push('/dashboard/articles');
+            const data = await response.json();
+
+            // For new articles, redirect to the article detail page
+            // For existing articles, redirect to the list
+            flushSync(() => {
+                setIsDirty(false);
+            });
+
+            if (!articleId && data.article?.id) {
+                router.push(`/dashboard/articles/${data.article.id}`);
+            } else {
+                router.push('/dashboard/articles');
+            }
         } catch (err) {
             setError(err instanceof Error ? err.message : 'Failed to save article');
         } finally {
             setLoading(false);
         }
+    };
+
+    const handleCancel = () => {
+        confirmNavigation(() => {
+            router.push('/dashboard/articles');
+        });
     };
 
     const handlePublish = async () => {
@@ -178,6 +218,7 @@ export default function ArticleEditor({ articleId }: ArticleEditorProps) {
                 ? prev.tags.filter(id => id !== tagId)
                 : [...prev.tags, tagId],
         }));
+        setIsDirty(true);
     };
 
     // Upload image and return URL
@@ -200,20 +241,20 @@ export default function ArticleEditor({ articleId }: ArticleEditorProps) {
     }
 
     if (error) {
-        console.log('Rendering error message:', error);
-        return <div data-testid="error-message" className="text-center py-8 text-red-600">Error: {error}</div>;
+        return <div className="text-center py-8 text-red-600" data-testid="error-message">Error: {error}</div>;
     }
 
     return (
         <div className="max-w-5xl mx-auto space-y-6">
             {/* Header */}
             <div className="flex justify-between items-center">
-                <h1 className="text-2xl font-bold text-gray-900">
+                <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
                     {articleId ? 'Edit Article' : 'New Article'}
+                    {isDirty && <span className="text-sm font-normal text-amber-600 bg-amber-50 px-2 py-0.5 rounded-full border border-amber-200">Unsaved changes</span>}
                 </h1>
                 <div className="flex space-x-2">
                     <button
-                        onClick={() => router.push('/dashboard/articles')}
+                        onClick={handleCancel}
                         className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
                     >
                         Cancel
@@ -248,7 +289,7 @@ export default function ArticleEditor({ articleId }: ArticleEditorProps) {
                         id="article-title"
                         type="text"
                         value={article.title}
-                        onChange={(e) => setArticle({ ...article, title: e.target.value })}
+                        onChange={(e) => { setArticle({ ...article, title: e.target.value }); setIsDirty(true); }}
                         className="block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
                         placeholder="Enter article title..."
                     />
@@ -262,7 +303,7 @@ export default function ArticleEditor({ articleId }: ArticleEditorProps) {
                     {categoryError && <p className="text-sm text-red-600 mb-2">{categoryError}</p>}
                     <select
                         value={article.category_id || ''}
-                        onChange={(e) => setArticle({ ...article, category_id: e.target.value || undefined })}
+                        onChange={(e) => { setArticle({ ...article, category_id: e.target.value || undefined }); setIsDirty(true); }}
                         className="block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
                         disabled={!!categoryError}
                     >
@@ -309,7 +350,7 @@ export default function ArticleEditor({ articleId }: ArticleEditorProps) {
 
                     <TiptapEditor
                         value={article.body}
-                        onChange={(markdown) => setArticle(prev => ({ ...prev, body: markdown }))}
+                        onChange={(markdown) => { setArticle(prev => ({ ...prev, body: markdown })); setIsDirty(true); }}
                         onImageUpload={uploadImage}
                     />
 
