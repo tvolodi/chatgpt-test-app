@@ -51,7 +51,7 @@ test.describe('Article Editor Loading and Error States (REQ-011)', () => {
             route.abort('connectionrefused');
         });
 
-        await page.goto('/en/dashboard/articles/edit/some-fake-id');
+        await page.goto('/en/dashboard/articles/some-fake-id');
 
         // Check for the main error boundary message
         await expect(page.getByTestId('error-message')).toBeVisible();

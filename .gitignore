@@ -26,6 +26,7 @@ Thumbs.db
 api_run.log
 api_err.log
 web/test-results/
+web/playwright-report/
 api/uploads/
 
 

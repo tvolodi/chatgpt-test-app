@@ -2,6 +2,7 @@ package articles
 
 import (
 	"errors"
+	"fmt"
 	"regexp"
 	"strings"
 	"time"
@@ -24,7 +25,21 @@ func (s *Service) Create(article *Article) error {
 
 	// Generate slug if empty
 	if article.Slug == "" {
-		article.Slug = generateSlug(article.Title)
+		baseSlug := generateSlug(article.Title)
+		article.Slug = baseSlug
+
+		// Ensure uniqueness
+		for i := 0; ; i++ {
+			existing, err := s.repo.FindBySlug(article.Slug)
+			if err != nil {
+				return err
+			}
+			if existing == nil {
+				break
+			}
+			// Slug exists, append counter
+			article.Slug = fmt.Sprintf("%s-%d", baseSlug, i+1)
+		}
 	}
 
 	// Validate status
@@ -69,7 +84,22 @@ func (s *Service) Update(id string, article *Article) error {
 
 	// Generate slug if empty and title is present
 	if article.Slug == "" && article.Title != "" {
-		article.Slug = generateSlug(article.Title)
+		baseSlug := generateSlug(article.Title)
+		article.Slug = baseSlug
+
+		// Ensure uniqueness
+		for i := 0; ; i++ {
+			existing, err := s.repo.FindBySlug(article.Slug)
+			if err != nil {
+				return err
+			}
+			// If no existing article, or existing article is the one we are updating, it's safe
+			if existing == nil || existing.ID == id {
+				break
+			}
+			// Slug exists and belongs to another article, append counter
+			article.Slug = fmt.Sprintf("%s-%d", baseSlug, i+1)
+		}
 	}
 
 	return s.repo.Update(id, article)

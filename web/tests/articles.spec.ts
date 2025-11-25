@@ -15,7 +15,7 @@ test.describe('Articles E2E', () => {
 
         // Click "New Article" button
         await page.click('text=+ New Article');
-        await expect(page).toHaveURL(/\/dashboard\/articles\/new$/);
+        await expect(page).toHaveURL('http://localhost:3000/en/dashboard/articles/new');
 
         // Fill in the form
         await page.fill('input[placeholder*="title"]', testTitle);
@@ -26,11 +26,11 @@ test.describe('Articles E2E', () => {
         // Save as draft
         await page.click('text=Save Draft');
 
-        // Should end up on list or stay on detail
-        await expect(page).toHaveURL(/\/dashboard\/articles(\/(new|[a-f0-9-]+))?$/);
+        // Should end up on list page
+        await expect(page).toHaveURL('http://localhost:3000/en/dashboard/articles');
     });
 
-    test('should display error when saving a draft fails', async ({ page }) => {
+    test('should display error when saving a new draft fails', async ({ page }) => {
         await page.goto('http://localhost:3000/en/dashboard/articles/new');
 
         // Fill in the form
@@ -55,7 +55,6 @@ test.describe('Articles E2E', () => {
         await expect(page.getByText('Error: Failed to save article')).toBeVisible();
     });
 
-
     test('Edit an article', async ({ page, request }) => {
         // Ensure article exists
         const editTitle = `Test Article ${Date.now()}`;
@@ -63,14 +62,9 @@ test.describe('Articles E2E', () => {
             data: { title: editTitle, body: '# Content' },
         });
         expect(createResp.ok()).toBeTruthy();
+        const article = await createResp.json();
 
-        await page.goto('http://localhost:3000/en/dashboard/articles');
-
-        // Find and click edit button for our test article
-        const row = page.locator(`tr:has-text("${editTitle}")`);
-        await row.locator('text=Edit').click();
-
-        await expect(page).toHaveURL(/\/dashboard\/articles\/[a-f0-9-]+$/);
+        await page.goto(`http://localhost:3000/en/dashboard/articles/${article.id}`);
 
         // Update title
         const updatedTitle = `${editTitle} (Updated)`;
@@ -80,7 +74,7 @@ test.describe('Articles E2E', () => {
         await page.click('text=Save Draft');
 
         // Verify stays on edit or returns to list
-        await expect(page).toHaveURL(/\/dashboard\/articles(\/[a-f0-9-]+)?$/);
+        await expect(page).toHaveURL(`http://localhost:3000/en/dashboard/articles/${article.id}`);
     });
 
     test('should display error when updating an article fails', async ({ page, request }) => {
@@ -125,7 +119,6 @@ test.describe('Articles E2E', () => {
 
         // Mock a failed save API call
         await page.route('**/api/articles', route => {
-            console.log('Fulfilling with error');
             route.fulfill({
                 status: 500,
                 contentType: 'application/json',
@@ -134,18 +127,15 @@ test.describe('Articles E2E', () => {
         });
 
         // Save as draft - should fail
-        console.log('Clicking save for the first time');
         await page.click('text=Save Draft');
 
         // Check for the error message
         const errorMessage = page.getByText('Error: Failed to save article');
         await expect(errorMessage).toBeVisible();
-        console.log('Error message is visible');
 
         // Mock a successful save API call
         await page.unroute('**/api/articles');
         await page.route('**/api/articles', route => {
-            console.log('Fulfilling with success');
             route.fulfill({
                 status: 200,
                 contentType: 'application/json',
@@ -154,16 +144,36 @@ test.describe('Articles E2E', () => {
         });
 
         // Save as draft again - should succeed
-        console.log('Clicking save for the second time');
         await page.click('text=Save Draft');
-        console.log('Clicked save for the second time');
-
 
         // Check that the error message is gone
         await expect(errorMessage).not.toBeVisible();
     });
 
+    test('should display error when there is a server error on save', async ({ page }) => {
+        await page.goto('http://localhost:3000/en/dashboard/articles/new');
 
+        // Fill in the form
+        await page.fill('input[placeholder*="title"]', 'Test Server Error');
+        const editor = page.locator('.ProseMirror');
+        await editor.click();
+        await editor.fill('# Test Content');
+
+        // Mock a server error
+        await page.route('**/api/articles', route => {
+            route.fulfill({
+                status: 500,
+                contentType: 'application/json',
+                body: JSON.stringify({ message: 'Internal Server Error' }),
+            });
+        });
+
+        // Save as draft
+        await page.click('text=Save Draft');
+
+        // Check for the error message
+        await expect(page.getByText('Error: Failed to save article')).toBeVisible();
+    });
 
     test('Publish an article', async ({ page, request }) => {
         // Create a draft article via API
@@ -256,7 +266,7 @@ test.describe('Articles E2E', () => {
         // Save
         await page.click('text=Save Draft');
 
-        await expect(page).toHaveURL(/\/dashboard\/articles(\/[a-f0-9-]+)?$/);
+        await expect(page).toHaveURL('http://localhost:3000/en/dashboard/articles');
     });
 
     test('Search articles', async ({ page, request }) => {

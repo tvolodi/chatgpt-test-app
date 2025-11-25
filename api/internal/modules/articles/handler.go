@@ -182,9 +182,20 @@ func (h *Handler) handleCreate(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
+	// Get tags for response
+	tags, err := h.service.GetTags(article.ID)
+	if err != nil {
+		tags = []string{}
+	}
+
+	response := map[string]interface{}{
+		"article": article,
+		"tags":    tags,
+	}
+
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusCreated)
-	json.NewEncoder(w).Encode(article)
+	json.NewEncoder(w).Encode(response)
 }
 
 // handleUpdate updates an existing article
@@ -239,8 +250,19 @@ func (h *Handler) handleUpdate(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// Get tags for response
+	tags, err := h.service.GetTags(id)
+	if err != nil {
+		tags = []string{}
+	}
+
+	response := map[string]interface{}{
+		"article": updated,
+		"tags":    tags,
+	}
+
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(updated)
+	json.NewEncoder(w).Encode(response)
 }
 
 // handlePublish publishes an article
@@ -258,8 +280,19 @@ func (h *Handler) handlePublish(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// Get tags for response
+	tags, err := h.service.GetTags(id)
+	if err != nil {
+		tags = []string{}
+	}
+
+	response := map[string]interface{}{
+		"article": article,
+		"tags":    tags,
+	}
+
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(article)
+	json.NewEncoder(w).Encode(response)
 }
 
 // handleDelete soft deletes an article
