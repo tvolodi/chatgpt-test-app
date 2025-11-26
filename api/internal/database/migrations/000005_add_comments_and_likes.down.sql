@@ -1,0 +1,2 @@
+DROP TABLE IF EXISTS article_likes;
+DROP TABLE IF EXISTS comments;

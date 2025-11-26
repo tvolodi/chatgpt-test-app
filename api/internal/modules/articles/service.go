@@ -62,7 +62,7 @@ func (s *Service) FindBySlug(slug string) (*Article, error) {
 
 // FindAll retrieves all articles with filters
 func (s *Service) FindAll(status, categoryID, authorID string, limit, offset int) ([]Article, int, error) {
-	articles, err := s.repo.FindAll(status, categoryID, authorID, limit, offset)
+	articles, err := s.repo.FindAll(status, categoryID, authorID, limit, offset, "")
 	if err != nil {
 		return nil, 0, err
 	}
@@ -142,6 +142,70 @@ func (s *Service) GetTags(articleID string) ([]string, error) {
 	return s.repo.GetTags(articleID)
 }
 
+// GetPublicArticles retrieves published articles for public display with text previews
+func (s *Service) GetPublicArticles(limit, offset int) ([]Article, int, error) {
+	articles, err := s.repo.FindAll("PUBLISHED", "", "", limit, offset, "published_at")
+	if err != nil {
+		return nil, 0, err
+	}
+
+	count, err := s.repo.Count("PUBLISHED", "", "")
+	if err != nil {
+		return nil, 0, err
+	}
+
+	// Generate previews
+	for i := range articles {
+		articles[i].Body = generatePreview(articles[i].Body)
+	}
+
+	return articles, count, nil
+}
+
+// AddComment adds a comment to an article
+func (s *Service) AddComment(articleID, userID, body string) (*Comment, error) {
+	if body == "" {
+		return nil, errors.New("comment body cannot be empty")
+	}
+	comment := &Comment{
+		ArticleID: articleID,
+		UserID:    userID,
+		Body:      body,
+	}
+	err := s.repo.AddComment(comment)
+	return comment, err
+}
+
+// GetComments retrieves comments for an article
+func (s *Service) GetComments(articleID string) ([]Comment, error) {
+	return s.repo.GetComments(articleID)
+}
+
+// AddLike adds or updates a like/dislike
+func (s *Service) AddLike(articleID, userID string, isLike bool) error {
+	like := &ArticleLike{
+		ArticleID: articleID,
+		UserID:    userID,
+		IsLike:    isLike,
+	}
+	return s.repo.AddLike(like)
+}
+
+// RemoveLike removes a like/dislike
+func (s *Service) RemoveLike(articleID, userID string) error {
+	return s.repo.RemoveLike(articleID, userID)
+}
+
+// GetLikesCount retrieves the count of likes and dislikes
+func (s *Service) GetLikesCount(articleID string) (int, int, error) {
+	return s.repo.GetLikesCount(articleID)
+}
+
+// GetUserLike retrieves the user's interaction status
+func (s *Service) GetUserLike(articleID, userID string) (*bool, error) {
+	return s.repo.GetUserLike(articleID, userID)
+}
+
 // generateSlug creates a URL-friendly slug from a string
 func generateSlug(s string) string {
 	s = strings.ToLower(s)
@@ -151,4 +215,50 @@ func generateSlug(s string) string {
 	// Trim dashes
 	s = strings.Trim(s, "-")
 	return s
+}
+
+// generatePreview creates a plain text preview from markdown
+func generatePreview(markdown string) string {
+	// Remove headers
+	re := regexp.MustCompile(`(?m)^#{1,6}\s+`)
+	text := re.ReplaceAllString(markdown, "")
+
+	// Remove images
+	re = regexp.MustCompile(`!\[.*?\]\(.*?\)`)
+	text = re.ReplaceAllString(text, "")
+
+	// Remove links
+	re = regexp.MustCompile(`\[(.*?)\]\(.*?\)`)
+	text = re.ReplaceAllString(text, "$1")
+
+	// Remove code blocks
+	re = regexp.MustCompile("```[\\s\\S]*?```")
+	text = re.ReplaceAllString(text, "")
+
+	// Remove inline code
+	re = regexp.MustCompile("`.*?`")
+	text = re.ReplaceAllString(text, "")
+
+	// Remove bold/italic
+	re = regexp.MustCompile(`(\*\*|__|\*|_)`)
+	text = re.ReplaceAllString(text, "")
+
+	// Normalize whitespace
+	text = strings.TrimSpace(text)
+	lines := strings.Split(text, "\n")
+
+	// Take first 10 lines
+	if len(lines) > 10 {
+		lines = lines[:10]
+		text = strings.Join(lines, "\n") + "..."
+	} else {
+		text = strings.Join(lines, "\n")
+	}
+
+	// Hard limit characters
+	if len(text) > 300 {
+		text = text[:300] + "..."
+	}
+
+	return text
 }

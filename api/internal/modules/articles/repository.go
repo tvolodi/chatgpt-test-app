@@ -34,8 +34,8 @@ func NewRepository(db *sqlx.DB) *Repository {
 // Create inserts a new article
 func (r *Repository) Create(article *Article) error {
 	query := `
-		INSERT INTO articles (title, slug, body, category_id, author_id, status)
-		VALUES ($1, $2, $3, $4, $5, $6)
+		INSERT INTO articles (title, slug, body, category_id, author_id, status, published_at)
+		VALUES ($1, $2, $3, $4, $5, $6, $7)
 		RETURNING id, created_at, updated_at
 	`
 	return r.db.QueryRow(
@@ -46,6 +46,7 @@ func (r *Repository) Create(article *Article) error {
 		article.CategoryID,
 		article.AuthorID,
 		article.Status,
+		article.PublishedAt,
 	).Scan(&article.ID, &article.CreatedAt, &article.UpdatedAt)
 }
 
@@ -80,7 +81,7 @@ func (r *Repository) FindBySlug(slug string) (*Article, error) {
 }
 
 // FindAll retrieves all active articles with optional filters
-func (r *Repository) FindAll(status, categoryID, authorID string, limit, offset int) ([]Article, error) {
+func (r *Repository) FindAll(status, categoryID, authorID string, limit, offset int, sortBy string) ([]Article, error) {
 	query := `
 		SELECT id, title, slug, body, category_id, author_id, status, published_at, created_at, updated_at
 		FROM articles
@@ -105,7 +106,12 @@ func (r *Repository) FindAll(status, categoryID, authorID string, limit, offset 
 		argPos++
 	}
 
-	query += fmt.Sprintf(` ORDER BY created_at DESC LIMIT $%d OFFSET $%d`, argPos, argPos+1)
+	orderBy := "created_at DESC"
+	if sortBy == "published_at" {
+		orderBy = "published_at DESC"
+	}
+
+	query += fmt.Sprintf(` ORDER BY %s LIMIT $%d OFFSET $%d`, orderBy, argPos, argPos+1)
 	args = append(args, limit, offset)
 
 	var articles []Article
@@ -183,6 +189,103 @@ func (r *Repository) GetTags(articleID string) ([]string, error) {
 	query := `SELECT tag_id FROM article_tags WHERE article_id = $1`
 	err := r.db.Select(&tagIDs, query, articleID)
 	return tagIDs, err
+}
+
+// Comment represents a user comment on an article
+type Comment struct {
+	ID        string    `json:"id" db:"id"`
+	ArticleID string    `json:"article_id" db:"article_id"`
+	UserID    string    `json:"user_id" db:"user_id"`
+	Body      string    `json:"body" db:"body"`
+	CreatedAt time.Time `json:"created_at" db:"created_at"`
+	UpdatedAt time.Time `json:"updated_at" db:"updated_at"`
+}
+
+// ArticleLike represents a user like/dislike on an article
+type ArticleLike struct {
+	ArticleID string    `json:"article_id" db:"article_id"`
+	UserID    string    `json:"user_id" db:"user_id"`
+	IsLike    bool      `json:"is_like" db:"is_like"`
+	CreatedAt time.Time `json:"created_at" db:"created_at"`
+}
+
+// AddComment adds a new comment
+func (r *Repository) AddComment(comment *Comment) error {
+	query := `
+		INSERT INTO comments (article_id, user_id, body)
+		VALUES ($1, $2, $3)
+		RETURNING id, created_at, updated_at
+	`
+	return r.db.QueryRow(
+		query,
+		comment.ArticleID,
+		comment.UserID,
+		comment.Body,
+	).Scan(&comment.ID, &comment.CreatedAt, &comment.UpdatedAt)
+}
+
+// GetComments retrieves comments for an article
+func (r *Repository) GetComments(articleID string) ([]Comment, error) {
+	query := `
+		SELECT id, article_id, user_id, body, created_at, updated_at
+		FROM comments
+		WHERE article_id = $1
+		ORDER BY created_at DESC
+	`
+	var comments []Comment
+	err := r.db.Select(&comments, query, articleID)
+	return comments, err
+}
+
+// AddLike adds or updates a like/dislike
+func (r *Repository) AddLike(like *ArticleLike) error {
+	query := `
+		INSERT INTO article_likes (article_id, user_id, is_like)
+		VALUES ($1, $2, $3)
+		ON CONFLICT (article_id, user_id)
+		DO UPDATE SET is_like = EXCLUDED.is_like, created_at = NOW()
+	`
+	_, err := r.db.Exec(query, like.ArticleID, like.UserID, like.IsLike)
+	return err
+}
+
+// RemoveLike removes a like/dislike
+func (r *Repository) RemoveLike(articleID, userID string) error {
+	query := `DELETE FROM article_likes WHERE article_id = $1 AND user_id = $2`
+	_, err := r.db.Exec(query, articleID, userID)
+	return err
+}
+
+// GetLikesCount retrieves the count of likes and dislikes for an article
+func (r *Repository) GetLikesCount(articleID string) (int, int, error) {
+	var likes int
+	var dislikes int
+
+	queryLikes := `SELECT COUNT(*) FROM article_likes WHERE article_id = $1 AND is_like = TRUE`
+	if err := r.db.Get(&likes, queryLikes, articleID); err != nil {
+		return 0, 0, err
+	}
+
+	queryDislikes := `SELECT COUNT(*) FROM article_likes WHERE article_id = $1 AND is_like = FALSE`
+	if err := r.db.Get(&dislikes, queryDislikes, articleID); err != nil {
+		return 0, 0, err
+	}
+
+	return likes, dislikes, nil
+}
+
+// GetUserLike checks if a user has liked/disliked an article
+func (r *Repository) GetUserLike(articleID, userID string) (*bool, error) {
+	var isLike bool
+	query := `SELECT is_like FROM article_likes WHERE article_id = $1 AND user_id = $2`
+	err := r.db.Get(&isLike, query, articleID, userID)
+	if err == sql.ErrNoRows {
+		return nil, nil
+	}
+	if err != nil {
+		return nil, err
+	}
+	return &isLike, nil
 }
 
 // Count returns total number of articles matching filters

@@ -43,20 +43,65 @@ func TestRepository_Integration(t *testing.T) {
 		// Create test articles
 		article1 := &Article{Title: "Article 1", Slug: fmt.Sprintf("article-1-%d", time.Now().UnixNano()), Body: "Body 1", AuthorID: "123e4567-e89b-12d3-a456-426614174000", Status: "DRAFT"}
 		time.Sleep(10 * time.Millisecond)
-		article2 := &Article{Title: "Article 2", Slug: fmt.Sprintf("article-2-%d", time.Now().UnixNano()), Body: "Body 2", AuthorID: "123e4567-e89b-12d3-a456-426614174000", Status: "PUBLISHED"}
+		now := time.Now()
+		article2 := &Article{Title: "Article 2", Slug: fmt.Sprintf("article-2-%d", time.Now().UnixNano()), Body: "Body 2", AuthorID: "123e4567-e89b-12d3-a456-426614174000", Status: "PUBLISHED", PublishedAt: &now}
 
 		require.NoError(t, repo.Create(article1))
 		require.NoError(t, repo.Create(article2))
 
 		// Test status filter
-		drafts, err := repo.FindAll("DRAFT", "", "", 10, 0)
+		drafts, err := repo.FindAll("DRAFT", "", "", 10, 0, "")
 		require.NoError(t, err)
 		assert.GreaterOrEqual(t, len(drafts), 1)
 
 		// Test pagination
-		all, err := repo.FindAll("", "", "", 1, 0)
+		all, err := repo.FindAll("", "", "", 1, 0, "")
 		require.NoError(t, err)
 		assert.Equal(t, 1, len(all))
+	})
+
+	t.Run("FindAll Sorting", func(t *testing.T) {
+		// Create articles with different published dates
+		now := time.Now()
+		oldDate := now.Add(-24 * time.Hour)
+		newDate := now
+
+		article1 := &Article{
+			Title:       "Old Article",
+			Slug:        fmt.Sprintf("old-%d", time.Now().UnixNano()),
+			Body:        "Body",
+			AuthorID:    "123e4567-e89b-12d3-a456-426614174000",
+			Status:      "PUBLISHED",
+			PublishedAt: &oldDate,
+		}
+		article2 := &Article{
+			Title:       "New Article",
+			Slug:        fmt.Sprintf("new-%d", time.Now().UnixNano()),
+			Body:        "Body",
+			AuthorID:    "123e4567-e89b-12d3-a456-426614174000",
+			Status:      "PUBLISHED",
+			PublishedAt: &newDate,
+		}
+
+		require.NoError(t, repo.Create(article1))
+		require.NoError(t, repo.Create(article2))
+
+		// Sort by published_at DESC (default is created_at DESC)
+		// Since we created them sequentially, created_at order is same as published_at order in this case if we don't manipulate created_at.
+		// But let's verify explicit sort.
+		articles, err := repo.FindAll("PUBLISHED", "", "", 10, 0, "published_at")
+		require.NoError(t, err)
+		assert.GreaterOrEqual(t, len(articles), 2)
+
+		// Check that the first item is the newer one (or at least check the order logic)
+		// Since we can't easily isolate just these two without clearing DB, we check if the list is sorted.
+		// A better way is to check if the first returned item has a date >= the second returned item.
+		if len(articles) >= 2 {
+			require.NotNil(t, articles[0].PublishedAt, "Article 0 PublishedAt is nil")
+			require.NotNil(t, articles[1].PublishedAt, "Article 1 PublishedAt is nil")
+			// Check if first is newer or equal
+			assert.True(t, articles[0].PublishedAt.After(*articles[1].PublishedAt) || articles[0].PublishedAt.Equal(*articles[1].PublishedAt))
+		}
 	})
 
 	t.Run("Update", func(t *testing.T) {

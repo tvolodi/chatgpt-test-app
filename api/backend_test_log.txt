@@ -1,0 +1,52 @@
+﻿=== RUN   TestRepository_Integration
+2025/11/25 20:33:57 github.com/testcontainers/testcontainers-go - Connected to docker: 
+  Server Version: 28.5.1
+  API Version: 1.51
+  Operating System: Docker Desktop
+  Total Memory: 15910 MB
+  Labels:
+    com.docker.desktop.address=npipe://\\.\pipe\docker_cli
+  Testcontainers for Go Version: v0.40.0
+  Resolved Docker Host: npipe:////./pipe/docker_engine
+  Resolved Docker Socket Path: //var/run/docker.sock
+  Test SessionID: 2c347045b57fcb3b980494af870d9922802c538c9b837d30550706bbfffb1f87
+  Test ProcessID: 0193175d-2f20-401f-b3fc-e852aa66e618
+2025/11/25 20:33:57 🐳 Creating container for image postgres:15-alpine
+2025/11/25 20:33:57 🐳 Creating container for image testcontainers/ryuk:0.13.0
+2025/11/25 20:33:57 ✅ Container created: 9616ce63e108
+2025/11/25 20:33:57 🐳 Starting container: 9616ce63e108
+2025/11/25 20:33:58 ✅ Container started: 9616ce63e108
+2025/11/25 20:33:58 ⏳ Waiting for container id 9616ce63e108 image: testcontainers/ryuk:0.13.0. Waiting for: port 8080/tcp to be listening
+2025/11/25 20:33:58 Shell not found in container
+2025/11/25 20:33:58 🔔 Container is ready: 9616ce63e108
+2025/11/25 20:33:58 ✅ Container created: 45ef545eec06
+2025/11/25 20:33:58 🐳 Starting container: 45ef545eec06
+2025/11/25 20:33:58 ✅ Container started: 45ef545eec06
+2025/11/25 20:33:58 ⏳ Waiting for container id 45ef545eec06 image: postgres:15-alpine. Waiting for: all of: [log message "database system is ready to accept connections" (occurrence: 2)]
+2025/11/25 20:34:00 🔔 Container is ready: 45ef545eec06
+2025/11/25 20:34:00 Current migration version: 4 (dirty: false)
+=== RUN   TestRepository_Integration/FindAll_Sorting
+2025/11/25 20:34:00 🐳 Stopping container: 45ef545eec06
+2025/11/25 20:34:01 ✅ Container stopped: 45ef545eec06
+2025/11/25 20:34:01 🐳 Terminating container: 45ef545eec06
+2025/11/25 20:34:01 🚫 Container terminated: 45ef545eec06
+--- FAIL: TestRepository_Integration (3.99s)
+    --- FAIL: TestRepository_Integration/FindAll_Sorting (0.01s)
+panic: runtime error: invalid memory address or nil pointer dereference [recovered, repanicked]
+[signal 0xc0000005 code=0x0 addr=0x0 pc=0x7ff65e7de080]
+
+goroutine 224 [running]:
+testing.tRunner.func1.2({0x7ff65e8bba00, 0x7ff65ed7a8f0})
+	C:/Program Files/Go/src/testing/testing.go:1872 +0x239
+testing.tRunner.func1()
+	C:/Program Files/Go/src/testing/testing.go:1875 +0x35b
+panic({0x7ff65e8bba00?, 0x7ff65ed7a8f0?})
+	C:/Program Files/Go/src/runtime/panic.go:783 +0x132
+github.com/ai-dala/api/internal/modules/articles.TestRepository_Integration.func3(0xc00053ec40)
+	C:/Users/tvolo/dev/ai-dala.com/api/internal/modules/articles/repository_integration_test.go:99 +0x4c0
+testing.tRunner(0xc00053ec40, 0xc000514220)
+	C:/Program Files/Go/src/testing/testing.go:1934 +0xc3
+created by testing.(*T).Run in goroutine 18
+	C:/Program Files/Go/src/testing/testing.go:1997 +0x44b
+FAIL	github.com/ai-dala/api/internal/modules/articles	4.101s
+FAIL

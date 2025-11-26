@@ -45,9 +45,28 @@ func Middleware(next http.Handler) http.Handler {
 		}
 
 		// Token is valid, proceed
-		// In a real app, we might extract claims and put them in context
-		_ = idToken
+		claims := struct {
+			Sub string `json:"sub"`
+		}{}
+		if err := idToken.Claims(&claims); err != nil {
+			http.Error(w, fmt.Sprintf("Invalid claims: %v", err), http.StatusUnauthorized)
+			return
+		}
 
-		next.ServeHTTP(w, r)
+		ctx = context.WithValue(r.Context(), UserIDKey, claims.Sub)
+		next.ServeHTTP(w, r.WithContext(ctx))
 	})
+}
+
+type contextKey string
+
+const UserIDKey contextKey = "user_id"
+
+// GetUserIDFromContext retrieves the user ID from the context
+func GetUserIDFromContext(ctx context.Context) (string, error) {
+	userID, ok := ctx.Value(UserIDKey).(string)
+	if !ok {
+		return "", fmt.Errorf("user id not found in context")
+	}
+	return userID, nil
 }

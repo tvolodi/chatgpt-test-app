@@ -1,0 +1,34 @@
+﻿
+Running 1 test using 1 worker
+
+  ✘  1 tests\req-013-article-view.spec.ts:4:9 › REQ-013 Public Article View & Interactions › should display article list and allow selection (1.6s)
+
+
+  1) tests\req-013-article-view.spec.ts:4:9 › REQ-013 Public Article View & Interactions › should display article list and allow selection 
+
+    Error: [2mexpect([22m[31mlocator[39m[2m).[22mtoBeVisible[2m([22m[2m)[22m failed
+
+    Locator: getByRole('heading', { name: 'Test Article 1', level: 1 })
+    Expected: visible
+    Error: strict mode violation: getByRole('heading', { name: 'Test Article 1', level: 1 }) resolved to 2 elements:
+        1) <h1 class="text-3xl font-bold text-gray-900 mb-4">Test Article 1</h1> aka getByRole('heading', { name: 'Test Article' }).nth(2)
+        2) <h1>Test Article 1</h1> aka getByRole('heading', { name: 'Test Article' }).nth(3)
+
+    Call log:
+    [2m  - Expect "toBeVisible" with timeout 10000ms[22m
+    [2m  - waiting for getByRole('heading', { name: 'Test Article 1', level: 1 })[22m
+
+
+      67 |
+      68 |         // Check detail view
+    > 69 |         await expect(page.getByRole('heading', { name: 'Test Article 1', level: 1 })).toBeVisible();
+         |                                                                                       ^
+      70 |         await expect(page.getByText('By Author author1')).toBeVisible();
+      71 |
+      72 |         // Check interaction controls
+        at C:\Users\tvolo\dev\ai-dala.com\web\tests\req-013-article-view.spec.ts:69:87
+
+    Error Context: test-results\req-013-article-view-REQ-0-11533-le-list-and-allow-selection\error-context.md
+
+  1 failed
+    tests\req-013-article-view.spec.ts:4:9 › REQ-013 Public Article View & Interactions › should display article list and allow selection 

@@ -1,0 +1,33 @@
+﻿
+Running 1 test using 1 worker
+
+  ✘  1 tests\req-013-article-view.spec.ts:4:9 › REQ-013 Public Article View & Interactions › should display article list and allow selection (11.6s)
+
+
+  1) tests\req-013-article-view.spec.ts:4:9 › REQ-013 Public Article View & Interactions › should display article list and allow selection 
+
+    Error: [2mexpect([22m[31mlocator[39m[2m).[22mtoBeVisible[2m([22m[2m)[22m failed
+
+    Locator: getByText('10')
+    Expected: visible
+    Timeout: 10000ms
+    Error: element(s) not found
+
+    Call log:
+    [2m  - Expect "toBeVisible" with timeout 10000ms[22m
+    [2m  - waiting for getByText('10')[22m
+
+
+      72 |         // Check interaction controls
+      73 |         await expect(page.getByText('👍')).toBeVisible();
+    > 74 |         await expect(page.getByText('10')).toBeVisible(); // Likes count
+         |                                            ^
+      75 |         await expect(page.getByText('👎')).toBeVisible();
+      76 |         await expect(page.getByText('2')).toBeVisible(); // Dislikes count
+      77 |
+        at C:\Users\tvolo\dev\ai-dala.com\web\tests\req-013-article-view.spec.ts:74:44
+
+    Error Context: test-results\req-013-article-view-REQ-0-11533-le-list-and-allow-selection\error-context.md
+
+  1 failed
+    tests\req-013-article-view.spec.ts:4:9 › REQ-013 Public Article View & Interactions › should display article list and allow selection 

@@ -4,7 +4,15 @@ const withNextIntl = require('next-intl/plugin')(
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  reactStrictMode: true
+  reactStrictMode: true,
+  async rewrites() {
+    return [
+      {
+        source: '/api/:path((?!auth).*)',
+        destination: 'http://localhost:4000/api/:path*',
+      },
+    ];
+  },
 };
 
 module.exports = withNextIntl(nextConfig);

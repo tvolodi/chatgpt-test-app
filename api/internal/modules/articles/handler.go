@@ -4,6 +4,8 @@ import (
 	"encoding/json"
 	"net/http"
 	"strconv"
+
+	"github.com/ai-dala/api/internal/auth"
 )
 
 type Handler struct {
@@ -17,6 +19,7 @@ func NewHandler(service *Service) *Handler {
 // RegisterRoutes registers all article routes
 func (h *Handler) RegisterRoutes(mux *http.ServeMux) {
 	mux.HandleFunc("GET /api/articles", h.handleList)
+	mux.HandleFunc("GET /api/articles/public", h.handlePublicList)
 	mux.HandleFunc("GET /api/articles/{id}", h.handleGet)
 	mux.HandleFunc("POST /api/articles", h.handleCreate)
 	mux.HandleFunc("PUT /api/articles/{id}", h.handleUpdate)
@@ -25,6 +28,13 @@ func (h *Handler) RegisterRoutes(mux *http.ServeMux) {
 	mux.HandleFunc("GET /api/articles/slug/{slug}", h.handleGetBySlug)
 	mux.HandleFunc("POST /api/articles/{id}/tags", h.handleAddTags)
 	mux.HandleFunc("DELETE /api/articles/{id}/tags", h.handleRemoveTags)
+
+	// Interaction routes
+	mux.Handle("POST /api/articles/{id}/comments", auth.Middleware(http.HandlerFunc(h.handleAddComment)))
+	mux.HandleFunc("GET /api/articles/{id}/comments", h.handleGetComments)
+	mux.Handle("POST /api/articles/{id}/like", auth.Middleware(http.HandlerFunc(h.handleAddLike)))
+	mux.Handle("DELETE /api/articles/{id}/like", auth.Middleware(http.HandlerFunc(h.handleRemoveLike)))
+	mux.HandleFunc("GET /api/articles/{id}/interactions", h.handleGetInteractions)
 }
 
 // handleList lists all articles with filters
@@ -51,6 +61,60 @@ func (h *Handler) handleList(w http.ResponseWriter, r *http.Request) {
 	offset := (page - 1) * limit
 
 	articles, total, err := h.service.FindAll(status, categoryID, authorID, limit, offset)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	// Get tags for each article
+	type ArticleWithTags struct {
+		Article
+		Tags []string `json:"tags"`
+	}
+
+	articlesWithTags := make([]ArticleWithTags, len(articles))
+	for i, article := range articles {
+		tags, err := h.service.GetTags(article.ID)
+		if err != nil {
+			tags = []string{}
+		}
+		articlesWithTags[i] = ArticleWithTags{
+			Article: article,
+			Tags:    tags,
+		}
+	}
+
+	response := map[string]interface{}{
+		"articles": articlesWithTags,
+		"total":    total,
+		"page":     page,
+		"limit":    limit,
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(response)
+}
+
+// handlePublicList lists published articles for public view
+func (h *Handler) handlePublicList(w http.ResponseWriter, r *http.Request) {
+	limitStr := r.URL.Query().Get("limit")
+	limit := 10
+	if limitStr != "" {
+		if l, err := strconv.Atoi(limitStr); err == nil && l > 0 {
+			limit = l
+		}
+	}
+
+	pageStr := r.URL.Query().Get("page")
+	page := 1
+	if pageStr != "" {
+		if p, err := strconv.Atoi(pageStr); err == nil && p > 0 {
+			page = p
+		}
+	}
+	offset := (page - 1) * limit
+
+	articles, total, err := h.service.GetPublicArticles(limit, offset)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -347,4 +411,114 @@ func (h *Handler) handleRemoveTags(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.WriteHeader(http.StatusNoContent)
+}
+
+// handleAddComment adds a comment to an article
+func (h *Handler) handleAddComment(w http.ResponseWriter, r *http.Request) {
+	id := r.PathValue("id")
+	userID, err := auth.GetUserIDFromContext(r.Context())
+	if err != nil {
+		http.Error(w, "unauthorized", http.StatusUnauthorized)
+		return
+	}
+
+	var req struct {
+		Body string `json:"body"`
+	}
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		http.Error(w, "invalid request body", http.StatusBadRequest)
+		return
+	}
+
+	comment, err := h.service.AddComment(id, userID, req.Body)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusCreated)
+	json.NewEncoder(w).Encode(comment)
+}
+
+// handleGetComments retrieves comments for an article
+func (h *Handler) handleGetComments(w http.ResponseWriter, r *http.Request) {
+	id := r.PathValue("id")
+
+	comments, err := h.service.GetComments(id)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	if comments == nil {
+		comments = []Comment{}
+	}
+
+	response := map[string]interface{}{
+		"comments": comments,
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(response)
+}
+
+// handleAddLike adds a like/dislike
+func (h *Handler) handleAddLike(w http.ResponseWriter, r *http.Request) {
+	id := r.PathValue("id")
+	userID, err := auth.GetUserIDFromContext(r.Context())
+	if err != nil {
+		http.Error(w, "unauthorized", http.StatusUnauthorized)
+		return
+	}
+
+	var req struct {
+		IsLike bool `json:"is_like"`
+	}
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		http.Error(w, "invalid request body", http.StatusBadRequest)
+		return
+	}
+
+	if err := h.service.AddLike(id, userID, req.IsLike); err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	w.WriteHeader(http.StatusNoContent)
+}
+
+// handleRemoveLike removes a like/dislike
+func (h *Handler) handleRemoveLike(w http.ResponseWriter, r *http.Request) {
+	id := r.PathValue("id")
+	userID, err := auth.GetUserIDFromContext(r.Context())
+	if err != nil {
+		http.Error(w, "unauthorized", http.StatusUnauthorized)
+		return
+	}
+
+	if err := h.service.RemoveLike(id, userID); err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	w.WriteHeader(http.StatusNoContent)
+}
+
+// handleGetInteractions retrieves interaction stats
+func (h *Handler) handleGetInteractions(w http.ResponseWriter, r *http.Request) {
+	id := r.PathValue("id")
+
+	likes, dislikes, err := h.service.GetLikesCount(id)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	response := map[string]interface{}{
+		"likes":    likes,
+		"dislikes": dislikes,
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(response)
 }

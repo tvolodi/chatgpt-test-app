@@ -1,0 +1,40 @@
+﻿
+Running 1 test using 1 worker
+
+  ✘  1 tests\req-013-article-view.spec.ts:4:9 › REQ-013 Public Article View & Interactions › should display article list and allow selection (1.6s)
+
+
+  1) tests\req-013-article-view.spec.ts:4:9 › REQ-013 Public Article View & Interactions › should display article list and allow selection 
+
+    Error: [2mexpect([22m[31mlocator[39m[2m).[22mtoBeVisible[2m([22m[2m)[22m failed
+
+    Locator: getByText('2')
+    Expected: visible
+    Error: strict mode violation: getByText('2') resolved to 8 elements:
+        1) <span>Nov 26, 2025</span> aka getByText('Nov 26,').first()
+        2) <h3 class="text-xl font-semibold text-gray-900 mb-2 line-clamp-2">Test Article 2</h3> aka getByRole('heading', { name: 'Test Article 2' })
+        3) <span>Nov 26, 2025</span> aka getByText('Nov 26,').nth(1)
+        4) <span class="px-2 py-1 bg-gray-100 text-gray-600 text-xs rounded-full">tag2</span> aka getByText('tag2')
+        5) <p class="text-gray-600 text-sm leading-relaxed mb-4 line-clamp-6 flex-grow">This is the body of test article 2.</p> aka getByText('This is the body of test article 2.')
+        6) <span>Nov 26, 2025</span> aka getByText('Nov 26,').nth(2)
+        7) <span>2</span> aka getByRole('button', { name: '👎' })
+        8) <p class="mt-8 text-base text-gray-400 md:mt-0 md:order-1">…</p> aka getByText('© 2025 AI-Dala. All rights')
+
+    Call log:
+    [2m  - Expect "toBeVisible" with timeout 10000ms[22m
+    [2m  - waiting for getByText('2')[22m
+
+
+      74 |         await expect(page.getByText('10')).toBeVisible(); // Likes count
+      75 |         await expect(page.getByText('👎')).toBeVisible();
+    > 76 |         await expect(page.getByText('2')).toBeVisible(); // Dislikes count
+         |                                           ^
+      77 |
+      78 |         // Check comments section
+      79 |         await expect(page.getByRole('heading', { name: 'Comments' })).toBeVisible();
+        at C:\Users\tvolo\dev\ai-dala.com\web\tests\req-013-article-view.spec.ts:76:43
+
+    Error Context: test-results\req-013-article-view-REQ-0-11533-le-list-and-allow-selection\error-context.md
+
+  1 failed
+    tests\req-013-article-view.spec.ts:4:9 › REQ-013 Public Article View & Interactions › should display article list and allow selection 

@@ -1,10 +1,10 @@
 import type { Metadata } from "next";
-import Header from "../../components/layout/Header";
-import Footer from "../../components/layout/Footer";
-import HeroSection from "../../components/landing/HeroSection";
-import FeatureSection from "../../components/landing/FeatureSection";
-import LatestContentSection from "../../components/landing/LatestContentSection";
-import AboutSection from "../../components/landing/AboutSection";
+import Header from "@/components/layout/Header";
+import Footer from "@/components/layout/Footer";
+import HeroSection from "@/components/landing/HeroSection";
+import FeatureSection from "@/components/landing/FeatureSection";
+import LatestArticles from "@/app/components/home/LatestArticles";
+import AboutSection from "@/components/landing/AboutSection";
 
 export const metadata: Metadata = {
   title: "AI-Dala | AI-driven CMS and search",
@@ -33,7 +33,7 @@ export default function HomePage() {
       <main className="flex-grow">
         <HeroSection />
         <FeatureSection />
-        <LatestContentSection />
+        <LatestArticles />
         <AboutSection />
       </main>
       <Footer />

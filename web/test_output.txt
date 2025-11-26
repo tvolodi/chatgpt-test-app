@@ -1,0 +1,29 @@
+﻿
+Running 1 test using 1 worker
+
+  ✘  1 tests\req-013-article-view.spec.ts:83:9 › REQ-013 Public Article View & Interactions › should navigate from home page to article detail (887ms)
+
+
+  1) tests\req-013-article-view.spec.ts:83:9 › REQ-013 Public Article View & Interactions › should navigate from home page to article detail 
+
+    Error: locator.click: Error: strict mode violation: getByText('Latest Article 1') resolved to 2 elements:
+        1) <h3 class="text-xl font-semibold text-gray-900 mb-2 line-clamp-2">Latest Article 1</h3> aka getByRole('link', { name: 'Latest Article 1 Nov 26, 2025' })
+        2) <p class="text-gray-600 text-sm leading-relaxed mb-4 line-clamp-6 flex-grow">Preview of latest article 1.</p> aka getByRole('link', { name: 'Latest Article 1 Nov 26, 2025' })
+
+    Call log:
+    [2m  - waiting for getByText('Latest Article 1')[22m
+
+
+      103 |
+      104 |         // Click on the article card
+    > 105 |         await page.getByText('Latest Article 1').click();
+          |                                                  ^
+      106 |
+      107 |         // Check URL
+      108 |         await expect(page).toHaveURL(/\/articles\?id=1/);
+        at C:\Users\tvolo\dev\ai-dala.com\web\tests\req-013-article-view.spec.ts:105:50
+
+    Error Context: test-results\req-013-article-view-REQ-0-2381a-home-page-to-article-detail\error-context.md
+
+  1 failed
+    tests\req-013-article-view.spec.ts:83:9 › REQ-013 Public Article View & Interactions › should navigate from home page to article detail 
