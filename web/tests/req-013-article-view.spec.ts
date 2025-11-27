@@ -52,6 +52,11 @@ test.describe('REQ-013 Public Article View & Interactions', () => {
             await route.fulfill({ json: { comments: [] } });
         });
 
+        // Mock session API to return unauthenticated state
+        await page.route('**/api/auth/session', async route => {
+            await route.fulfill({ json: {} });
+        });
+
         // Navigate to articles page
         await page.goto('/articles');
 
@@ -80,7 +85,11 @@ test.describe('REQ-013 Public Article View & Interactions', () => {
 
         // Check comments section
         await expect(page.getByRole('heading', { name: 'Comments' })).toBeVisible();
-        await expect(page.getByText('Please sign in to leave a comment.')).toBeVisible();
+        await expect(page.getByPlaceholder('Add a comment...')).toBeVisible();
+
+        // Check persistent login banner is visible for unauthenticated users
+        await expect(page.getByText('to leave comments and like this article.')).toBeVisible();
+        await expect(page.getByRole('link', { name: 'Sign in' })).toBeVisible();
     });
 
     test('should navigate from home page to article detail', async ({ page }) => {
@@ -104,7 +113,6 @@ test.describe('REQ-013 Public Article View & Interactions', () => {
 
         await page.goto('/');
 
-        // Click on the article card
         // Click on the article card
         await page.getByRole('heading', { name: 'Latest Article 1' }).click();
 

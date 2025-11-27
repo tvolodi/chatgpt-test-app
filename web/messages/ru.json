@@ -97,5 +97,25 @@
                 "comingSoonText": "Управляйте своим профилем, предпочтениями и настройками аккаунта."
             }
         }
+    },
+    "Articles": {
+        "Articles": "Статьи",
+        "All": "Все",
+        "Tags": "Теги",
+        "Show all": "Показать все",
+        "Filters": "Фильтры",
+        "Category": "Категория",
+        "Remove category filter": "Удалить фильтр категории",
+        "Tag": "Тег",
+        "Remove tag filter": "Удалить фильтр тега",
+        "Clear all": "Очистить все",
+        "No articles found": "Статьи не найдены",
+        "Clear all filters": "Сбросить все фильтры",
+        "Prev": "Пред",
+        "Next": "След",
+        "Back to List": "Назад к списку",
+        "Article not found": "Статья не найдена",
+        "Select an article to read": "Выберите статью для чтения",
+        "Hide Filters": "Скрыть фильтры"
     }
 }

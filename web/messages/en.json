@@ -97,5 +97,25 @@
                 "comingSoonText": "Manage your profile, preferences, and account settings."
             }
         }
+    },
+    "Articles": {
+        "Articles": "Articles",
+        "All": "All",
+        "Tags": "Tags",
+        "Show all": "Show all",
+        "Filters": "Filters",
+        "Category": "Category",
+        "Remove category filter": "Remove category filter",
+        "Tag": "Tag",
+        "Remove tag filter": "Remove tag filter",
+        "Clear all": "Clear all",
+        "No articles found": "No articles found",
+        "Clear all filters": "Clear all filters",
+        "Prev": "Prev",
+        "Next": "Next",
+        "Back to List": "Back to List",
+        "Article not found": "Article not found",
+        "Select an article to read": "Select an article to read",
+        "Hide Filters": "Hide Filters"
     }
 }

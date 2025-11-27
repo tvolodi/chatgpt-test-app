@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useSession } from 'next-auth/react';
+import Link from 'next/link';
 import { formatDistanceToNow } from 'date-fns';
 
 interface Comment {
@@ -16,10 +17,11 @@ interface CommentSectionProps {
 }
 
 export default function CommentSection({ articleId }: CommentSectionProps) {
-    const { data: session } = useSession();
+    const { data: session, status } = useSession();
     const [comments, setComments] = useState<Comment[]>([]);
     const [newComment, setNewComment] = useState("");
     const [loading, setLoading] = useState(false);
+    const [showLoginMessage, setShowLoginMessage] = useState(false);
 
     useEffect(() => {
         const fetchComments = async () => {
@@ -38,7 +40,11 @@ export default function CommentSection({ articleId }: CommentSectionProps) {
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        if (!session || !newComment.trim()) return;
+        if (status !== 'authenticated') {
+            setShowLoginMessage(true);
+            return;
+        }
+        if (!newComment.trim()) return;
 
         setLoading(true);
         try {
@@ -46,10 +52,15 @@ export default function CommentSection({ articleId }: CommentSectionProps) {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${session.accessToken}`
+                    'Authorization': `Bearer ${session?.accessToken}`
                 },
                 body: JSON.stringify({ body: newComment })
             });
+
+            if (res.status === 401) {
+                setShowLoginMessage(true);
+                return;
+            }
 
             if (res.ok) {
                 const comment = await res.json();
@@ -67,29 +78,36 @@ export default function CommentSection({ articleId }: CommentSectionProps) {
         <div className="mt-8 border-t pt-8">
             <h3 className="text-xl font-bold mb-4">Comments</h3>
 
-            {session ? (
-                <form onSubmit={handleSubmit} className="mb-8">
-                    <textarea
-                        value={newComment}
-                        onChange={(e) => setNewComment(e.target.value)}
-                        className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                        placeholder="Add a comment..."
-                        rows={3}
-                        disabled={loading}
-                    />
-                    <div className="mt-2 flex justify-end">
-                        <button
-                            type="submit"
-                            disabled={loading || !newComment.trim()}
-                            className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50"
-                        >
-                            {loading ? 'Posting...' : 'Post Comment'}
-                        </button>
-                    </div>
-                </form>
+            {status === 'loading' ? (
+                <div className="mb-8 p-4 text-center text-gray-500">Loading...</div>
             ) : (
-                <div className="mb-8 p-4 bg-gray-50 rounded-lg text-center">
-                    <p className="text-gray-600">Please sign in to leave a comment.</p>
+                <div className="mb-8">
+                    <form onSubmit={handleSubmit}>
+                        <textarea
+                            value={newComment}
+                            onChange={(e) => setNewComment(e.target.value)}
+                            onFocus={() => status !== 'authenticated' && setShowLoginMessage(true)}
+                            className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            placeholder="Add a comment..."
+                            rows={3}
+                            disabled={loading}
+                        />
+                        <div className="mt-2 flex justify-between items-center">
+                            {showLoginMessage && (
+                                <p className="text-sm text-red-500">
+                                    Please <Link href="/api/auth/signin" className="underline">sign in</Link> to leave a comment.
+                                </p>
+                            )}
+                            <div className="flex-grow"></div>
+                            <button
+                                type="submit"
+                                disabled={loading || !newComment.trim()}
+                                className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50"
+                            >
+                                {loading ? 'Posting...' : 'Post Comment'}
+                            </button>
+                        </div>
+                    </form>
                 </div>
             )}
 

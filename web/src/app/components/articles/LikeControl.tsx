@@ -10,18 +10,20 @@ interface LikeControlProps {
 }
 
 export default function LikeControl({ articleId, initialLikes, initialDislikes }: LikeControlProps) {
-    const { data: session } = useSession();
+    const { data: session, status } = useSession();
     const [likes, setLikes] = useState(initialLikes);
     const [dislikes, setDislikes] = useState(initialDislikes);
     const [userLike, setUserLike] = useState<boolean | null>(null); // true = like, false = dislike, null = none
     const [loading, setLoading] = useState(false);
 
+    const [showLoginMessage, setShowLoginMessage] = useState(false);
+
     // Fetch user interaction status on mount if logged in
     useEffect(() => {
-        if (session) {
+        if (status === 'authenticated') {
             // TODO: Implement fetching user status if API supports it
         }
-    }, [session, articleId]);
+    }, [status, articleId]);
 
     // Sync state with props
     useEffect(() => {
@@ -30,13 +32,15 @@ export default function LikeControl({ articleId, initialLikes, initialDislikes }
     }, [initialLikes, initialDislikes]);
 
     const handleInteraction = async (isLike: boolean) => {
-        if (!session) {
-            alert("Please sign in to interact.");
+        if (status !== 'authenticated') {
+            setShowLoginMessage(true);
+            setTimeout(() => setShowLoginMessage(false), 3000);
             return;
         }
         if (loading) return;
 
         setLoading(true);
+        // ... (rest of the logic)
         // Optimistic update
         const previousUserLike = userLike;
         const previousLikes = likes;
@@ -51,8 +55,13 @@ export default function LikeControl({ articleId, initialLikes, initialDislikes }
             try {
                 const res = await fetch(`/api/articles/${articleId}/like`, {
                     method: 'DELETE',
-                    headers: { 'Authorization': `Bearer ${session.accessToken}` } // Assuming accessToken is available
+                    headers: { 'Authorization': `Bearer ${session?.accessToken}` } // Assuming accessToken is available
                 });
+                if (res.status === 401) {
+                    setShowLoginMessage(true);
+                    setTimeout(() => setShowLoginMessage(false), 3000);
+                    throw new Error("Unauthorized");
+                }
                 if (!res.ok) throw new Error();
             } catch (err) {
                 // Revert
@@ -76,10 +85,15 @@ export default function LikeControl({ articleId, initialLikes, initialDislikes }
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${session.accessToken}`
+                        'Authorization': `Bearer ${session?.accessToken}`
                     },
                     body: JSON.stringify({ is_like: isLike })
                 });
+                if (res.status === 401) {
+                    setShowLoginMessage(true);
+                    setTimeout(() => setShowLoginMessage(false), 3000);
+                    throw new Error("Unauthorized");
+                }
                 if (!res.ok) throw new Error();
             } catch (err) {
                 // Revert
@@ -92,25 +106,30 @@ export default function LikeControl({ articleId, initialLikes, initialDislikes }
     };
 
     return (
-        <div className="flex items-center space-x-4">
-            <button
-                onClick={() => handleInteraction(true)}
-                disabled={loading}
-                className={`flex items-center space-x-1 px-3 py-1 rounded-full transition-colors ${userLike === true ? 'bg-blue-100 text-blue-600' : 'hover:bg-gray-100 text-gray-600'
-                    }`}
-            >
-                <span>👍</span>
-                <span>{likes}</span>
-            </button>
-            <button
-                onClick={() => handleInteraction(false)}
-                disabled={loading}
-                className={`flex items-center space-x-1 px-3 py-1 rounded-full transition-colors ${userLike === false ? 'bg-red-100 text-red-600' : 'hover:bg-gray-100 text-gray-600'
-                    }`}
-            >
-                <span>👎</span>
-                <span>{dislikes}</span>
-            </button>
+        <div className="flex flex-col items-start">
+            <div className="flex items-center space-x-4">
+                <button
+                    onClick={() => handleInteraction(true)}
+                    disabled={loading}
+                    className={`flex items-center space-x-1 px-3 py-1 rounded-full transition-colors ${userLike === true ? 'bg-blue-100 text-blue-600' : 'hover:bg-gray-100 text-gray-600'
+                        }`}
+                >
+                    <span>👍</span>
+                    <span>{likes}</span>
+                </button>
+                <button
+                    onClick={() => handleInteraction(false)}
+                    disabled={loading}
+                    className={`flex items-center space-x-1 px-3 py-1 rounded-full transition-colors ${userLike === false ? 'bg-red-100 text-red-600' : 'hover:bg-gray-100 text-gray-600'
+                        }`}
+                >
+                    <span>👎</span>
+                    <span>{dislikes}</span>
+                </button>
+            </div>
+            {showLoginMessage && (
+                <p className="text-sm text-red-500 mt-2">Please sign in to interact.</p>
+            )}
         </div>
     );
 }

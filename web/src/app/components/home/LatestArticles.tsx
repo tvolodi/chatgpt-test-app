@@ -60,22 +60,24 @@ export default function LatestArticles() {
 
     return (
         <section className="py-12">
-            <div className="flex justify-between items-center mb-8">
-                <h2 className="text-3xl font-bold text-gray-900">Latest Articles</h2>
-                <Link
-                    href="/articles"
-                    className="text-blue-600 font-semibold hover:text-blue-800 transition-colors"
-                >
-                    Show All →
-                </Link>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                {articles.map((article) => (
-                    <Link key={article.id} href={`/articles?id=${article.id}`} className="block h-full">
-                        <ArticleCard article={article} />
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div className="flex justify-between items-center mb-8">
+                    <h2 className="text-3xl font-bold text-gray-900">Latest Articles</h2>
+                    <Link
+                        href="/articles"
+                        className="text-blue-600 font-semibold hover:text-blue-800 transition-colors"
+                    >
+                        Show All →
                     </Link>
-                ))}
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    {articles.map((article) => (
+                        <Link key={article.id} href={`/articles?id=${article.id}`} className="block h-full">
+                            <ArticleCard article={article} />
+                        </Link>
+                    ))}
+                </div>
             </div>
         </section>
     );

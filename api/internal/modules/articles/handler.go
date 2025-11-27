@@ -25,7 +25,7 @@ func (h *Handler) RegisterRoutes(mux *http.ServeMux) {
 	mux.HandleFunc("PUT /api/articles/{id}", h.handleUpdate)
 	mux.HandleFunc("POST /api/articles/{id}/publish", h.handlePublish)
 	mux.HandleFunc("DELETE /api/articles/{id}", h.handleDelete)
-	mux.HandleFunc("GET /api/articles/slug/{slug}", h.handleGetBySlug)
+	mux.HandleFunc("GET /api/articles-by-slug/{slug}", h.handleGetBySlug)
 	mux.HandleFunc("POST /api/articles/{id}/tags", h.handleAddTags)
 	mux.HandleFunc("DELETE /api/articles/{id}/tags", h.handleRemoveTags)
 
@@ -35,6 +35,8 @@ func (h *Handler) RegisterRoutes(mux *http.ServeMux) {
 	mux.Handle("POST /api/articles/{id}/like", auth.Middleware(http.HandlerFunc(h.handleAddLike)))
 	mux.Handle("DELETE /api/articles/{id}/like", auth.Middleware(http.HandlerFunc(h.handleRemoveLike)))
 	mux.HandleFunc("GET /api/articles/{id}/interactions", h.handleGetInteractions)
+	mux.HandleFunc("GET /api/categories", h.handleListCategories)
+	mux.HandleFunc("GET /api/tags", h.handleListTags)
 }
 
 // handleList lists all articles with filters
@@ -60,7 +62,9 @@ func (h *Handler) handleList(w http.ResponseWriter, r *http.Request) {
 	}
 	offset := (page - 1) * limit
 
-	articles, total, err := h.service.FindAll(status, categoryID, authorID, limit, offset)
+	tags := r.URL.Query()["tags"]
+
+	articles, total, err := h.service.FindAll(status, categoryID, authorID, tags, limit, offset)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -114,7 +118,10 @@ func (h *Handler) handlePublicList(w http.ResponseWriter, r *http.Request) {
 	}
 	offset := (page - 1) * limit
 
-	articles, total, err := h.service.GetPublicArticles(limit, offset)
+	categoryID := r.URL.Query().Get("category_id")
+	tags := r.URL.Query()["tags"]
+
+	articles, total, err := h.service.GetPublicArticles(categoryID, tags, limit, offset)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -354,7 +361,6 @@ func (h *Handler) handlePublish(w http.ResponseWriter, r *http.Request) {
 		"article": article,
 		"tags":    tags,
 	}
-
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(response)
 }
@@ -517,6 +523,47 @@ func (h *Handler) handleGetInteractions(w http.ResponseWriter, r *http.Request) 
 	response := map[string]interface{}{
 		"likes":    likes,
 		"dislikes": dislikes,
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(response)
+}
+
+// handleListCategories lists all categories with counts
+func (h *Handler) handleListCategories(w http.ResponseWriter, r *http.Request) {
+	categories, err := h.service.GetCategoriesWithCounts()
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	response := map[string]interface{}{
+		"categories": categories,
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(response)
+}
+
+// handleListTags lists tags with counts
+func (h *Handler) handleListTags(w http.ResponseWriter, r *http.Request) {
+	popular := r.URL.Query().Get("popular") == "true"
+	limitStr := r.URL.Query().Get("limit")
+	limit := 0
+	if limitStr != "" {
+		if l, err := strconv.Atoi(limitStr); err == nil && l > 0 {
+			limit = l
+		}
+	}
+
+	tags, err := h.service.GetTagsWithCounts(popular, limit)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	response := map[string]interface{}{
+		"tags": tags,
 	}
 
 	w.Header().Set("Content-Type", "application/json")

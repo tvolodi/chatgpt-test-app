@@ -23,6 +23,28 @@ type Article struct {
 	DeletedAt   *time.Time `db:"deleted_at" json:"deleted_at,omitempty"`
 }
 
+type FilterOptions struct {
+	Status     string
+	CategoryID string
+	AuthorID   string
+	Tags       []string
+	Limit      int
+	Offset     int
+	SortBy     string
+}
+
+type CategoryWithCount struct {
+	ID           string `db:"id" json:"id"`
+	Name         string `db:"name" json:"name"`
+	Slug         string `db:"slug" json:"slug"`
+	ArticleCount int    `db:"article_count" json:"article_count"`
+}
+
+type TagWithCount struct {
+	Name         string `db:"name" json:"name"`
+	ArticleCount int    `db:"article_count" json:"article_count"`
+}
+
 type Repository struct {
 	db *sqlx.DB
 }
@@ -81,38 +103,49 @@ func (r *Repository) FindBySlug(slug string) (*Article, error) {
 }
 
 // FindAll retrieves all active articles with optional filters
-func (r *Repository) FindAll(status, categoryID, authorID string, limit, offset int, sortBy string) ([]Article, error) {
+func (r *Repository) FindAll(opts FilterOptions) ([]Article, error) {
 	query := `
-		SELECT id, title, slug, body, category_id, author_id, status, published_at, created_at, updated_at
-		FROM articles
-		WHERE deleted_at IS NULL
+		SELECT DISTINCT a.id, a.title, a.slug, a.body, a.category_id, a.author_id, a.status, a.published_at, a.created_at, a.updated_at
+		FROM articles a
 	`
+
+	if len(opts.Tags) > 0 {
+		query += ` JOIN article_tags at ON a.id = at.article_id JOIN tags t ON at.tag_id = t.id`
+	}
+
+	query += ` WHERE a.deleted_at IS NULL`
+
 	args := []interface{}{}
 	argPos := 1
 
-	if status != "" {
-		query += fmt.Sprintf(` AND status = $%d`, argPos)
-		args = append(args, status)
+	if opts.Status != "" {
+		query += fmt.Sprintf(` AND a.status = $%d`, argPos)
+		args = append(args, opts.Status)
 		argPos++
 	}
-	if categoryID != "" {
-		query += fmt.Sprintf(` AND category_id = $%d`, argPos)
-		args = append(args, categoryID)
+	if opts.CategoryID != "" {
+		query += fmt.Sprintf(` AND a.category_id = $%d`, argPos)
+		args = append(args, opts.CategoryID)
 		argPos++
 	}
-	if authorID != "" {
-		query += fmt.Sprintf(` AND author_id = $%d`, argPos)
-		args = append(args, authorID)
+	if opts.AuthorID != "" {
+		query += fmt.Sprintf(` AND a.author_id = $%d`, argPos)
+		args = append(args, opts.AuthorID)
+		argPos++
+	}
+	if len(opts.Tags) > 0 {
+		query += fmt.Sprintf(` AND t.code = ANY($%d)`, argPos)
+		args = append(args, pq.Array(opts.Tags))
 		argPos++
 	}
 
-	orderBy := "created_at DESC"
-	if sortBy == "published_at" {
-		orderBy = "published_at DESC"
+	orderBy := "a.created_at DESC"
+	if opts.SortBy == "published_at" {
+		orderBy = "a.published_at DESC"
 	}
 
 	query += fmt.Sprintf(` ORDER BY %s LIMIT $%d OFFSET $%d`, orderBy, argPos, argPos+1)
-	args = append(args, limit, offset)
+	args = append(args, opts.Limit, opts.Offset)
 
 	var articles []Article
 	err := r.db.Select(&articles, query, args...)
@@ -183,12 +216,17 @@ func (r *Repository) RemoveTags(articleID string, tagIDs []string) error {
 	return err
 }
 
-// GetTags retrieves all tag IDs for an article
+// GetTags retrieves all tag codes for an article
 func (r *Repository) GetTags(articleID string) ([]string, error) {
-	var tagIDs []string
-	query := `SELECT tag_id FROM article_tags WHERE article_id = $1`
-	err := r.db.Select(&tagIDs, query, articleID)
-	return tagIDs, err
+	var tags []string
+	query := `
+		SELECT t.code 
+		FROM article_tags at
+		JOIN tags t ON at.tag_id = t.id
+		WHERE at.article_id = $1
+	`
+	err := r.db.Select(&tags, query, articleID)
+	return tags, err
 }
 
 // Comment represents a user comment on an article
@@ -289,27 +327,80 @@ func (r *Repository) GetUserLike(articleID, userID string) (*bool, error) {
 }
 
 // Count returns total number of articles matching filters
-func (r *Repository) Count(status, categoryID, authorID string) (int, error) {
-	query := `SELECT COUNT(*) FROM articles WHERE deleted_at IS NULL`
+func (r *Repository) Count(opts FilterOptions) (int, error) {
+	query := `SELECT COUNT(DISTINCT a.id) FROM articles a`
+
+	if len(opts.Tags) > 0 {
+		query += ` JOIN article_tags at ON a.id = at.article_id JOIN tags t ON at.tag_id = t.id`
+	}
+
+	query += ` WHERE a.deleted_at IS NULL`
+
 	args := []interface{}{}
 	argPos := 1
 
-	if status != "" {
-		query += fmt.Sprintf(` AND status = $%d`, argPos)
-		args = append(args, status)
+	if opts.Status != "" {
+		query += fmt.Sprintf(` AND a.status = $%d`, argPos)
+		args = append(args, opts.Status)
 		argPos++
 	}
-	if categoryID != "" {
-		query += fmt.Sprintf(` AND category_id = $%d`, argPos)
-		args = append(args, categoryID)
+	if opts.CategoryID != "" {
+		query += fmt.Sprintf(` AND a.category_id = $%d`, argPos)
+		args = append(args, opts.CategoryID)
 		argPos++
 	}
-	if authorID != "" {
-		query += fmt.Sprintf(` AND author_id = $%d`, argPos)
-		args = append(args, authorID)
+	if opts.AuthorID != "" {
+		query += fmt.Sprintf(` AND a.author_id = $%d`, argPos)
+		args = append(args, opts.AuthorID)
+		argPos++
+	}
+	if len(opts.Tags) > 0 {
+		query += fmt.Sprintf(` AND t.code = ANY($%d)`, argPos)
+		args = append(args, pq.Array(opts.Tags))
+		argPos++
 	}
 
 	var count int
 	err := r.db.Get(&count, query, args...)
 	return count, err
+}
+
+// GetCategoriesWithCounts retrieves all categories with their article counts
+func (r *Repository) GetCategoriesWithCounts() ([]CategoryWithCount, error) {
+	query := `
+		SELECT c.id, c.name, c.slug, COUNT(a.id) as article_count
+		FROM categories c
+		LEFT JOIN articles a ON c.id = a.category_id AND a.status = 'published' AND a.deleted_at IS NULL
+		GROUP BY c.id, c.name, c.slug
+		ORDER BY c.name
+	`
+	var categories []CategoryWithCount
+	err := r.db.Select(&categories, query)
+	return categories, err
+}
+
+// GetTagsWithCounts retrieves tags with their article counts
+func (r *Repository) GetTagsWithCounts(popular bool, limit int) ([]TagWithCount, error) {
+	query := `
+		SELECT t.code as name, COUNT(DISTINCT a.id) as article_count
+		FROM article_tags at
+		JOIN tags t ON at.tag_id = t.id
+		JOIN articles a ON at.article_id = a.id
+		WHERE a.status = 'published' AND a.deleted_at IS NULL
+		GROUP BY t.code
+	`
+
+	if popular {
+		query += ` HAVING COUNT(DISTINCT a.id) >= 1` // Simplified for now, can be adjusted
+	}
+
+	query += ` ORDER BY article_count DESC, t.code`
+
+	if limit > 0 {
+		query += fmt.Sprintf(` LIMIT %d`, limit)
+	}
+
+	var tags []TagWithCount
+	err := r.db.Select(&tags, query)
+	return tags, err
 }

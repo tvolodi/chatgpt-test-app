@@ -1,6 +1,8 @@
 "use client";
 
 import React, { useEffect, useState } from 'react';
+import { useSession } from 'next-auth/react';
+import Link from 'next/link';
 import { marked } from 'marked';
 import { format } from 'date-fns';
 import LikeControl from './LikeControl';
@@ -20,6 +22,7 @@ interface ArticleDetailProps {
 }
 
 export default function ArticleDetail({ article }: ArticleDetailProps) {
+    const { status } = useSession();
     const [htmlContent, setHtmlContent] = useState("");
     const [interactions, setInteractions] = useState({ likes: 0, dislikes: 0 });
 
@@ -77,6 +80,17 @@ export default function ArticleDetail({ article }: ArticleDetailProps) {
                             #{tag}
                         </span>
                     ))}
+                </div>
+            )}
+
+            {status !== 'authenticated' && status !== 'loading' && (
+                <div className="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                    <p className="text-sm text-blue-800">
+                        <Link href="/api/auth/signin" className="font-medium underline hover:text-blue-900">
+                            Sign in
+                        </Link>
+                        {' '}to leave comments and like this article.
+                    </p>
                 </div>
             )}
 

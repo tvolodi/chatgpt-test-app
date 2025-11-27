@@ -50,12 +50,12 @@ func TestRepository_Integration(t *testing.T) {
 		require.NoError(t, repo.Create(article2))
 
 		// Test status filter
-		drafts, err := repo.FindAll("DRAFT", "", "", 10, 0, "")
+		drafts, err := repo.FindAll(FilterOptions{Status: "DRAFT", Limit: 10})
 		require.NoError(t, err)
 		assert.GreaterOrEqual(t, len(drafts), 1)
 
 		// Test pagination
-		all, err := repo.FindAll("", "", "", 1, 0, "")
+		all, err := repo.FindAll(FilterOptions{Limit: 1})
 		require.NoError(t, err)
 		assert.Equal(t, 1, len(all))
 	})
@@ -89,7 +89,7 @@ func TestRepository_Integration(t *testing.T) {
 		// Sort by published_at DESC (default is created_at DESC)
 		// Since we created them sequentially, created_at order is same as published_at order in this case if we don't manipulate created_at.
 		// But let's verify explicit sort.
-		articles, err := repo.FindAll("PUBLISHED", "", "", 10, 0, "published_at")
+		articles, err := repo.FindAll(FilterOptions{Status: "PUBLISHED", Limit: 10, SortBy: "published_at"})
 		require.NoError(t, err)
 		assert.GreaterOrEqual(t, len(articles), 2)
 
@@ -169,17 +169,28 @@ func TestRepository_Integration(t *testing.T) {
 		require.NoError(t, err)
 		assert.Len(t, tags, 1)
 		assert.Contains(t, tags, tag2ID)
+
+		// Test filtering by tags
+		taggedArticles, err := repo.FindAll(FilterOptions{Tags: []string{tag2ID}, Limit: 10})
+		require.NoError(t, err)
+		assert.Len(t, taggedArticles, 1)
+		assert.Equal(t, article.ID, taggedArticles[0].ID)
+
+		// Test filtering by non-existent tag
+		noArticles, err := repo.FindAll(FilterOptions{Tags: []string{"non-existent-tag"}})
+		require.NoError(t, err)
+		assert.Len(t, noArticles, 0)
 	})
 
 	t.Run("Count", func(t *testing.T) {
 		article := &Article{Title: "Count Test", Slug: fmt.Sprintf("count-test-%d", time.Now().UnixNano()), Body: "Body", AuthorID: "123e4567-e89b-12d3-a456-426614174000", Status: "DRAFT"}
 		require.NoError(t, repo.Create(article))
 
-		count, err := repo.Count("", "", "")
+		count, err := repo.Count(FilterOptions{})
 		require.NoError(t, err)
 		assert.Greater(t, count, 0)
 
-		countDrafts, err := repo.Count("DRAFT", "", "")
+		countDrafts, err := repo.Count(FilterOptions{Status: "DRAFT"})
 		require.NoError(t, err)
 		assert.Greater(t, countDrafts, 0)
 	})

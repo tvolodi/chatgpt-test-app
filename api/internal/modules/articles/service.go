@@ -61,13 +61,22 @@ func (s *Service) FindBySlug(slug string) (*Article, error) {
 }
 
 // FindAll retrieves all articles with filters
-func (s *Service) FindAll(status, categoryID, authorID string, limit, offset int) ([]Article, int, error) {
-	articles, err := s.repo.FindAll(status, categoryID, authorID, limit, offset, "")
+func (s *Service) FindAll(status, categoryID, authorID string, tags []string, limit, offset int) ([]Article, int, error) {
+	opts := FilterOptions{
+		Status:     status,
+		CategoryID: categoryID,
+		AuthorID:   authorID,
+		Tags:       tags,
+		Limit:      limit,
+		Offset:     offset,
+	}
+
+	articles, err := s.repo.FindAll(opts)
 	if err != nil {
 		return nil, 0, err
 	}
 
-	count, err := s.repo.Count(status, categoryID, authorID)
+	count, err := s.repo.Count(opts)
 	if err != nil {
 		return nil, 0, err
 	}
@@ -143,13 +152,22 @@ func (s *Service) GetTags(articleID string) ([]string, error) {
 }
 
 // GetPublicArticles retrieves published articles for public display with text previews
-func (s *Service) GetPublicArticles(limit, offset int) ([]Article, int, error) {
-	articles, err := s.repo.FindAll("PUBLISHED", "", "", limit, offset, "published_at")
+func (s *Service) GetPublicArticles(categoryID string, tags []string, limit, offset int) ([]Article, int, error) {
+	opts := FilterOptions{
+		Status:     "PUBLISHED",
+		CategoryID: categoryID,
+		Tags:       tags,
+		Limit:      limit,
+		Offset:     offset,
+		SortBy:     "published_at",
+	}
+
+	articles, err := s.repo.FindAll(opts)
 	if err != nil {
 		return nil, 0, err
 	}
 
-	count, err := s.repo.Count("PUBLISHED", "", "")
+	count, err := s.repo.Count(opts)
 	if err != nil {
 		return nil, 0, err
 	}
@@ -160,6 +178,16 @@ func (s *Service) GetPublicArticles(limit, offset int) ([]Article, int, error) {
 	}
 
 	return articles, count, nil
+}
+
+// GetCategoriesWithCounts retrieves all categories with their article counts
+func (s *Service) GetCategoriesWithCounts() ([]CategoryWithCount, error) {
+	return s.repo.GetCategoriesWithCounts()
+}
+
+// GetTagsWithCounts retrieves tags with their article counts
+func (s *Service) GetTagsWithCounts(popular bool, limit int) ([]TagWithCount, error) {
+	return s.repo.GetTagsWithCounts(popular, limit)
 }
 
 // AddComment adds a comment to an article

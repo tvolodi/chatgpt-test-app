@@ -3,6 +3,7 @@ package auth
 import (
 	"context"
 	"fmt"
+	"log"
 	"net/http"
 	"os"
 	"strings"
@@ -28,18 +29,28 @@ func Middleware(next http.Handler) http.Handler {
 		tokenString := parts[1]
 		ctx := context.Background()
 
-		provider, err := oidc.NewProvider(ctx, os.Getenv("KEYCLOAK_ISSUER"))
+		issuer := os.Getenv("KEYCLOAK_ISSUER")
+
+		log.Printf("[AUTH] Attempting to validate token with issuer: %s", issuer)
+
+		provider, err := oidc.NewProvider(ctx, issuer)
 		if err != nil {
+			log.Printf("[AUTH] Failed to get OIDC provider from %s: %v", issuer, err)
 			http.Error(w, fmt.Sprintf("Failed to get provider: %v", err), http.StatusInternalServerError)
 			return
 		}
 
+		// Skip audience check since access tokens have audience "account" not the client ID
 		verifier := provider.Verifier(&oidc.Config{
-			ClientID: os.Getenv("KEYCLOAK_CLIENT_ID"),
+			SkipClientIDCheck: true,
 		})
 
 		idToken, err := verifier.Verify(ctx, tokenString)
 		if err != nil {
+			log.Printf("[AUTH] Token verification failed: %v", err)
+			if len(tokenString) > 50 {
+				log.Printf("[AUTH] Token (first 50 chars): %s...", tokenString[:50])
+			}
 			http.Error(w, fmt.Sprintf("Invalid token: %v", err), http.StatusUnauthorized)
 			return
 		}
@@ -49,10 +60,12 @@ func Middleware(next http.Handler) http.Handler {
 			Sub string `json:"sub"`
 		}{}
 		if err := idToken.Claims(&claims); err != nil {
+			log.Printf("[AUTH] Failed to extract claims: %v", err)
 			http.Error(w, fmt.Sprintf("Invalid claims: %v", err), http.StatusUnauthorized)
 			return
 		}
 
+		log.Printf("[AUTH] Token validated successfully for user: %s", claims.Sub)
 		ctx = context.WithValue(r.Context(), UserIDKey, claims.Sub)
 		next.ServeHTTP(w, r.WithContext(ctx))
 	})

@@ -1,0 +1,60 @@
+﻿=== RUN   TestRepository_Integration
+2025/11/27 18:33:33 github.com/testcontainers/testcontainers-go - Connected to docker: 
+  Server Version: 28.5.1
+  API Version: 1.51
+  Operating System: Docker Desktop
+  Total Memory: 15910 MB
+  Labels:
+    com.docker.desktop.address=npipe://\\.\pipe\docker_cli
+  Testcontainers for Go Version: v0.40.0
+  Resolved Docker Host: npipe:////./pipe/docker_engine
+  Resolved Docker Socket Path: //var/run/docker.sock
+  Test SessionID: c07b5f54a731a9844e623f0547f38ecdcd694ff882db0d9e6ef79f9c0b09d09f
+  Test ProcessID: eb1b08e8-fcdc-4976-b862-352dc4a9fa5e
+2025/11/27 18:33:34 🐳 Creating container for image postgres:15-alpine
+2025/11/27 18:33:34 🐳 Creating container for image testcontainers/ryuk:0.13.0
+2025/11/27 18:33:34 ✅ Container created: 1f3dba7c92d2
+2025/11/27 18:33:34 🐳 Starting container: 1f3dba7c92d2
+2025/11/27 18:33:34 ✅ Container started: 1f3dba7c92d2
+2025/11/27 18:33:34 ⏳ Waiting for container id 1f3dba7c92d2 image: testcontainers/ryuk:0.13.0. Waiting for: port 8080/tcp to be listening
+2025/11/27 18:33:34 Shell not found in container
+2025/11/27 18:33:34 🔔 Container is ready: 1f3dba7c92d2
+2025/11/27 18:33:34 ✅ Container created: e2356f4bedd2
+2025/11/27 18:33:34 🐳 Starting container: e2356f4bedd2
+2025/11/27 18:33:34 ✅ Container started: e2356f4bedd2
+2025/11/27 18:33:34 ⏳ Waiting for container id e2356f4bedd2 image: postgres:15-alpine. Waiting for: all of: [log message "database system is ready to accept connections" (occurrence: 2)]
+2025/11/27 18:33:36 🔔 Container is ready: e2356f4bedd2
+2025/11/27 18:33:36 Current migration version: 5 (dirty: false)
+=== RUN   TestRepository_Integration/Tag_Management
+FindAll Query: 
+		SELECT DISTINCT a.id, a.title, a.slug, a.body, a.category_id, a.author_id, a.status, a.published_at, a.created_at, a.updated_at
+		FROM articles a
+	 JOIN article_tags at ON a.id = at.article_id WHERE a.deleted_at IS NULL AND at.tag_id::text = ANY($1) ORDER BY a.created_at DESC LIMIT $2 OFFSET $3
+Args: [0xc000009218 0 0]
+    repository_integration_test.go:176: 
+        	Error Trace:	C:/Users/tvolo/dev/ai-dala.com/api/internal/modules/articles/repository_integration_test.go:176
+        	Error:      	"[]" should have 1 item(s), but has 0
+        	Test:       	TestRepository_Integration/Tag_Management
+2025/11/27 18:33:36 🐳 Stopping container: e2356f4bedd2
+2025/11/27 18:33:36 ✅ Container stopped: e2356f4bedd2
+2025/11/27 18:33:36 🐳 Terminating container: e2356f4bedd2
+2025/11/27 18:33:36 🚫 Container terminated: e2356f4bedd2
+--- FAIL: TestRepository_Integration (2.59s)
+    --- FAIL: TestRepository_Integration/Tag_Management (0.02s)
+panic: runtime error: index out of range [0] with length 0 [recovered, repanicked]
+
+goroutine 258 [running]:
+testing.tRunner.func1.2({0x7ff6d0b14680, 0xc000125350})
+	C:/Program Files/Go/src/testing/testing.go:1872 +0x239
+testing.tRunner.func1()
+	C:/Program Files/Go/src/testing/testing.go:1875 +0x35b
+panic({0x7ff6d0b14680?, 0xc000125350?})
+	C:/Program Files/Go/src/runtime/panic.go:783 +0x132
+github.com/ai-dala/api/internal/modules/articles.TestRepository_Integration.func6(0xc000334c40)
+	C:/Users/tvolo/dev/ai-dala.com/api/internal/modules/articles/repository_integration_test.go:177 +0x8e5
+testing.tRunner(0xc000334c40, 0xc000008d80)
+	C:/Program Files/Go/src/testing/testing.go:1934 +0xc3
+created by testing.(*T).Run in goroutine 7
+	C:/Program Files/Go/src/testing/testing.go:1997 +0x44b
+FAIL	github.com/ai-dala/api/internal/modules/articles	4.822s
+FAIL
