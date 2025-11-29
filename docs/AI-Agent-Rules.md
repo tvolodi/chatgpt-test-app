@@ -47,6 +47,66 @@ description: Requirement Development
 
 ---
 
+## 0. COMPLEXITY ASSESSMENT (Before Any Work)
+
+⚠️ **CRITICAL**: Before starting any implementation, assess complexity to determine approach.
+
+### 0.0.1. Complexity Tiers
+
+| Tier | Heuristic Triggers | Semantic Triggers | Agent Behavior |
+|------|-------------------|-------------------|----------------|
+| **S (Simple)** | 1 file, <50 lines changed | Bug fix, typo, config change | Implement directly, no plan needed |
+| **M (Medium)** | 2-5 files, 50-200 lines | New API endpoint, DB schema change, new component | State plan before implementing |
+| **L (Large)** | >5 files, >200 lines | New module, new entity, cross-module changes | Propose architecture, wait for Human approval |
+| **XL (Epic)** | >10 files, >500 lines | Touches >3 REQs, major refactor, breaking changes | Must split into separate REQs |
+
+### 0.0.2. Semantic Complexity Bumpers
+
+These factors **automatically increase** the tier:
+
+| Change Type | Minimum Tier | Reason |
+|-------------|--------------|--------|
+| New database table/column | **M** | Requires migration, affects persistence |
+| New API endpoint | **M** | Contract change, needs documentation |
+| New frontend route/page | **M** | Navigation change, may need auth |
+| New module folder (`api/internal/modules/X`) | **L** | Architectural decision |
+| New entity (REQ + backend + frontend + tests) | **L** | Full-stack implementation |
+| Auth/permission changes | **L** | Security-critical, needs careful review |
+| Changes to >3 existing files in different modules | **L** | Cross-cutting, risk of regression |
+| Affects >3 existing REQs | **XL** | Must be planned as separate work items |
+| Breaking API changes | **XL** | Requires versioning strategy |
+
+### 0.0.3. Complexity Assessment Workflow
+
+```
+1. Read the request
+2. Identify affected files (grep/search)
+3. Count files and estimate lines
+4. Check semantic triggers
+5. Assign tier = max(heuristic tier, semantic tier)
+6. Apply tier behavior:
+   - S: Just do it
+   - M: "Plan: [files], [approach]. Proceeding."
+   - L: "Proposed architecture: [...]. Approve?"
+   - XL: "This is XL complexity. Recommend splitting into: REQ-A, REQ-B, REQ-C"
+```
+
+### 0.0.4. Examples
+
+**Example S**: `FIX: Typo in login button text`
+→ 1 file, <10 lines, no semantic triggers → **S** → Fix directly
+
+**Example M**: `FIX: Add created_at column to articles`
+→ 2 files (migration + model), DB change → **M** → State plan, implement
+
+**Example L**: `NEW: REQ-018 Bookmarks feature`
+→ New entity, backend + frontend + tests → **L** → Propose architecture first
+
+**Example XL**: `REFACTOR: Change all IDs from int to UUID`
+→ >20 files, breaks existing APIs, affects multiple REQs → **XL** → Split into phases
+
+---
+
 ## 0. WORKFLOW MODES (MANDATORY)
 
 ⚠️ **CRITICAL**: Every user request MUST start with a workflow prefix. Agent MUST identify the workflow before taking any action.

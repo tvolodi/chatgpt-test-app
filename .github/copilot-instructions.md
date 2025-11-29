@@ -62,6 +62,24 @@ Before creating REQ/MOD, check indexes:
 - **Tests**: Playwright (E2E), TestContainers (integration)
 - **Auth**: Keycloak
 
+## 📊 COMPLEXITY TIERS
+
+Before implementing, assess complexity:
+
+| Tier | Triggers | Action |
+|------|----------|--------|
+| **S** | 1 file, <50 lines, no API/DB | Implement directly |
+| **M** | 2-5 files, OR new endpoint, OR DB change | Report plan, then implement |
+| **L** | >5 files, OR new module, OR new entity | Propose architecture, wait for OK |
+| **XL** | Cross-REQ, major refactor | Split into separate REQs |
+
+**Semantic triggers that bump complexity:**
+- New database table → at least **M**
+- New API endpoint → at least **M**
+- New module folder → at least **L**
+- Changes auth/permissions → at least **L**
+- Touches >3 existing REQs → **XL**
+
 ## 📖 FULL DOCUMENTATION
 
 For complete rules, patterns, and examples, read:
