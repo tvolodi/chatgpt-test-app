@@ -51,10 +51,9 @@ test.describe('Categories Management', () => {
 
         await expect(tree.getByText('Child Updated')).toBeVisible();
 
-        /*
         // 5. Try to delete Parent (should fail)
         console.log('Step 5: Deleting Parent (Fail)');
-        await tree.getByText('Root Category').click();
+        await tree.getByText('Root Category').first().click();
         
         // Wait for form to show Edit mode
         await expect(page.getByRole('heading', { name: 'Edit Category' })).toBeVisible();
@@ -67,9 +66,11 @@ test.describe('Categories Management', () => {
         
         await page.getByRole('button', { name: 'Delete Category' }).click();
         
+        // Should get an error alert about having children
+        await expect(page.getByText('Cannot delete category with active children')).toBeVisible();
+        
         // Verify root is still there
         await expect(tree.getByText('Root Category')).toBeVisible();
-        */
 
         // 6. Delete Child Category
         console.log('Step 6: Deleting Child');

@@ -30,6 +30,8 @@ function ArticlesPageContent() {
 
     const page = Number(searchParams.get('page')) || 1;
     const selectedId = searchParams.get('id');
+    const selectedSlug = searchParams.get('slug');
+    const selectedIdentifier = selectedId || selectedSlug; // Use either id or slug
     const categoryId = searchParams.get('category_id');
     const tags = searchParams.getAll('tags');
     const limit = 9;
@@ -89,7 +91,7 @@ function ArticlesPageContent() {
 
     // Fetch selected article details
     useEffect(() => {
-        if (!selectedId) {
+        if (!selectedIdentifier) {
             setSelectedArticle(null);
             return;
         }
@@ -98,7 +100,9 @@ function ArticlesPageContent() {
             setLoadingDetail(true);
             setError(null);
             try {
-                const res = await fetch(`/api/articles/${selectedId}`);
+                // Use different endpoint based on whether we have id or slug
+                const endpoint = selectedId ? `/api/articles/${selectedId}` : `/api/articles-by-slug/${selectedSlug}`;
+                const res = await fetch(endpoint);
                 if (!res.ok) {
                     const errorData = await res.json().catch(() => ({ message: `HTTP ${res.status}: ${res.statusText}` }));
                     throw new Error(errorData.message || `Failed to fetch article (${res.status})`);
@@ -115,7 +119,7 @@ function ArticlesPageContent() {
         };
 
         fetchDetail();
-    }, [selectedId]);
+    }, [selectedIdentifier]);
 
     const totalPages = Math.ceil(total / limit);
 
@@ -164,7 +168,7 @@ function ArticlesPageContent() {
             <main className="flex-grow max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 w-full">
                 <div className="flex flex-col lg:flex-row gap-8">
                     {/* Master List Panel */}
-                    <div className={`lg:w-1/3 w-full ${selectedId ? 'hidden lg:block' : 'block'}`}>
+                    <div className={`lg:w-1/3 w-full ${selectedIdentifier ? 'hidden lg:block' : 'block'}`}>
                         <div className="flex justify-between items-center mb-6">
                             <h1 className="text-2xl font-bold text-walnut-800 font-retro">{t('Articles')}</h1>
                             <button
@@ -227,7 +231,7 @@ function ArticlesPageContent() {
                                     <div
                                         key={article.id}
                                         onClick={() => handleSelectArticle(article.id)}
-                                        className={`cursor-pointer transition-all duration-200 p-2 rounded-retro border-2 ${selectedId === article.id
+                                        className={`cursor-pointer transition-all duration-200 p-2 rounded-retro border-2 ${selectedIdentifier === article.id
                                             ? 'ring-2 ring-walnut-500 transform scale-[1.02] bg-walnut-100 border-walnut-400 shadow-retro'
                                             : 'hover:bg-walnut-50 border-walnut-200'
                                             }`}
@@ -262,8 +266,8 @@ function ArticlesPageContent() {
                     </div>
 
                     {/* Detail Panel */}
-                    <div className={`lg:w-2/3 w-full ${!selectedId ? 'hidden lg:block' : 'block'}`}>
-                        {selectedId ? (
+                    <div className={`lg:w-2/3 w-full ${!selectedIdentifier ? 'hidden lg:block' : 'block'}`}>
+                        {selectedIdentifier ? (
                             loadingDetail ? (
                                 <div className="h-96 bg-walnut-100 rounded-retro border-2 border-walnut-300 flex items-center justify-center">
                                     <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-walnut-600"></div>

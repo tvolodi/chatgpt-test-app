@@ -11,9 +11,11 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "@heroicons/react": "^2.2.0",
     "@tiptap/extension-image": "^3.11.0",
     "@tiptap/react": "^3.11.0",
     "@tiptap/starter-kit": "^3.11.0",
+    "crypto-js": "^4.2.0",
     "date-fns": "^4.1.0",
     "marked": "^17.0.1",
     "next": "14.2.0",

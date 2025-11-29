@@ -13,6 +13,7 @@ import (
 	"github.com/ai-dala/api/internal/modules/categories"
 	"github.com/ai-dala/api/internal/modules/tags"
 	"github.com/ai-dala/api/internal/modules/uploads"
+	"github.com/ai-dala/api/internal/modules/user"
 	"github.com/google/uuid"
 )
 
@@ -22,15 +23,17 @@ type Server struct {
 	categoriesHandler *categories.Handler
 	articlesHandler   *articles.Handler
 	uploadsHandler    *uploads.Handler
+	userHandler       *user.Handler
 }
 
-func NewServer(authService auth.Service, tagsHandler *tags.Handler, categoriesHandler *categories.Handler, articlesHandler *articles.Handler, uploadsHandler *uploads.Handler) *Server {
+func NewServer(authService auth.Service, tagsHandler *tags.Handler, categoriesHandler *categories.Handler, articlesHandler *articles.Handler, uploadsHandler *uploads.Handler, userHandler *user.Handler) *Server {
 	return &Server{
 		auth:              authService,
 		tagsHandler:       tagsHandler,
 		categoriesHandler: categoriesHandler,
 		articlesHandler:   articlesHandler,
 		uploadsHandler:    uploadsHandler,
+		userHandler:       userHandler,
 	}
 }
 
@@ -84,13 +87,13 @@ func (s *Server) RegisterRoutes(mux *http.ServeMux) {
 		mux.HandleFunc("POST /api/auth/test-token", s.testTokenHandler)
 	}
 
-	// Tag routes (optional)
+	// Tag routes (protected - require authentication)
 	if s.tagsHandler != nil {
 		mux.HandleFunc("GET /api/tags", s.tagsHandler.ListTags)
 		mux.HandleFunc("GET /api/tags/{code}", s.tagsHandler.GetTagByCode)
-		mux.HandleFunc("POST /api/tags", s.tagsHandler.CreateTag)
-		mux.HandleFunc("PUT /api/tags/{code}", s.tagsHandler.UpdateTag)
-		mux.HandleFunc("DELETE /api/tags/{code}", s.tagsHandler.DeleteTag)
+		mux.Handle("POST /api/tags", auth.Middleware(http.HandlerFunc(s.tagsHandler.CreateTag)))
+		mux.Handle("PUT /api/tags/{code}", auth.Middleware(http.HandlerFunc(s.tagsHandler.UpdateTag)))
+		mux.Handle("DELETE /api/tags/{code}", auth.Middleware(http.HandlerFunc(s.tagsHandler.DeleteTag)))
 	}
 
 	// Categories routes
@@ -110,6 +113,11 @@ func (s *Server) RegisterRoutes(mux *http.ServeMux) {
 	// Uploads routes
 	if s.uploadsHandler != nil {
 		s.uploadsHandler.RegisterRoutes(mux)
+	}
+
+	// User routes
+	if s.userHandler != nil {
+		s.userHandler.RegisterRoutes(mux)
 	}
 
 	// Protected routes

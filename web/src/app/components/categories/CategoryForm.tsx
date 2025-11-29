@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useTranslations } from 'next-intl';
 import { Category } from './CategoryTree';
 
 interface CategoryFormProps {
@@ -10,6 +11,7 @@ interface CategoryFormProps {
 }
 
 const CategoryForm: React.FC<CategoryFormProps> = ({ initialData, categories, onSubmit, onDelete, locale }) => {
+    const t = useTranslations('categories');
     const [code, setCode] = useState('');
     const [names, setNames] = useState<Record<string, string>>({ en: '', ru: '', kk: '' });
     const [parentId, setParentId] = useState<string>('');
@@ -49,7 +51,7 @@ const CategoryForm: React.FC<CategoryFormProps> = ({ initialData, categories, on
         <form onSubmit={handleSubmit} className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
             <div className="px-6 py-4 border-b border-gray-100 bg-gray-50 flex justify-between items-center">
                 <h3 className="text-lg font-medium text-gray-900">
-                    {isEditMode ? 'Edit Category' : 'Create New Category'}
+                    {isEditMode ? t('editCategory') : t('createNewCategory')}
                 </h3>
                 {isEditMode && onDelete && (
                     <button
@@ -57,7 +59,7 @@ const CategoryForm: React.FC<CategoryFormProps> = ({ initialData, categories, on
                         onClick={() => onDelete(initialData!.id)}
                         className="text-red-600 hover:text-red-800 text-sm font-medium"
                     >
-                        Delete Category
+                        {t('deleteCategory')}
                     </button>
                 )}
             </div>
@@ -66,7 +68,7 @@ const CategoryForm: React.FC<CategoryFormProps> = ({ initialData, categories, on
                 {/* Code Field */}
                 <div>
                     <label htmlFor="code" className="block text-sm font-medium text-gray-700 mb-2">
-                        Category Code
+                        {t('categoryCode')}
                     </label>
                     <input
                         type="text"
@@ -83,7 +85,7 @@ const CategoryForm: React.FC<CategoryFormProps> = ({ initialData, categories, on
                 {/* Parent Selection */}
                 <div>
                     <label htmlFor="parent" className="block text-sm font-medium text-gray-700 mb-2">
-                        Parent Category
+                        {t('parentCategory')}
                     </label>
                     <select
                         id="parent"
@@ -91,7 +93,7 @@ const CategoryForm: React.FC<CategoryFormProps> = ({ initialData, categories, on
                         onChange={(e) => setParentId(e.target.value)}
                         className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm transition-colors duration-150"
                     >
-                        <option value="">(None - Root Category)</option>
+                        <option value="">{t('noneRootCategory')}</option>
                         {parentOptions.map(cat => (
                             <option key={cat.id} value={cat.id}>
                                 {cat.name[locale] || cat.name['en'] || cat.code}
@@ -103,19 +105,19 @@ const CategoryForm: React.FC<CategoryFormProps> = ({ initialData, categories, on
                 {/* Names Section */}
                 <div>
                     <label className="block text-sm font-medium text-gray-700 mb-3">
-                        Display Names
+                        {t('displayNames')}
                     </label>
                     <div className="space-y-4">
                         {[
-                            { lang: 'en', label: 'English', flag: '🇬🇧' },
-                            { lang: 'ru', label: 'Russian', flag: '🇷🇺' },
-                            { lang: 'kk', label: 'Kazakh', flag: '🇰🇿' }
-                        ].map(({ lang, label, flag }) => (
+                            { lang: 'en', labelKey: 'english', flag: '🇬🇧' },
+                            { lang: 'ru', labelKey: 'russian', flag: '🇷🇺' },
+                            { lang: 'kk', labelKey: 'kazakh', flag: '🇰🇿' }
+                        ].map(({ lang, labelKey, flag }) => (
                             <div key={lang} className="grid grid-cols-12 gap-3 items-center">
                                 <div className="col-span-3 flex items-center gap-2">
                                     <span className="text-lg">{flag}</span>
                                     <label htmlFor={`name-${lang}`} className="text-sm font-medium text-gray-700">
-                                        {label}
+                                        {t(labelKey)}
                                     </label>
                                 </div>
                                 <div className="col-span-9">
@@ -125,7 +127,7 @@ const CategoryForm: React.FC<CategoryFormProps> = ({ initialData, categories, on
                                         value={names[lang] || ''}
                                         onChange={(e) => handleNameChange(lang, e.target.value)}
                                         className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm transition-colors duration-150"
-                                        placeholder={`Name in ${label}`}
+                                        placeholder={`${t(labelKey)} ${t('displayNames').toLowerCase()}`}
                                     />
                                 </div>
                             </div>
@@ -145,13 +147,13 @@ const CategoryForm: React.FC<CategoryFormProps> = ({ initialData, categories, on
                     }}
                     className="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors duration-150"
                 >
-                    Reset
+                    {t('reset')}
                 </button>
                 <button
                     type="submit"
                     className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors duration-150"
                 >
-                    {isEditMode ? 'Update Category' : 'Create Category'}
+                    {isEditMode ? t('updateCategory') : t('createCategory')}
                 </button>
             </div>
         </form>

@@ -5,7 +5,7 @@ import { useSession } from 'next-auth/react';
 import Link from 'next/link';
 import { marked } from 'marked';
 import { format } from 'date-fns';
-import LikeControl from './LikeControl';
+import LikeDislikeButtons from './LikeDislikeButtons';
 import CommentSection from './CommentSection';
 
 interface Article {
@@ -61,7 +61,7 @@ export default function ArticleDetail({ article }: ArticleDetailProps) {
                         <span>{format(new Date(article.published_at), 'MMM d, yyyy')}</span>
                     )}
                 </div>
-                <LikeControl
+                <LikeDislikeButtons
                     articleId={article.id}
                     initialLikes={interactions.likes}
                     initialDislikes={interactions.dislikes}

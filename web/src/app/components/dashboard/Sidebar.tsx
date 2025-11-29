@@ -33,6 +33,7 @@ export function DashboardSidebar() {
         { href: "/dashboard/articles", label: "Articles", icon: "📝" },
         { href: "/dashboard/categories", label: "Categories", icon: "📁" },
         { href: "/dashboard/tags", label: "Tags", icon: "🏷️" },
+        { href: "/dashboard/profile", label: "Profile", icon: "👤" },
         { href: "/dashboard/settings", label: "Settings", icon: "⚙️" }
     ];
 

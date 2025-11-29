@@ -1,4 +1,5 @@
 import React, { useMemo } from 'react';
+import { useTranslations } from 'next-intl';
 
 export interface Category {
     id: string;
@@ -17,6 +18,7 @@ interface CategoryTreeProps {
 }
 
 const CategoryTree: React.FC<CategoryTreeProps> = ({ categories, selectedId, onSelect, onCreate, locale }) => {
+    const t = useTranslations('categories');
     // Build tree structure from flat list
     const treeData = useMemo(() => {
         const map = new Map<string, Category>();
@@ -75,18 +77,18 @@ const CategoryTree: React.FC<CategoryTreeProps> = ({ categories, selectedId, onS
     return (
         <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 min-h-[500px]" data-testid="category-tree">
             <div className="flex justify-between items-center mb-4 pb-2 border-b border-gray-100">
-                <h3 className="text-lg font-medium text-gray-900">Categories</h3>
+                <h3 className="text-lg font-medium text-gray-900">{t('title')}</h3>
                 <button
                     onClick={() => onCreate(selectedId)}
                     className="text-sm text-indigo-600 hover:text-indigo-800 font-medium"
                 >
-                    + New Category
+                    + {t('newCategory')}
                 </button>
             </div>
 
             {treeData.length === 0 ? (
                 <div className="text-center py-8 text-gray-500 text-sm">
-                    No categories found.
+                    {t('noCategoriesFound')}
                 </div>
             ) : (
                 <ul className="space-y-1">

@@ -48,6 +48,15 @@ func (m *mockRepo) Update(oldCode, newCode string, name map[string]interface{}) 
 	return nil, nil
 }
 
+func (m *mockRepo) FindAllWithPagination(limit, offset int, search string) ([]Tag, int, error) {
+	if m.err != nil {
+		return nil, 0, m.err
+	}
+
+	// Simple mock implementation - just return all tags
+	return m.tags, len(m.tags), nil
+}
+
 func (m *mockRepo) Delete(code string) error {
 	if m.err != nil {
 		return m.err

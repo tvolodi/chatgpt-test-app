@@ -268,6 +268,35 @@ func publishedAfter(a, b string) bool {
 	return at.After(bt)
 }
 
+func filterNews(items []newsItem, category string) []newsItem {
+	if category == "" {
+		return items
+	}
+	out := make([]newsItem, 0, len(items))
+	for _, item := range items {
+		for _, tag := range item.Tags {
+			if tag == category {
+				out = append(out, item)
+				break
+			}
+		}
+	}
+	return out
+}
+
+func sortNews(items []newsItem) []newsItem {
+	sorted := make([]newsItem, len(items))
+	copy(sorted, items)
+	for i := 1; i < len(sorted); i++ {
+		j := i
+		for j > 0 && publishedAfter(sorted[j].PublishedAt, sorted[j-1].PublishedAt) {
+			sorted[j], sorted[j-1] = sorted[j-1], sorted[j]
+			j--
+		}
+	}
+	return sorted
+}
+
 func seedNews() []newsItem {
 	base := []newsItem{
 		{

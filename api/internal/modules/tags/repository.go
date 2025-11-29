@@ -4,10 +4,12 @@ import (
 	"database/sql"
 	"encoding/json"
 	"fmt"
+	"strings"
 )
 
 type Repository interface {
 	FindAll() ([]Tag, error)
+	FindAllWithPagination(limit, offset int, search string) ([]Tag, int, error)
 	FindByCode(code string) (*Tag, error)
 	Create(code string, name map[string]interface{}) (*Tag, error)
 	Update(oldCode, newCode string, name map[string]interface{}) (*Tag, error)
@@ -40,6 +42,65 @@ func (r *postgresRepository) FindAll() ([]Tag, error) {
 		tags = append(tags, t)
 	}
 	return tags, nil
+}
+
+func (r *postgresRepository) FindAllWithPagination(limit, offset int, search string) ([]Tag, int, error) {
+	// Build the base query
+	baseQuery := `SELECT id, code, name FROM tags`
+	countQuery := `SELECT COUNT(*) FROM tags`
+
+	var args []interface{}
+	var conditions []string
+	argIndex := 1
+
+	// Add search condition if provided
+	if search != "" {
+		conditions = append(conditions, `(code ILIKE $`+fmt.Sprintf("%d", argIndex)+` OR name->>'en' ILIKE $`+fmt.Sprintf("%d", argIndex)+` OR name->>'ru' ILIKE $`+fmt.Sprintf("%d", argIndex)+` OR name->>'kk' ILIKE $`+fmt.Sprintf("%d", argIndex)+`)`)
+		args = append(args, "%"+search+"%")
+		argIndex++
+	}
+
+	// Add WHERE clause if we have conditions
+	whereClause := ""
+	if len(conditions) > 0 {
+		whereClause = " WHERE " + strings.Join(conditions, " AND ")
+	}
+
+	// Get total count
+	var total int
+	countQueryWithWhere := countQuery + whereClause
+	err := r.db.QueryRow(countQueryWithWhere, args...).Scan(&total)
+	if err != nil {
+		return nil, 0, err
+	}
+
+	// Get paginated results
+	query := baseQuery + whereClause + ` ORDER BY code ASC`
+	if limit > 0 {
+		query += ` LIMIT $` + fmt.Sprintf("%d", argIndex)
+		args = append(args, limit)
+		argIndex++
+	}
+	if offset > 0 {
+		query += ` OFFSET $` + fmt.Sprintf("%d", argIndex)
+		args = append(args, offset)
+	}
+
+	rows, err := r.db.Query(query, args...)
+	if err != nil {
+		return nil, 0, err
+	}
+	defer rows.Close()
+
+	var tags []Tag
+	for rows.Next() {
+		var t Tag
+		if err := rows.Scan(&t.ID, &t.Code, &t.Name); err != nil {
+			return nil, 0, err
+		}
+		tags = append(tags, t)
+	}
+	return tags, total, nil
 }
 
 func (r *postgresRepository) FindByCode(code string) (*Tag, error) {

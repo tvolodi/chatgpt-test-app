@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { useSession } from 'next-auth/react';
 import Link from 'next/link';
 import { formatDistanceToNow } from 'date-fns';
+import { useTranslations } from 'next-intl';
 
 interface Comment {
     id: string;
@@ -18,10 +19,10 @@ interface CommentSectionProps {
 
 export default function CommentSection({ articleId }: CommentSectionProps) {
     const { data: session, status } = useSession();
+    const t = useTranslations('Comments');
     const [comments, setComments] = useState<Comment[]>([]);
     const [newComment, setNewComment] = useState("");
     const [loading, setLoading] = useState(false);
-    const [showLoginMessage, setShowLoginMessage] = useState(false);
 
     useEffect(() => {
         const fetchComments = async () => {
@@ -41,7 +42,7 @@ export default function CommentSection({ articleId }: CommentSectionProps) {
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         if (status !== 'authenticated') {
-            setShowLoginMessage(true);
+            // This shouldn't happen since we only show the form to authenticated users
             return;
         }
         if (!newComment.trim()) return;
@@ -58,7 +59,8 @@ export default function CommentSection({ articleId }: CommentSectionProps) {
             });
 
             if (res.status === 401) {
-                setShowLoginMessage(true);
+                // Token expired, user needs to re-authenticate
+                window.location.href = '/login';
                 return;
             }
 
@@ -66,73 +68,96 @@ export default function CommentSection({ articleId }: CommentSectionProps) {
                 const comment = await res.json();
                 setComments([comment, ...comments]);
                 setNewComment("");
+            } else {
+                console.error('Failed to post comment:', res.status);
             }
         } catch (err) {
-            console.error(err);
+            console.error('Error posting comment:', err);
         } finally {
             setLoading(false);
         }
     };
 
     return (
-        <div className="mt-8 border-t pt-8">
-            <h3 className="text-xl font-bold mb-4">Comments</h3>
+        <div className="mt-8 border-t-2 border-walnut-300 pt-8">
+            <h3 className="text-2xl font-bold text-walnut-800 mb-6 font-retro uppercase tracking-wide">
+                {t('Comments')} ({comments.length})
+            </h3>
 
             {status === 'loading' ? (
-                <div className="mb-8 p-4 text-center text-gray-500">Loading...</div>
+                <div className="mb-8 p-6 bg-walnut-100 border-2 border-walnut-400 rounded-retro text-center text-walnut-600 font-retro-sans">
+                    {t('LoadingComments')}
+                </div>
             ) : (
                 <div className="mb-8">
-                    <form onSubmit={handleSubmit}>
-                        <textarea
-                            value={newComment}
-                            onChange={(e) => setNewComment(e.target.value)}
-                            onFocus={() => status !== 'authenticated' && setShowLoginMessage(true)}
-                            className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                            placeholder="Add a comment..."
-                            rows={3}
-                            disabled={loading}
-                        />
-                        <div className="mt-2 flex justify-between items-center">
-                            {showLoginMessage && (
-                                <p className="text-sm text-red-500">
-                                    Please <Link href="/api/auth/signin" className="underline">sign in</Link> to leave a comment.
-                                </p>
-                            )}
-                            <div className="flex-grow"></div>
-                            <button
-                                type="submit"
-                                disabled={loading || !newComment.trim()}
-                                className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50"
+                    {status === 'authenticated' ? (
+                        <form onSubmit={handleSubmit} className="bg-walnut-50 border-2 border-walnut-500 rounded-retro p-6 shadow-retro">
+                            <textarea
+                                value={newComment}
+                                onChange={(e) => setNewComment(e.target.value)}
+                                className="w-full p-4 border-2 border-walnut-300 rounded-retro shadow-sm focus:ring-walnut-500 focus:border-walnut-500 bg-walnut-50 font-retro-sans resize-none"
+                                placeholder={t('ShareThoughts')}
+                                rows={4}
+                                disabled={loading}
+                            />
+                            <div className="mt-4 flex justify-end">
+                                <button
+                                    type="submit"
+                                    disabled={loading || !newComment.trim()}
+                                    className="px-6 py-3 bg-walnut-600 text-walnut-50 rounded-retro border-2 border-walnut-700 shadow-retro hover:shadow-retro-hover font-retro-sans uppercase tracking-wide disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+                                >
+                                    {loading ? t('Posting') : t('PostComment')}
+                                </button>
+                            </div>
+                        </form>
+                    ) : (
+                        <div className="bg-walnut-100 border-2 border-walnut-400 rounded-retro p-6 text-center">
+                            <p className="text-walnut-700 font-retro-sans mb-4">
+                                {t('SignInToComment')}
+                            </p>
+                            <Link
+                                href="/login"
+                                className="inline-block px-6 py-3 bg-walnut-600 text-walnut-50 rounded-retro border-2 border-walnut-700 shadow-retro hover:shadow-retro-hover font-retro-sans uppercase tracking-wide transition-all"
                             >
-                                {loading ? 'Posting...' : 'Post Comment'}
-                            </button>
+                                {t('SignInToCommentButton')}
+                            </Link>
                         </div>
-                    </form>
+                    )}
                 </div>
             )}
 
             <div className="space-y-6">
                 {comments.length > 0 ? (
                     comments.map((comment) => (
-                        <div key={comment.id} className="flex space-x-4">
-                            <div className="flex-shrink-0">
-                                <div className="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center">
-                                    <span className="text-gray-500 text-sm">U</span>
+                        <div key={comment.id} className="bg-walnut-50 border-2 border-walnut-500 rounded-retro p-6 shadow-retro" data-testid="comment-item">
+                            <div className="flex items-start space-x-4">
+                                <div className="flex-shrink-0">
+                                    <div className="w-12 h-12 bg-walnut-200 border-2 border-walnut-400 rounded-retro flex items-center justify-center shadow-retro">
+                                        <span className="text-walnut-600 text-lg font-retro">{t('User').charAt(0)}</span>
+                                    </div>
                                 </div>
-                            </div>
-                            <div className="flex-grow">
-                                <div className="flex items-center justify-between mb-1">
-                                    <span className="font-medium text-gray-900">User {comment.user_id.slice(0, 8)}</span>
-                                    <span className="text-sm text-gray-500">
-                                        {formatDistanceToNow(new Date(comment.created_at), { addSuffix: true })}
-                                    </span>
+                                <div className="flex-grow min-w-0">
+                                    <div className="flex items-center justify-between mb-3">
+                                        <span className="font-semibold text-walnut-800 font-retro-sans">
+                                            {t('User')} {comment.user_id.slice(0, 8)}
+                                        </span>
+                                        <span className="text-sm text-walnut-500 font-retro-sans uppercase tracking-wide">
+                                            {formatDistanceToNow(new Date(comment.created_at), { addSuffix: true })}
+                                        </span>
+                                    </div>
+                                    <p className="text-walnut-700 font-retro-sans leading-relaxed whitespace-pre-wrap">
+                                        {comment.body}
+                                    </p>
                                 </div>
-                                <p className="text-gray-700">{comment.body}</p>
                             </div>
                         </div>
                     ))
                 ) : (
-                    <p className="text-gray-500 text-center">No comments yet.</p>
+                    <div className="bg-walnut-100 border-2 border-walnut-400 rounded-retro p-8 text-center">
+                        <p className="text-walnut-600 font-retro-sans">
+                            {t('NoCommentsYet')}
+                        </p>
+                    </div>
                 )}
             </div>
         </div>

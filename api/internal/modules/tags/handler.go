@@ -3,6 +3,7 @@ package tags
 import (
 	"encoding/json"
 	"net/http"
+	"strconv"
 	"strings"
 )
 
@@ -15,6 +16,39 @@ func NewHandler(service Service) *Handler {
 }
 
 func (h *Handler) ListTags(w http.ResponseWriter, r *http.Request) {
+	// Parse query parameters
+	limitStr := r.URL.Query().Get("limit")
+	offsetStr := r.URL.Query().Get("offset")
+	search := r.URL.Query().Get("search")
+
+	limit := 20 // default
+	offset := 0 // default
+
+	if limitStr != "" {
+		if l, err := strconv.Atoi(limitStr); err == nil && l > 0 {
+			limit = l
+		}
+	}
+
+	if offsetStr != "" {
+		if o, err := strconv.Atoi(offsetStr); err == nil && o >= 0 {
+			offset = o
+		}
+	}
+
+	// Use pagination if any parameters are provided
+	if limitStr != "" || offsetStr != "" || search != "" {
+		response, err := h.service.ListTagsWithPagination(limit, offset, search)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(response)
+		return
+	}
+
+	// Fallback to simple list for backward compatibility
 	tags, err := h.service.ListTags()
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)

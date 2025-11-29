@@ -7,8 +7,9 @@ import { format } from 'date-fns';
 interface Article {
     id: string;
     title: string;
-    body: string; // This will be the preview text
-    author_id: string;
+    body?: string; // This will be the preview text
+    summary?: string; // Alternative field for preview text
+    author_id?: string;
     published_at?: string;
     tags?: string[];
 }
@@ -21,6 +22,7 @@ export default function ArticleCard({ article }: ArticleCardProps) {
     return (
         <div
             className="bg-walnut-50 rounded-retro shadow-retro border-2 border-walnut-500 p-6 hover:shadow-retro-hover transition-all cursor-pointer select-none h-full flex flex-col"
+            data-testid="article-card"
         >
             <div className="flex justify-between items-start mb-4">
                 <div>
@@ -50,7 +52,7 @@ export default function ArticleCard({ article }: ArticleCardProps) {
             </div>
 
             <p className="text-walnut-600 text-sm leading-relaxed mb-4 line-clamp-6 flex-grow font-retro-sans">
-                {article.body}
+                {article.body || article.summary}
             </p>
 
             <div className="text-retro-orange text-sm font-medium hover:underline mt-auto font-retro-sans uppercase tracking-wide">

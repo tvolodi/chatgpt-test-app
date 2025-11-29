@@ -64,6 +64,22 @@ func (m *mockService) DeleteTag(code string) error {
 	return errors.New("not found")
 }
 
+func (m *mockService) ListTagsWithPagination(limit, offset int, search string) (*PaginatedTagsResponse, error) {
+	if m.err != nil {
+		return nil, m.err
+	}
+
+	// Simple mock implementation - just return all tags with pagination info
+	total := len(m.tags)
+	hasMore := offset+limit < total
+
+	return &PaginatedTagsResponse{
+		Tags:    m.tags,
+		Total:   total,
+		HasMore: hasMore,
+	}, nil
+}
+
 func TestHandler_ListTags(t *testing.T) {
 	h := NewHandler(&mockService{tags: []Tag{{ID: "1", Code: "tag1", Name: []byte(`{"en":"Tag One"}`)}}})
 	req := httptest.NewRequest(http.MethodGet, "/api/tags", nil)
