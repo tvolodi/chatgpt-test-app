@@ -21,13 +21,13 @@ func (h *Handler) RegisterRoutes(mux *http.ServeMux) {
 	mux.HandleFunc("GET /api/articles", h.handleList)
 	mux.HandleFunc("GET /api/articles/public", h.handlePublicList)
 	mux.HandleFunc("GET /api/articles/{id}", h.handleGet)
-	mux.HandleFunc("POST /api/articles", h.handleCreate)
-	mux.HandleFunc("PUT /api/articles/{id}", h.handleUpdate)
-	mux.HandleFunc("POST /api/articles/{id}/publish", h.handlePublish)
-	mux.HandleFunc("DELETE /api/articles/{id}", h.handleDelete)
+	mux.Handle("POST /api/articles", auth.Middleware(http.HandlerFunc(h.handleCreate)))
+	mux.Handle("PUT /api/articles/{id}", auth.Middleware(http.HandlerFunc(h.handleUpdate)))
+	mux.Handle("POST /api/articles/{id}/publish", auth.Middleware(http.HandlerFunc(h.handlePublish)))
+	mux.Handle("DELETE /api/articles/{id}", auth.Middleware(http.HandlerFunc(h.handleDelete)))
 	mux.HandleFunc("GET /api/articles-by-slug/{slug}", h.handleGetBySlug)
-	mux.HandleFunc("POST /api/articles/{id}/tags", h.handleAddTags)
-	mux.HandleFunc("DELETE /api/articles/{id}/tags", h.handleRemoveTags)
+	mux.Handle("POST /api/articles/{id}/tags", auth.Middleware(http.HandlerFunc(h.handleAddTags)))
+	mux.Handle("DELETE /api/articles/{id}/tags", auth.Middleware(http.HandlerFunc(h.handleRemoveTags)))
 
 	// Interaction routes
 	mux.Handle("POST /api/articles/{id}/comments", auth.Middleware(http.HandlerFunc(h.handleAddComment)))
@@ -35,8 +35,6 @@ func (h *Handler) RegisterRoutes(mux *http.ServeMux) {
 	mux.Handle("POST /api/articles/{id}/like", auth.Middleware(http.HandlerFunc(h.handleAddLike)))
 	mux.Handle("DELETE /api/articles/{id}/like", auth.Middleware(http.HandlerFunc(h.handleRemoveLike)))
 	mux.HandleFunc("GET /api/articles/{id}/interactions", h.handleGetInteractions)
-	mux.HandleFunc("GET /api/categories", h.handleListCategories)
-	mux.HandleFunc("GET /api/tags", h.handleListTags)
 }
 
 // handleList lists all articles with filters
@@ -228,9 +226,11 @@ func (h *Handler) handleCreate(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// TODO: Get author_id from auth context
-	// For now, use a fixed UUID to satisfy DB constraints
-	authorID := "00000000-0000-0000-0000-000000000001"
+	authorID, err := auth.GetUserIDFromContext(r.Context())
+	if err != nil {
+		http.Error(w, "unauthorized", http.StatusUnauthorized)
+		return
+	}
 
 	article := &Article{
 		Title:      req.Title,
@@ -523,47 +523,6 @@ func (h *Handler) handleGetInteractions(w http.ResponseWriter, r *http.Request) 
 	response := map[string]interface{}{
 		"likes":    likes,
 		"dislikes": dislikes,
-	}
-
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(response)
-}
-
-// handleListCategories lists all categories with counts
-func (h *Handler) handleListCategories(w http.ResponseWriter, r *http.Request) {
-	categories, err := h.service.GetCategoriesWithCounts()
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-
-	response := map[string]interface{}{
-		"categories": categories,
-	}
-
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(response)
-}
-
-// handleListTags lists tags with counts
-func (h *Handler) handleListTags(w http.ResponseWriter, r *http.Request) {
-	popular := r.URL.Query().Get("popular") == "true"
-	limitStr := r.URL.Query().Get("limit")
-	limit := 0
-	if limitStr != "" {
-		if l, err := strconv.Atoi(limitStr); err == nil && l > 0 {
-			limit = l
-		}
-	}
-
-	tags, err := h.service.GetTagsWithCounts(popular, limit)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-
-	response := map[string]interface{}{
-		"tags": tags,
 	}
 
 	w.Header().Set("Content-Type", "application/json")

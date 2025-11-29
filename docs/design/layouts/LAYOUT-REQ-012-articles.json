@@ -1,0 +1,51 @@
+{
+  "$meta": {
+    "name": "Articles Page Layout",
+    "requirement": "REQ-012, REQ-013",
+    "route": "/articles",
+    "description": "Master-detail layout for articles listing and viewing"
+  },
+
+  "baseLayout": "PublicLayout",
+
+  "layout": {
+    "type": "master-detail",
+    "classes": "flex flex-col lg:flex-row gap-8",
+    "container": "max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12"
+  },
+
+  "slots": {
+    "master": {
+      "width": "lg:w-1/3",
+      "mobileVisibility": "hidden when detail selected",
+      "contains": ["filters", "articleList", "pagination"]
+    },
+    "detail": {
+      "width": "lg:w-2/3", 
+      "mobileVisibility": "shown when article selected",
+      "contains": ["articleDetail", "comments"]
+    }
+  },
+
+  "responsive": {
+    "desktop": "side-by-side (1/3 + 2/3)",
+    "mobile": "stacked, one panel visible at a time"
+  },
+
+  "diagram": [
+    "Desktop:                              ",
+    "┌─────────────┬───────────────────────┐",
+    "│   MASTER    │       DETAIL          │",
+    "│    (1/3)    │        (2/3)          │",
+    "│ • Filters   │   • Article Content   │",
+    "│ • List      │   • Comments          │",
+    "│ • Pagination│                       │",
+    "└─────────────┴───────────────────────┘",
+    "",
+    "Mobile (list):        Mobile (detail):",
+    "┌──────────────┐     ┌──────────────┐",
+    "│    MASTER    │     │ ← Back       │",
+    "│ (full width) │     │    DETAIL    │",
+    "└──────────────┘     └──────────────┘"
+  ]
+}

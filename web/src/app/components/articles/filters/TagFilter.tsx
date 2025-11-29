@@ -30,21 +30,21 @@ export default function TagFilter({ selectedTags, onToggleTag }: TagFilterProps)
             });
     }, []);
 
-    if (loading) return <div className="animate-pulse h-20 bg-gray-200 rounded w-full"></div>;
+    if (loading) return <div className="animate-pulse h-20 bg-walnut-200 rounded-retro w-full"></div>;
 
     const displayedTags = showAll ? tags : tags.slice(0, 15);
 
     return (
         <div className="mb-4">
-            <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-2">{t('Tags')}</h3>
+            <h3 className="text-sm font-semibold text-walnut-500 uppercase tracking-widest mb-2 font-retro-sans">{t('Tags')}</h3>
             <div className="flex flex-wrap gap-2">
                 {displayedTags.map((tag) => (
                     <button
                         key={tag.name}
                         onClick={() => onToggleTag(tag.name)}
-                        className={`px-3 py-1.5 rounded-md text-xs font-medium transition-colors ${selectedTags.includes(tag.name)
-                                ? 'bg-blue-500 text-white'
-                                : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                        className={`px-3 py-1.5 rounded-retro text-xs font-medium transition-all font-retro-sans ${selectedTags.includes(tag.name)
+                                ? 'bg-walnut-500 text-walnut-50 shadow-retro border-2 border-walnut-600'
+                                : 'bg-walnut-100 text-walnut-600 hover:bg-walnut-200 border-2 border-walnut-300'
                             }`}
                     >
                         {tag.name} <span className="opacity-75 ml-1">({tag.article_count})</span>
@@ -53,7 +53,7 @@ export default function TagFilter({ selectedTags, onToggleTag }: TagFilterProps)
                 {!showAll && tags.length > 15 && (
                     <button
                         onClick={() => setShowAll(true)}
-                        className="px-3 py-1.5 rounded-md text-xs font-medium bg-white border border-gray-300 text-gray-700 hover:bg-gray-50"
+                        className="px-3 py-1.5 rounded-retro text-xs font-medium bg-walnut-50 border-2 border-walnut-400 text-walnut-700 hover:bg-walnut-100 font-retro-sans"
                     >
                         + {t('Show all')}
                     </button>

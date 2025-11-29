@@ -1,0 +1,416 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$meta": {
+    "name": "AI-Dala Component Registry",
+    "version": "1.0.0",
+    "description": "Complete specification of all UI components with props, variants, and styling rules."
+  },
+
+  "components": {
+
+    "Button": {
+      "$description": "Interactive button component",
+      "file": "web/src/components/ui/Button.tsx",
+      "category": "action",
+      
+      "props": {
+        "variant": {
+          "type": "enum",
+          "values": ["primary", "secondary", "ghost", "danger"],
+          "default": "primary",
+          "description": "Visual style variant"
+        },
+        "size": {
+          "type": "enum",
+          "values": ["sm", "md", "lg"],
+          "default": "md",
+          "description": "Button size"
+        },
+        "disabled": {
+          "type": "boolean",
+          "default": false
+        },
+        "fullWidth": {
+          "type": "boolean",
+          "default": false
+        },
+        "children": {
+          "type": "ReactNode",
+          "required": true
+        }
+      },
+
+      "variants": {
+        "primary": {
+          "classes": "bg-walnut-600 text-walnut-50 border-2 border-walnut-700 hover:bg-walnut-700 shadow-retro hover:shadow-retro-hover",
+          "usage": "Primary actions (Submit, Save, Create)"
+        },
+        "secondary": {
+          "classes": "bg-walnut-50 text-walnut-700 border-2 border-walnut-500 hover:bg-walnut-100 shadow-retro hover:shadow-retro-hover",
+          "usage": "Secondary actions (Cancel, Back)"
+        },
+        "ghost": {
+          "classes": "bg-transparent text-walnut-600 border-2 border-transparent hover:bg-walnut-100 hover:border-walnut-300",
+          "usage": "Tertiary actions, icon buttons"
+        },
+        "danger": {
+          "classes": "bg-retro-rust text-walnut-50 border-2 border-retro-rust hover:bg-red-700 shadow-retro",
+          "usage": "Destructive actions (Delete)"
+        }
+      },
+
+      "sizes": {
+        "sm": { "classes": "px-3 py-1.5 text-sm" },
+        "md": { "classes": "px-4 py-2 text-base" },
+        "lg": { "classes": "px-6 py-3 text-lg" }
+      },
+
+      "baseClasses": "inline-flex items-center justify-center font-semibold font-retro-sans rounded-retro transition-all duration-200 uppercase tracking-wide disabled:opacity-50 disabled:cursor-not-allowed"
+    },
+
+    "Card": {
+      "$description": "Container component for grouped content",
+      "file": "web/src/components/ui/Card.tsx",
+      "category": "container",
+
+      "props": {
+        "variant": {
+          "type": "enum",
+          "values": ["default", "elevated", "outlined"],
+          "default": "default"
+        },
+        "padding": {
+          "type": "enum",
+          "values": ["none", "sm", "md", "lg"],
+          "default": "md"
+        },
+        "children": {
+          "type": "ReactNode",
+          "required": true
+        }
+      },
+
+      "variants": {
+        "default": {
+          "classes": "bg-walnut-50 border-2 border-walnut-500 shadow-retro rounded-retro",
+          "usage": "Standard card"
+        },
+        "elevated": {
+          "classes": "bg-walnut-50 border-2 border-walnut-500 shadow-retro-hover rounded-retro",
+          "usage": "Highlighted card"
+        },
+        "outlined": {
+          "classes": "bg-transparent border-2 border-walnut-300 rounded-retro",
+          "usage": "Subtle container"
+        }
+      },
+
+      "padding": {
+        "none": { "classes": "p-0" },
+        "sm":   { "classes": "p-4" },
+        "md":   { "classes": "p-6" },
+        "lg":   { "classes": "p-8" }
+      }
+    },
+
+    "Input": {
+      "$description": "Text input field",
+      "file": "web/src/components/ui/Input.tsx",
+      "category": "form",
+
+      "props": {
+        "type": {
+          "type": "enum",
+          "values": ["text", "email", "password", "search", "url"],
+          "default": "text"
+        },
+        "size": {
+          "type": "enum",
+          "values": ["sm", "md", "lg"],
+          "default": "md"
+        },
+        "error": {
+          "type": "boolean",
+          "default": false
+        },
+        "disabled": {
+          "type": "boolean",
+          "default": false
+        },
+        "placeholder": {
+          "type": "string"
+        }
+      },
+
+      "states": {
+        "default": {
+          "classes": "bg-walnut-50 border-2 border-walnut-400 text-walnut-800 placeholder:text-walnut-400"
+        },
+        "focus": {
+          "classes": "focus:border-walnut-600 focus:ring-2 focus:ring-walnut-300 focus:outline-none"
+        },
+        "error": {
+          "classes": "border-retro-rust text-retro-rust focus:ring-retro-rust"
+        },
+        "disabled": {
+          "classes": "bg-walnut-100 text-walnut-400 cursor-not-allowed"
+        }
+      },
+
+      "sizes": {
+        "sm": { "classes": "px-3 py-1.5 text-sm" },
+        "md": { "classes": "px-4 py-2 text-base" },
+        "lg": { "classes": "px-4 py-3 text-lg" }
+      },
+
+      "baseClasses": "w-full rounded-retro font-retro-sans transition-colors duration-200"
+    },
+
+    "Badge": {
+      "$description": "Status indicator or tag",
+      "file": "web/src/components/ui/Badge.tsx",
+      "category": "display",
+
+      "props": {
+        "variant": {
+          "type": "enum",
+          "values": ["default", "success", "warning", "error", "info"],
+          "default": "default"
+        },
+        "size": {
+          "type": "enum",
+          "values": ["sm", "md"],
+          "default": "sm"
+        }
+      },
+
+      "variants": {
+        "default": {
+          "classes": "bg-walnut-200 text-walnut-700 border border-walnut-400"
+        },
+        "success": {
+          "classes": "bg-green-100 text-retro-olive border border-retro-olive"
+        },
+        "warning": {
+          "classes": "bg-yellow-100 text-retro-mustard border border-retro-mustard"
+        },
+        "error": {
+          "classes": "bg-red-100 text-retro-rust border border-retro-rust"
+        },
+        "info": {
+          "classes": "bg-teal-100 text-retro-teal border border-retro-teal"
+        }
+      },
+
+      "sizes": {
+        "sm": { "classes": "px-2 py-0.5 text-xs" },
+        "md": { "classes": "px-3 py-1 text-sm" }
+      },
+
+      "baseClasses": "inline-flex items-center font-medium font-retro-sans rounded-retro"
+    },
+
+    "Avatar": {
+      "$description": "User avatar display",
+      "file": "web/src/components/ui/Avatar.tsx",
+      "category": "display",
+
+      "props": {
+        "src": { "type": "string", "description": "Image URL" },
+        "alt": { "type": "string", "required": true },
+        "fallback": { "type": "string", "description": "Text to show if no image" },
+        "size": {
+          "type": "enum",
+          "values": ["sm", "md", "lg"],
+          "default": "md"
+        }
+      },
+
+      "sizes": {
+        "sm": { "classes": "w-8 h-8 text-sm" },
+        "md": { "classes": "w-10 h-10 text-base" },
+        "lg": { "classes": "w-14 h-14 text-lg" }
+      },
+
+      "baseClasses": "rounded-full bg-walnut-600 text-walnut-50 flex items-center justify-center font-bold font-retro-sans overflow-hidden"
+    },
+
+    "Link": {
+      "$description": "Navigation link",
+      "category": "navigation",
+
+      "variants": {
+        "default": {
+          "classes": "text-retro-orange hover:text-retro-rust font-medium transition-colors",
+          "usage": "Inline text links"
+        },
+        "nav": {
+          "classes": "text-walnut-700 hover:text-walnut-900 font-semibold font-retro-sans",
+          "usage": "Navigation menu links"
+        },
+        "muted": {
+          "classes": "text-walnut-500 hover:text-walnut-700",
+          "usage": "Secondary links"
+        }
+      }
+    },
+
+    "Header": {
+      "$description": "Page header/navigation bar",
+      "file": "web/src/components/layout/Header.tsx",
+      "category": "layout",
+      
+      "structure": {
+        "container": "sticky top-0 z-50 bg-retro-cream border-b-2 border-walnut-500",
+        "inner": "max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between",
+        "logo": "flex items-center gap-3",
+        "nav": "hidden md:flex items-center gap-6",
+        "actions": "flex items-center gap-4"
+      },
+
+      "slots": ["logo", "navigation", "actions"]
+    },
+
+    "Footer": {
+      "$description": "Page footer",
+      "file": "web/src/components/layout/Footer.tsx",
+      "category": "layout",
+
+      "structure": {
+        "container": "bg-walnut-800 text-walnut-50",
+        "inner": "max-w-7xl mx-auto py-12 px-4 sm:px-6 lg:px-8",
+        "grid": "grid grid-cols-2 md:grid-cols-4 gap-8",
+        "copyright": "mt-8 border-t border-walnut-600 pt-8"
+      },
+
+      "slots": ["columns", "copyright", "socialLinks"]
+    },
+
+    "Sidebar": {
+      "$description": "Dashboard sidebar navigation",
+      "file": "web/src/components/dashboard/Sidebar.tsx",
+      "category": "layout",
+
+      "structure": {
+        "container": "w-64 bg-retro-cream border-r-2 border-walnut-500 min-h-screen",
+        "nav": "p-4 space-y-2",
+        "item": {
+          "default": "flex items-center gap-3 px-4 py-3 rounded-retro text-walnut-600 hover:bg-walnut-100 font-retro-sans transition-colors",
+          "active": "bg-walnut-100 text-walnut-800 border-2 border-walnut-500 shadow-retro font-semibold"
+        }
+      }
+    },
+
+    "ArticleCard": {
+      "$description": "Article preview card",
+      "file": "web/src/app/components/articles/ArticleCard.tsx",
+      "category": "content",
+
+      "structure": {
+        "container": "bg-walnut-50 rounded-retro shadow-retro border-2 border-walnut-500 p-6 hover:shadow-retro-hover transition-all cursor-pointer",
+        "header": "flex justify-between items-start mb-4",
+        "title": "text-xl font-semibold text-walnut-800 font-retro line-clamp-2",
+        "meta": "flex items-center text-sm text-walnut-500 space-x-4 font-retro-sans",
+        "body": "text-walnut-600 text-sm leading-relaxed line-clamp-6 font-retro-sans",
+        "tags": "flex flex-wrap gap-2",
+        "tag": "px-2 py-1 bg-walnut-200 text-walnut-700 text-xs rounded-retro border border-walnut-400",
+        "readMore": "text-retro-orange text-sm font-medium uppercase tracking-wide"
+      }
+    },
+
+    "Table": {
+      "$description": "Data table component",
+      "category": "data",
+
+      "structure": {
+        "container": "w-full overflow-hidden rounded-retro border-2 border-walnut-500",
+        "table": "w-full",
+        "thead": "bg-walnut-100",
+        "th": "px-6 py-3 text-left text-xs font-semibold text-walnut-600 uppercase tracking-widest font-retro-sans",
+        "tbody": "bg-walnut-50 divide-y divide-walnut-200",
+        "tr": "hover:bg-walnut-100 transition-colors",
+        "td": "px-6 py-4 text-sm text-walnut-700 font-retro-sans"
+      }
+    },
+
+    "Modal": {
+      "$description": "Modal dialog overlay",
+      "category": "overlay",
+
+      "structure": {
+        "backdrop": "fixed inset-0 bg-walnut-900/50 z-40",
+        "container": "fixed inset-0 z-50 flex items-center justify-center p-4",
+        "content": "bg-walnut-50 rounded-retro shadow-retro-hover border-2 border-walnut-500 max-w-lg w-full max-h-[90vh] overflow-auto",
+        "header": "px-6 py-4 border-b-2 border-walnut-200",
+        "body": "px-6 py-4",
+        "footer": "px-6 py-4 border-t-2 border-walnut-200 flex justify-end gap-3"
+      }
+    },
+
+    "Toast": {
+      "$description": "Notification toast",
+      "category": "feedback",
+
+      "variants": {
+        "success": {
+          "classes": "bg-walnut-50 border-2 border-retro-olive text-retro-olive"
+        },
+        "error": {
+          "classes": "bg-walnut-50 border-2 border-retro-rust text-retro-rust"
+        },
+        "warning": {
+          "classes": "bg-walnut-50 border-2 border-retro-mustard text-retro-mustard"
+        },
+        "info": {
+          "classes": "bg-walnut-50 border-2 border-retro-teal text-retro-teal"
+        }
+      },
+
+      "baseClasses": "rounded-retro shadow-retro p-4 font-retro-sans"
+    }
+  },
+
+  "patterns": {
+    "$description": "Common UI patterns combining multiple components",
+
+    "FormField": {
+      "structure": ["Label", "Input", "ErrorMessage"],
+      "classes": "space-y-2",
+      "example": {
+        "label": "block text-sm font-semibold text-walnut-700 font-retro-sans",
+        "input": "[Input component]",
+        "error": "text-sm text-retro-rust font-retro-sans mt-1"
+      }
+    },
+
+    "PageHeader": {
+      "structure": ["Title", "Description", "Actions"],
+      "classes": "flex items-center justify-between mb-8",
+      "example": {
+        "title": "text-3xl font-bold text-walnut-800 font-retro",
+        "description": "text-walnut-600 font-retro-sans mt-2",
+        "actions": "flex gap-3"
+      }
+    },
+
+    "EmptyState": {
+      "structure": ["Icon", "Title", "Description", "Action"],
+      "classes": "text-center py-12 bg-walnut-100 rounded-retro border-2 border-walnut-300",
+      "example": {
+        "icon": "mx-auto h-12 w-12 text-walnut-400",
+        "title": "mt-4 text-lg font-semibold text-walnut-700 font-retro",
+        "description": "mt-2 text-walnut-500 font-retro-sans",
+        "action": "[Button component]"
+      }
+    },
+
+    "LoadingState": {
+      "structure": ["Spinner", "Text"],
+      "classes": "flex items-center justify-center py-12",
+      "example": {
+        "spinner": "animate-spin h-8 w-8 border-4 border-walnut-300 border-t-walnut-600 rounded-full",
+        "text": "ml-3 text-walnut-600 font-retro-sans"
+      }
+    }
+  }
+}

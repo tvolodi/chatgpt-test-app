@@ -60,30 +60,27 @@ cd web && npm run test:e2e
 - ✅ Catches real integration issues
 - ✅ True confidence in system
 
-### 3. Unit Tests (Minimal)
-**Location**: `api/internal/modules/tags/*_test.go`
+## ⛔ MOCKS ARE FORBIDDEN
 
-**Uses**: Mocks (only for isolated logic)
+**This project does NOT use mocks.** See `AI-Agent-Rules.md` Section 1.3.
 
-**When to use**:
-- Complex business logic
-- Pure functions
-- Algorithm testing
+| ❌ FORBIDDEN | ✅ USE INSTEAD |
+|--------------|---------------|
+| `page.route()` / `route.fulfill()` | Real API calls |
+| `jest.mock()` / `vi.mock()` | Real database (TestContainers) |
+| Mock authentication | Real Keycloak test user |
+| Fake API responses | Create real test data via API |
 
-**When NOT to use**:
-- Simple CRUD operations
-- Database queries
-- API handlers
-
-## Why No Mocked E2E Tests?
+## Why No Mocks?
 
 **Problems with mocks**:
-- ❌ Mocks diverge from real API
-- ❌ Double work (write mocks, then fix real issues)
-- ❌ False confidence
-- ❌ Maintenance burden
+- ❌ Mocks diverge from real API over time
+- ❌ Double work (maintain mocks AND fix real issues)
+- ❌ False confidence (tests pass, production breaks)
+- ❌ Hide frontend-backend integration bugs
+- ❌ Maintenance burden grows with codebase
 
-**Example issue we found**:
+**Real example from this project**:
 - Mock used `id` for delete
 - Real API uses `code` for delete
 - Tests passed, but app failed!
@@ -128,25 +125,30 @@ docker compose down
 
 ## Coverage Goals
 
-- **Backend Integration**: 100% of CRUD operations
-- **E2E Tests**: All critical user workflows
-- **Unit Tests**: Complex business logic only
+| Test Type | Coverage Target |
+|-----------|----------------|
+| **Backend Integration** | 100% of CRUD operations |
+| **E2E Tests** | All REQ acceptance criteria |
+| **API Verification** | Double-check UI actions via API |
 
 ## Best Practices
 
 ### DO ✅
 - Test against real database
-- Test complete user workflows
-- Clean up test data
-- Use unique test data (timestamps)
-- Verify database state after operations
+- Test complete user workflows  
+- Clean up test data after tests
+- Use unique test data (`Date.now()`, UUIDs)
+- Verify state via API after UI actions
+- Start services before running tests
+- Use `request` fixture for API calls in Playwright
 
 ### DON'T ❌
-- Mock API calls in E2E tests
-- Mock database in integration tests
-- Test simple getters/setters
+- ~~Mock API calls~~ → **FORBIDDEN**: `page.route()`, `route.fulfill()`
+- ~~Mock database~~ → **FORBIDDEN**: Use TestContainers instead
+- ~~Mock authentication~~ → **FORBIDDEN**: Use real Keycloak
 - Leave test data in database
 - Share test data between tests
+- Use hardcoded IDs (use generated unique IDs)
 
 ## Troubleshooting
 
@@ -177,20 +179,29 @@ docker pull postgres:15-alpine
 
 ## Migration from Mocked Tests
 
-**Old approach** (Mocked):
+> **See**: `docs/MOCK-REFACTORING-AUDIT.md` for list of files requiring refactoring.
+
+**Old approach** (❌ FORBIDDEN):
 ```typescript
-// ❌ Mock API responses
+// ❌ FORBIDDEN - Never intercept API calls
 await page.route('http://localhost:4000/api/tags', async (route) => {
-    await route.fulfill({ json: mockData });
+    await route.fulfill({ json: mockData }); // ❌ NO!
 });
 ```
 
-**New approach** (Real):
+**New approach** (✅ REQUIRED):
 ```typescript
-// ✅ Use real API
-await fetch('http://localhost:4000/api/tags', {
-    method: 'POST',
-    body: JSON.stringify(realData)
+// ✅ CORRECT - Use real API with Playwright request fixture
+test('create tag', async ({ page, request }) => {
+    // Create real test data
+    const res = await request.post('http://localhost:4000/api/tags', {
+        data: { code: `tag-${Date.now()}`, name: { en: 'Test' } }
+    });
+    expect(res.ok()).toBeTruthy();
+    
+    // Verify in UI
+    await page.goto('/dashboard/tags');
+    await expect(page.getByText('Test')).toBeVisible();
 });
 ```
 

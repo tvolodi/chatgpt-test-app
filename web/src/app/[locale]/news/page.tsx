@@ -3,35 +3,26 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { format } from 'date-fns';
+import { fetchNews } from './services';
+import type { NewsItem } from './services';
 
-interface Article {
-  id: string;
-  title: string;
-  slug: string;
-  summary?: string; // We might want to add a summary field later, for now we can truncate body
-  body: string;
-  published_at: string;
-  tags: string[];
-}
-
-export type Category = string;
+export type Category = 'OpenAI' | 'Tools' | 'Market' | 'AI-Dala updates';
 
 export default function NewsListPage() {
-  const [articles, setArticles] = useState<Article[]>([]);
+  const [articles, setArticles] = useState<NewsItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [page, setPage] = useState(1);
+  const [hasMore, setHasMore] = useState(true);
+  const [selectedCategory, setSelectedCategory] = useState<Category | null>(null);
 
   useEffect(() => {
-    const fetchArticles = async () => {
+    const loadNews = async () => {
       try {
-        // Fetch only published articles
-        const response = await fetch('http://localhost:4000/api/articles?status=PUBLISHED');
-        if (!response.ok) throw new Error('Failed to fetch news');
-        const data = await response.json();
-
-        // Transform data to include tags directly in article object if needed, 
-        // but our API returns { articles: [{...article, tags: []}], ... }
-        setArticles(data.articles || []);
+        setLoading(true);
+        const { items, total } = await fetchNews({ page: 1, pageSize: 10, category: selectedCategory || undefined });
+        setArticles(items);
+        setHasMore(items.length < total);
       } catch (err) {
         setError(err instanceof Error ? err.message : 'An error occurred');
       } finally {
@@ -39,8 +30,31 @@ export default function NewsListPage() {
       }
     };
 
-    fetchArticles();
-  }, []);
+    loadNews();
+  }, [selectedCategory]);
+
+  const loadMore = async () => {
+    if (loading || !hasMore) return;
+
+    try {
+      setLoading(true);
+      const nextPage = page + 1;
+      const { items, total } = await fetchNews({ page: nextPage, pageSize: 10, category: selectedCategory || undefined });
+      setArticles(prev => [...prev, ...items]);
+      setPage(nextPage);
+      setHasMore(articles.length + items.length < total);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'An error occurred');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleCategoryFilter = (category: Category | null) => {
+    setSelectedCategory(category);
+    setPage(1);
+    setArticles([]);
+  };
 
   if (loading) {
     return (
@@ -74,9 +88,45 @@ export default function NewsListPage() {
           <p className="text-xl text-gray-600">Latest updates from the AI world and AI-Dala platform.</p>
         </div>
 
+        {/* Category Filters */}
+        <div className="flex flex-wrap justify-center gap-2 mb-8">
+          <button
+            onClick={() => handleCategoryFilter(null)}
+            className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
+              selectedCategory === null
+                ? 'bg-indigo-600 text-white'
+                : 'bg-white text-gray-700 hover:bg-gray-100'
+            }`}
+          >
+            All
+          </button>
+          {(['OpenAI', 'Tools', 'Market', 'AI-Dala updates'] as Category[]).map((category) => (
+            <button
+              key={category}
+              onClick={() => handleCategoryFilter(category)}
+              className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
+                selectedCategory === category
+                  ? 'bg-indigo-600 text-white'
+                  : 'bg-white text-gray-700 hover:bg-gray-100'
+              }`}
+            >
+              {category}
+            </button>
+          ))}
+        </div>
+
         <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
           {articles.map((article) => (
             <article key={article.id} className="bg-white rounded-xl shadow-sm hover:shadow-md transition-shadow duration-200 overflow-hidden flex flex-col">
+              {article.image && (
+                <div className="aspect-video bg-gray-200">
+                  <img
+                    src={article.image}
+                    alt={article.title}
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+              )}
               <div className="p-6 flex-1 flex flex-col">
                 <div className="flex items-center text-sm text-gray-500 mb-3">
                   <time dateTime={article.published_at}>
@@ -93,20 +143,19 @@ export default function NewsListPage() {
                   )}
                 </div>
 
-                <Link href={`/news/${article.slug || article.id}`} className="block group">
+                <Link href={`/news/${article.slug}`} className="block group">
                   <h2 className="text-xl font-bold text-gray-900 group-hover:text-indigo-600 transition-colors mb-3">
                     {article.title}
                   </h2>
                 </Link>
 
                 <p className="text-gray-600 mb-4 line-clamp-3 flex-1">
-                  {/* Simple strip markdown for summary - in real app use a proper stripper or summary field */}
-                  {article.body.replace(/[#*`]/g, '').substring(0, 150)}...
+                  {article.summary || article.body.replace(/[#*`]/g, '').substring(0, 150) + '...'}
                 </p>
 
                 <div className="mt-auto pt-4 border-t border-gray-100">
                   <Link
-                    href={`/news/${article.slug || article.id}`}
+                    href={`/news/${article.slug}`}
                     className="text-indigo-600 font-medium hover:text-indigo-800 flex items-center"
                   >
                     Read more
@@ -120,7 +169,19 @@ export default function NewsListPage() {
           ))}
         </div>
 
-        {articles.length === 0 && (
+        {hasMore && (
+          <div className="text-center mt-12">
+            <button
+              onClick={loadMore}
+              disabled={loading}
+              className="px-6 py-3 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {loading ? 'Loading...' : 'Load More'}
+            </button>
+          </div>
+        )}
+
+        {articles.length === 0 && !loading && (
           <div className="text-center py-12 text-gray-500">
             No news articles found. Check back later!
           </div>

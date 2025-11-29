@@ -1,0 +1,250 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$meta": {
+    "name": "AI-Dala Design Tokens",
+    "version": "1.0.0",
+    "theme": "Walnut Retro",
+    "description": "All primitive design values. Every UI element MUST reference these tokens.",
+    "tailwindConfig": "web/tailwind.config.js"
+  },
+
+  "colors": {
+    "$description": "Color palette. Use Tailwind class names in components.",
+    
+    "walnut": {
+      "$description": "Primary brand color - warm brown palette",
+      "50":  { "hex": "#FAF7F2", "tailwind": "walnut-50",  "usage": "Lightest backgrounds, hover states" },
+      "100": { "hex": "#F0E9DC", "tailwind": "walnut-100", "usage": "Secondary backgrounds, cards" },
+      "200": { "hex": "#E0D3BF", "tailwind": "walnut-200", "usage": "Borders, dividers" },
+      "300": { "hex": "#C9B89A", "tailwind": "walnut-300", "usage": "Disabled states, muted text" },
+      "400": { "hex": "#A89470", "tailwind": "walnut-400", "usage": "Placeholder text" },
+      "500": { "hex": "#8B7355", "tailwind": "walnut-500", "usage": "Secondary text, icons" },
+      "600": { "hex": "#6F5B43", "tailwind": "walnut-600", "usage": "Primary buttons, links" },
+      "700": { "hex": "#584834", "tailwind": "walnut-700", "usage": "Primary text, headings" },
+      "800": { "hex": "#3D3225", "tailwind": "walnut-800", "usage": "Dark backgrounds, footer" },
+      "900": { "hex": "#2A2219", "tailwind": "walnut-900", "usage": "Darkest elements" }
+    },
+
+    "retro": {
+      "$description": "Accent colors for the retro theme",
+      "orange":  { "hex": "#D97706", "tailwind": "retro-orange",  "usage": "Primary CTA, highlights" },
+      "teal":    { "hex": "#0D9488", "tailwind": "retro-teal",    "usage": "Success states, links" },
+      "rust":    { "hex": "#B45309", "tailwind": "retro-rust",    "usage": "Warnings, errors" },
+      "olive":   { "hex": "#65A30D", "tailwind": "retro-olive",   "usage": "Success, published status" },
+      "mustard": { "hex": "#CA8A04", "tailwind": "retro-mustard", "usage": "Pending status, highlights" },
+      "cream":   { "hex": "#FEFCF3", "tailwind": "retro-cream",   "usage": "Page backgrounds" }
+    },
+
+    "semantic": {
+      "$description": "Semantic color mappings",
+      "background": { "token": "retro-cream", "usage": "Default page background" },
+      "surface":    { "token": "walnut-50",   "usage": "Card/panel backgrounds" },
+      "text": {
+        "primary":   { "token": "walnut-800", "usage": "Main body text" },
+        "secondary": { "token": "walnut-600", "usage": "Secondary/muted text" },
+        "muted":     { "token": "walnut-400", "usage": "Placeholder, disabled" },
+        "inverse":   { "token": "walnut-50",  "usage": "Text on dark backgrounds" }
+      },
+      "border": {
+        "default":  { "token": "walnut-300", "usage": "Default borders" },
+        "strong":   { "token": "walnut-500", "usage": "Emphasized borders" },
+        "focus":    { "token": "walnut-600", "usage": "Focus rings" }
+      },
+      "status": {
+        "success":  { "token": "retro-olive",   "usage": "Success states" },
+        "warning":  { "token": "retro-mustard", "usage": "Warning states" },
+        "error":    { "token": "retro-rust",    "usage": "Error states" },
+        "info":     { "token": "retro-teal",    "usage": "Info states" }
+      }
+    }
+  },
+
+  "typography": {
+    "$description": "Typography system. All text MUST use these tokens.",
+    
+    "fontFamilies": {
+      "retro": {
+        "value": "Playfair Display, Georgia, serif",
+        "tailwind": "font-retro",
+        "usage": "Headings, display text, logo"
+      },
+      "retroSans": {
+        "value": "Source Sans 3, system-ui, sans-serif",
+        "tailwind": "font-retro-sans",
+        "usage": "Body text, UI elements, buttons"
+      }
+    },
+
+    "fontSizes": {
+      "xs":   { "rem": "0.75rem",  "px": "12px", "tailwind": "text-xs" },
+      "sm":   { "rem": "0.875rem", "px": "14px", "tailwind": "text-sm" },
+      "base": { "rem": "1rem",     "px": "16px", "tailwind": "text-base" },
+      "lg":   { "rem": "1.125rem", "px": "18px", "tailwind": "text-lg" },
+      "xl":   { "rem": "1.25rem",  "px": "20px", "tailwind": "text-xl" },
+      "2xl":  { "rem": "1.5rem",   "px": "24px", "tailwind": "text-2xl" },
+      "3xl":  { "rem": "1.875rem", "px": "30px", "tailwind": "text-3xl" },
+      "4xl":  { "rem": "2.25rem",  "px": "36px", "tailwind": "text-4xl" }
+    },
+
+    "fontWeights": {
+      "normal":   { "value": 400, "tailwind": "font-normal" },
+      "medium":   { "value": 500, "tailwind": "font-medium" },
+      "semibold": { "value": 600, "tailwind": "font-semibold" },
+      "bold":     { "value": 700, "tailwind": "font-bold" }
+    },
+
+    "lineHeights": {
+      "tight":   { "value": 1.25, "tailwind": "leading-tight" },
+      "normal":  { "value": 1.5,  "tailwind": "leading-normal" },
+      "relaxed": { "value": 1.625, "tailwind": "leading-relaxed" }
+    },
+
+    "textStyles": {
+      "$description": "Pre-composed text styles for common use cases",
+      "h1": {
+        "classes": "text-4xl font-bold font-retro text-walnut-800 leading-tight",
+        "usage": "Page titles"
+      },
+      "h2": {
+        "classes": "text-3xl font-bold font-retro text-walnut-800 leading-tight",
+        "usage": "Section headings"
+      },
+      "h3": {
+        "classes": "text-xl font-semibold font-retro text-walnut-800",
+        "usage": "Card titles, subsections"
+      },
+      "body": {
+        "classes": "text-base font-retro-sans text-walnut-700 leading-relaxed",
+        "usage": "Body paragraphs"
+      },
+      "bodySmall": {
+        "classes": "text-sm font-retro-sans text-walnut-600",
+        "usage": "Secondary text, captions"
+      },
+      "label": {
+        "classes": "text-sm font-semibold font-retro-sans text-walnut-500 uppercase tracking-widest",
+        "usage": "Form labels, section labels"
+      },
+      "link": {
+        "classes": "text-retro-orange hover:text-retro-rust font-medium underline",
+        "usage": "Inline links"
+      }
+    }
+  },
+
+  "spacing": {
+    "$description": "Spacing scale. Use Tailwind spacing classes (p-*, m-*, gap-*).",
+    "scale": {
+      "0":   { "rem": "0",       "px": "0" },
+      "1":   { "rem": "0.25rem", "px": "4px" },
+      "2":   { "rem": "0.5rem",  "px": "8px" },
+      "3":   { "rem": "0.75rem", "px": "12px" },
+      "4":   { "rem": "1rem",    "px": "16px" },
+      "5":   { "rem": "1.25rem", "px": "20px" },
+      "6":   { "rem": "1.5rem",  "px": "24px" },
+      "8":   { "rem": "2rem",    "px": "32px" },
+      "10":  { "rem": "2.5rem",  "px": "40px" },
+      "12":  { "rem": "3rem",    "px": "48px" },
+      "16":  { "rem": "4rem",    "px": "64px" },
+      "20":  { "rem": "5rem",    "px": "80px" },
+      "24":  { "rem": "6rem",    "px": "96px" }
+    },
+    "semantic": {
+      "componentPadding": { "value": "4", "usage": "Internal padding for components" },
+      "cardPadding":      { "value": "6", "usage": "Card/panel internal padding" },
+      "sectionGap":       { "value": "8", "usage": "Gap between major sections" },
+      "pageMargin":       { "value": "6", "usage": "Page edge margins" }
+    }
+  },
+
+  "borders": {
+    "$description": "Border styles for the retro theme",
+    
+    "widths": {
+      "default": { "value": "2px", "tailwind": "border-2" },
+      "thin":    { "value": "1px", "tailwind": "border" }
+    },
+
+    "radius": {
+      "retro":   { "value": "2px",  "tailwind": "rounded-retro", "usage": "Default sharp corners" },
+      "sm":      { "value": "4px",  "tailwind": "rounded-sm" },
+      "md":      { "value": "6px",  "tailwind": "rounded-md" },
+      "full":    { "value": "9999px", "tailwind": "rounded-full", "usage": "Pills, avatars" }
+    },
+
+    "styles": {
+      "default": {
+        "classes": "border-2 border-walnut-300",
+        "usage": "Default border style"
+      },
+      "strong": {
+        "classes": "border-2 border-walnut-500",
+        "usage": "Emphasized elements, cards"
+      },
+      "focus": {
+        "classes": "ring-2 ring-walnut-600 ring-offset-2",
+        "usage": "Focus states"
+      }
+    }
+  },
+
+  "shadows": {
+    "$description": "Shadow styles - key element of retro aesthetic",
+    
+    "retro": {
+      "value": "4px 4px 0px 0px",
+      "color": "rgba(139, 115, 85, 0.3)",
+      "tailwind": "shadow-retro",
+      "usage": "Primary shadow for buttons, cards"
+    },
+    "retroHover": {
+      "value": "6px 6px 0px 0px",
+      "color": "rgba(139, 115, 85, 0.4)",
+      "tailwind": "shadow-retro-hover",
+      "usage": "Hover state shadow"
+    },
+    "sm": {
+      "tailwind": "shadow-sm",
+      "usage": "Subtle elevation"
+    },
+    "md": {
+      "tailwind": "shadow-md",
+      "usage": "Medium elevation"
+    }
+  },
+
+  "transitions": {
+    "$description": "Animation and transition tokens",
+    
+    "duration": {
+      "fast":   { "value": "150ms", "tailwind": "duration-150" },
+      "normal": { "value": "200ms", "tailwind": "duration-200" },
+      "slow":   { "value": "300ms", "tailwind": "duration-300" }
+    },
+    "easing": {
+      "default": { "value": "ease-out", "tailwind": "ease-out" }
+    },
+    "common": {
+      "classes": "transition-all duration-200 ease-out",
+      "usage": "Default transition for interactive elements"
+    }
+  },
+
+  "breakpoints": {
+    "$description": "Responsive breakpoints (Tailwind defaults)",
+    "sm":  { "minWidth": "640px",  "usage": "Small devices" },
+    "md":  { "minWidth": "768px",  "usage": "Tablets" },
+    "lg":  { "minWidth": "1024px", "usage": "Laptops" },
+    "xl":  { "minWidth": "1280px", "usage": "Desktops" },
+    "2xl": { "minWidth": "1536px", "usage": "Large screens" }
+  },
+
+  "zIndex": {
+    "$description": "Z-index scale for layering",
+    "dropdown": { "value": 10,  "tailwind": "z-10" },
+    "sticky":   { "value": 20,  "tailwind": "z-20" },
+    "modal":    { "value": 30,  "tailwind": "z-30" },
+    "popover":  { "value": 40,  "tailwind": "z-40" },
+    "tooltip":  { "value": 50,  "tailwind": "z-50" }
+  }
+}

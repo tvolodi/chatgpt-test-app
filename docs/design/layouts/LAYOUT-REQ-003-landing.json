@@ -1,0 +1,54 @@
+{
+  "$meta": {
+    "name": "Landing Page Layout",
+    "requirement": "REQ-003",
+    "route": "/",
+    "description": "Section layout for the public landing page"
+  },
+
+  "baseLayout": "PublicLayout",
+
+  "sections": [
+    {
+      "name": "hero",
+      "component": "HeroSection",
+      "order": 1,
+      "background": "bg-retro-cream",
+      "pattern": "diagonal stripes"
+    },
+    {
+      "name": "features",
+      "component": "FeatureSection", 
+      "order": 2,
+      "background": "bg-walnut-100"
+    },
+    {
+      "name": "latestArticles",
+      "component": "LatestArticles",
+      "order": 3,
+      "background": "bg-walnut-50"
+    },
+    {
+      "name": "cta",
+      "component": "AboutSection",
+      "order": 4,
+      "background": "bg-walnut-700"
+    }
+  ],
+
+  "diagram": [
+    "┌─────────────────────────────────────┐",
+    "│            HEADER                   │",
+    "├─────────────────────────────────────┤",
+    "│         HERO (cream+pattern)        │",
+    "├─────────────────────────────────────┤",
+    "│       FEATURES (walnut-100)         │",
+    "├─────────────────────────────────────┤",
+    "│    LATEST ARTICLES (walnut-50)      │",
+    "├─────────────────────────────────────┤",
+    "│         CTA (walnut-700)            │",
+    "├─────────────────────────────────────┤",
+    "│       FOOTER (walnut-800)           │",
+    "└─────────────────────────────────────┘"
+  ]
+}

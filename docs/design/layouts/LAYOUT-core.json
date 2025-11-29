@@ -1,0 +1,85 @@
+{
+  "$meta": {
+    "name": "Core Page Layouts",
+    "description": "Base layout structures used across the application"
+  },
+
+  "PublicLayout": {
+    "file": "web/src/app/[locale]/layout.tsx",
+    "structure": "flex-column",
+    "classes": "min-h-screen flex flex-col bg-retro-cream",
+    
+    "slots": {
+      "header": {
+        "component": "Header",
+        "position": "top",
+        "sticky": true,
+        "classes": "sticky top-0 z-50"
+      },
+      "main": {
+        "position": "center",
+        "flex": 1,
+        "classes": "flex-grow"
+      },
+      "footer": {
+        "component": "Footer",
+        "position": "bottom",
+        "classes": "mt-auto"
+      }
+    },
+
+    "diagram": [
+      "┌─────────────────────────────────────┐",
+      "│            HEADER (sticky)         │",
+      "├─────────────────────────────────────┤",
+      "│              MAIN (flex-grow)       │",
+      "├─────────────────────────────────────┤",
+      "│             FOOTER                  │",
+      "└─────────────────────────────────────┘"
+    ]
+  },
+
+  "DashboardLayout": {
+    "file": "web/src/app/[locale]/dashboard/layout.tsx",
+    "structure": "flex-column",
+    "classes": "min-h-screen flex flex-col font-retro-sans",
+
+    "slots": {
+      "header": {
+        "component": "DashboardHeader",
+        "height": "64px",
+        "classes": "sticky top-0 z-50 h-16"
+      },
+      "body": {
+        "type": "flex-row",
+        "classes": "flex flex-1",
+        "children": {
+          "sidebar": {
+            "component": "DashboardSidebar",
+            "width": "256px",
+            "classes": "w-64 shrink-0"
+          },
+          "main": {
+            "flex": 1,
+            "classes": "flex-1 p-6 bg-retro-cream overflow-auto"
+          }
+        }
+      },
+      "footer": {
+        "component": "DashboardFooter",
+        "classes": "mt-auto"
+      }
+    },
+
+    "diagram": [
+      "┌─────────────────────────────────────┐",
+      "│         DASHBOARD HEADER            │",
+      "├──────────┬──────────────────────────┤",
+      "│ SIDEBAR  │         MAIN             │",
+      "│  (256px) │       (flex-1)           │",
+      "├──────────┴──────────────────────────┤",
+      "│         DASHBOARD FOOTER            │",
+      "└─────────────────────────────────────┘"
+    ]
+  }
+}

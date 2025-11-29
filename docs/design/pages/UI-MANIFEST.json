@@ -1,0 +1,44 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$meta": {
+    "name": "AI-Dala UI Manifest Index",
+    "version": "2.0.0",
+    "description": "Index file pointing to UI trees split by requirement/feature."
+  },
+
+  "structure": {
+    "description": "UI manifests are split by requirement for smaller context",
+    "files": {
+      "UI-REQ-003-landing.json": "Landing page (/) component tree - ~60 lines",
+      "UI-REQ-012-articles.json": "Public articles page (/articles) - ~80 lines",
+      "UI-REQ-004-dashboard.json": "Dashboard home (/dashboard) - ~50 lines",
+      "UI-REQ-010-articles-mgmt.json": "Article management (/dashboard/articles/*) - ~100 lines",
+      "UI-REQ-001-auth.json": "Auth pages (/login, /register) - ~50 lines",
+      "UI-REQ-007-tags.json": "Tags management (/dashboard/tags) - ~40 lines",
+      "UI-REQ-009-categories.json": "Categories management (/dashboard/categories) - ~40 lines"
+    }
+  },
+
+  "howToUse": {
+    "forAIAgents": [
+      "1. Identify the route you're working on",
+      "2. Find the corresponding UI-REQ-*.json file",
+      "3. Load only that file for component tree",
+      "4. Reference COMPONENT-REGISTRY.json for component details"
+    ]
+  },
+
+  "routeToFile": {
+    "/": "UI-REQ-003-landing.json",
+    "/articles": "UI-REQ-012-articles.json",
+    "/dashboard": "UI-REQ-004-dashboard.json",
+    "/dashboard/articles": "UI-REQ-010-articles-mgmt.json",
+    "/dashboard/articles/new": "UI-REQ-010-articles-mgmt.json",
+    "/dashboard/articles/[id]": "UI-REQ-010-articles-mgmt.json",
+    "/dashboard/tags": "UI-REQ-007-tags.json",
+    "/dashboard/categories": "UI-REQ-009-categories.json",
+    "/dashboard/profile": "UI-REQ-004-dashboard.json",
+    "/login": "UI-REQ-001-auth.json",
+    "/register": "UI-REQ-001-auth.json"
+  }
+}

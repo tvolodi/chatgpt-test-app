@@ -1,166 +1,134 @@
 import { test, expect } from '@playwright/test';
+import { loginAsTestUser } from './helpers/auth';
 
 test.describe('Dashboard Sidebar Navigation (REQ-005)', () => {
 
     test('Sidebar displays all navigation items (TC-UI-011)', async ({ page }) => {
-        // Note: Requires authentication
-        await page.goto('/dashboard');
+        // Login first
+        await loginAsTestUser(page);
+        await page.waitForURL(/.*dashboard.*/, { timeout: 10000 });
 
-        // Should redirect to login if not authenticated
-        await page.waitForURL(/\/(login|dashboard)/);
-
-        if (page.url().includes('/login')) {
-            // Test passes - authentication required
-            expect(page.url()).toContain('/login');
-            return;
-        }
-
-        // If authenticated, verify sidebar items
         // Verify all 6 navigation items are present
-        const homeLink = page.getByRole('link', { name: /Home/i });
-        const newsLink = page.getByRole('link', { name: /News/i });
-        const articlesLink = page.getByRole('link', { name: /Articles/i });
-        const categoriesLink = page.getByRole('link', { name: /Categories/i });
-        const tagsLink = page.getByRole('link', { name: /Tags/i });
-        const settingsLink = page.getByRole('link', { name: /Settings/i });
-
-        // Note: These assertions would run if authenticated
-        // await expect(homeLink).toBeVisible();
-        // await expect(newsLink).toBeVisible();
-        // await expect(articlesLink).toBeVisible();
-        // await expect(categoriesLink).toBeVisible();
-        // await expect(tagsLink).toBeVisible();
-        // await expect(settingsLink).toBeVisible();
+        await expect(page.getByRole('link', { name: /Home/i })).toBeVisible();
+        await expect(page.getByRole('link', { name: /News/i })).toBeVisible();
+        await expect(page.getByRole('link', { name: /Articles/i })).toBeVisible();
+        await expect(page.getByRole('link', { name: /Categories/i })).toBeVisible();
+        await expect(page.getByRole('link', { name: /Tags/i })).toBeVisible();
+        await expect(page.getByRole('link', { name: /Settings/i })).toBeVisible();
     });
 
     test('News page routes and renders correctly (TC-UI-012)', async ({ page }) => {
-        await page.goto('/dashboard/news');
+        // Login first
+        await loginAsTestUser(page);
+        await page.waitForURL(/.*dashboard.*/, { timeout: 10000 });
 
-        // Should redirect to login if not authenticated
-        await page.waitForURL(/\/(login|dashboard)/);
+        // Navigate to News page
+        await page.getByRole('link', { name: /News/i }).click();
+        await expect(page).toHaveURL('/dashboard/news');
 
-        if (page.url().includes('/login')) {
-            expect(page.url()).toContain('/login');
-            return;
-        }
-
-        // If authenticated, verify page content
-        // await expect(page).toHaveURL('/dashboard/news');
-        // await expect(page.getByRole('heading', { name: /News/i, level: 1 })).toBeVisible();
-        // await expect(page.getByText(/Manage news articles/i)).toBeVisible();
-        // await expect(page.getByText(/No News Articles Yet/i)).toBeVisible();
+        // Verify page content
+        await expect(page.getByRole('heading', { name: /News/i, level: 1 })).toBeVisible();
+        await expect(page.getByText(/Manage news articles/i)).toBeVisible();
+        await expect(page.getByText(/No News Articles Yet/i)).toBeVisible();
     });
 
     test('Articles page routes and renders correctly (TC-UI-012)', async ({ page }) => {
-        await page.goto('/dashboard/articles');
+        // Login first
+        await loginAsTestUser(page);
+        await page.waitForURL(/.*dashboard.*/, { timeout: 10000 });
 
-        await page.waitForURL(/\/(login|dashboard)/);
+        // Navigate to Articles page
+        await page.getByRole('link', { name: /Articles/i }).click();
+        await expect(page).toHaveURL('/dashboard/articles');
 
-        if (page.url().includes('/login')) {
-            expect(page.url()).toContain('/login');
-            return;
-        }
-
-        // If authenticated:
-        // await expect(page).toHaveURL('/dashboard/articles');
-        // await expect(page.getByRole('heading', { name: /Articles/i, level: 1 })).toBeVisible();
-        // await expect(page.getByText(/Manage articles and blog posts/i)).toBeVisible();
+        // Verify page content
+        await expect(page.getByRole('heading', { name: /Articles/i, level: 1 })).toBeVisible();
     });
 
     test('Categories page routes and renders correctly (TC-UI-012)', async ({ page }) => {
-        await page.goto('/dashboard/categories');
+        // Login first
+        await loginAsTestUser(page);
+        await page.waitForURL(/.*dashboard.*/, { timeout: 10000 });
 
-        await page.waitForURL(/\/(login|dashboard)/);
+        // Navigate to Categories page
+        await page.getByRole('link', { name: /Categories/i }).click();
+        await expect(page).toHaveURL('/dashboard/categories');
 
-        if (page.url().includes('/login')) {
-            expect(page.url()).toContain('/login');
-            return;
-        }
-
-        // If authenticated:
-        // await expect(page).toHaveURL('/dashboard/categories');
-        // await expect(page.getByRole('heading', { name: /Categories/i, level: 1 })).toBeVisible();
-        // await expect(page.getByText(/Manage content categories/i)).toBeVisible();
+        // Verify page content
+        await expect(page.getByRole('heading', { name: /Categories/i, level: 1 })).toBeVisible();
     });
 
     test('Tags page routes and renders correctly (TC-UI-012)', async ({ page }) => {
-        await page.goto('/dashboard/tags');
+        // Login first
+        await loginAsTestUser(page);
+        await page.waitForURL(/.*dashboard.*/, { timeout: 10000 });
 
-        await page.waitForURL(/\/(login|dashboard)/);
+        // Navigate to Tags page
+        await page.getByRole('link', { name: /Tags/i }).click();
+        await expect(page).toHaveURL('/dashboard/tags');
 
-        if (page.url().includes('/login')) {
-            expect(page.url()).toContain('/login');
-            return;
-        }
-
-        // If authenticated:
-        // await expect(page).toHaveURL('/dashboard/tags');
-        // await expect(page.getByRole('heading', { name: /Tags/i, level: 1 })).toBeVisible();
-        // await expect(page.getByText(/Manage content tags/i)).toBeVisible();
+        // Verify page content
+        await expect(page.getByRole('heading', { name: /Tags/i, level: 1 })).toBeVisible();
     });
 
     test('Settings page routes and renders correctly (TC-UI-012)', async ({ page }) => {
-        await page.goto('/dashboard/settings');
+        // Login first
+        await loginAsTestUser(page);
+        await page.waitForURL(/.*dashboard.*/, { timeout: 10000 });
 
-        await page.waitForURL(/\/(login|dashboard)/);
+        // Navigate to Settings page
+        await page.getByRole('link', { name: /Settings/i }).click();
+        await expect(page).toHaveURL('/dashboard/settings');
 
-        if (page.url().includes('/login')) {
-            expect(page.url()).toContain('/login');
-            return;
-        }
-
-        // If authenticated:
-        // await expect(page).toHaveURL('/dashboard/settings');
-        // await expect(page.getByRole('heading', { name: /Settings/i, level: 1 })).toBeVisible();
-        // await expect(page.getByText(/Manage your account and preferences/i)).toBeVisible();
+        // Verify page content
+        await expect(page.getByRole('heading', { name: /Settings/i, level: 1 })).toBeVisible();
+        await expect(page.getByText(/Manage your account and preferences/i)).toBeVisible();
     });
 
-    /* 
-    The following tests require authentication and are documented for manual testing
-    or future implementation with proper Keycloak test setup
-    
     test('Sidebar active state highlighting works (TC-UI-011)', async ({ page }) => {
-        // Requires: Authenticated session
-        await page.goto('/dashboard');
-        
-        // Verify Home is active
-        const homeLink = page.getByRole('link', { name: /Home/i });
+        // Login first
+        await loginAsTestUser(page);
+        await page.waitForURL(/.*dashboard.*/, { timeout: 10000 });
+
+        // Verify Home is active (should be on dashboard page)
+        const homeLink = page.locator('a[href="/dashboard"]');
         await expect(homeLink).toHaveCSS('background-color', 'rgb(0, 102, 255)'); // #0066FF
-        
+
         // Click News
         await page.getByRole('link', { name: /News/i }).click();
         await expect(page).toHaveURL('/dashboard/news');
-        
+
         // Verify News is now active
-        const newsLink = page.getByRole('link', { name: /News/i });
+        const newsLink = page.locator('a[href="/dashboard/news"]');
         await expect(newsLink).toHaveCSS('background-color', 'rgb(0, 102, 255)');
-        
+
         // Verify Home is no longer active
         await expect(homeLink).not.toHaveCSS('background-color', 'rgb(0, 102, 255)');
     });
-    
+
     test('Sidebar toggle functionality works (TC-UI-011)', async ({ page }) => {
-        // Requires: Authenticated session
-        await page.goto('/dashboard');
-        
+        // Login first
+        await loginAsTestUser(page);
+        await page.waitForURL(/.*dashboard.*/, { timeout: 10000 });
+
         // Get sidebar element
         const sidebar = page.locator('aside');
-        
+
         // Verify sidebar is expanded (240px)
         await expect(sidebar).toHaveCSS('width', '240px');
-        
+
         // Click toggle button
-        const toggleButton = page.getByRole('button', { name: /←|→/ });
+        const toggleButton = page.getByRole('button', { name: /←/ });
         await toggleButton.click();
-        
+
         // Verify sidebar is collapsed (72px)
         await expect(sidebar).toHaveCSS('width', '72px');
-        
+
         // Click toggle again
-        await toggleButton.click();
-        
+        const toggleButtonCollapsed = page.getByRole('button', { name: /→/ });
+        await toggleButtonCollapsed.click();
+
         // Verify sidebar is expanded again
         await expect(sidebar).toHaveCSS('width', '240px');
     });
-    */
 });

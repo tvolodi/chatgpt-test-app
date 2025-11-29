@@ -11,7 +11,7 @@ export default function Header() {
     const { data: session, status } = useSession();
 
     return (
-        <header className="bg-white border-b border-gray-200 sticky top-0 z-50">
+        <header className="bg-walnut-50 border-b-2 border-walnut-500 sticky top-0 z-50">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div className="flex justify-between h-16">
                     <div className="flex">
@@ -25,24 +25,24 @@ export default function Header() {
                                     height={32}
                                 />
                             </Link>
-                            <span className="ml-2 text-xl font-bold text-gray-900">AI-Dala</span>
+                            <span className="ml-2 text-xl font-bold text-walnut-800 font-retro tracking-wide">AI-Dala</span>
                         </div>
                         <div className="hidden sm:ml-6 sm:flex sm:space-x-8">
                             <Link
                                 href="/about"
-                                className="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium"
+                                className="border-transparent text-walnut-600 hover:border-walnut-500 hover:text-walnut-800 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium font-retro-sans uppercase tracking-wider"
                             >
                                 About
                             </Link>
                             <Link
                                 href="/news"
-                                className="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium"
+                                className="border-transparent text-walnut-600 hover:border-walnut-500 hover:text-walnut-800 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium font-retro-sans uppercase tracking-wider"
                             >
                                 News
                             </Link>
                             <Link
                                 href="/articles"
-                                className="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium"
+                                className="border-transparent text-walnut-600 hover:border-walnut-500 hover:text-walnut-800 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium font-retro-sans uppercase tracking-wider"
                             >
                                 Articles
                             </Link>
@@ -53,21 +53,21 @@ export default function Header() {
                             <LanguageSwitcher />
                         </div>
                         {status === 'loading' ? (
-                            <span className="text-gray-400 px-3 py-2 text-sm">...</span>
+                            <span className="text-walnut-400 px-3 py-2 text-sm">...</span>
                         ) : session ? (
                             <>
                                 <Link
                                     href="/dashboard"
-                                    className="text-gray-500 hover:text-gray-700 px-3 py-2 rounded-md text-sm font-medium"
+                                    className="text-walnut-600 hover:text-walnut-800 px-3 py-2 rounded-retro text-sm font-medium font-retro-sans"
                                 >
                                     Dashboard
                                 </Link>
-                                <span className="text-gray-700 px-3 py-2 text-sm font-medium">
+                                <span className="text-walnut-700 px-3 py-2 text-sm font-medium font-retro-sans">
                                     {session.user?.email || session.user?.name || 'User'}
                                 </span>
                                 <button
                                     onClick={() => signOut({ callbackUrl: '/' })}
-                                    className="ml-3 text-gray-500 hover:text-gray-700 px-3 py-2 rounded-md text-sm font-medium"
+                                    className="ml-3 text-walnut-600 hover:text-walnut-800 px-3 py-2 rounded-retro text-sm font-medium font-retro-sans"
                                 >
                                     Sign out
                                 </button>
@@ -76,13 +76,13 @@ export default function Header() {
                             <>
                                 <Link
                                     href="/api/auth/signin"
-                                    className="text-gray-500 hover:text-gray-700 px-3 py-2 rounded-md text-sm font-medium"
+                                    className="text-walnut-600 hover:text-walnut-800 px-3 py-2 rounded-retro text-sm font-medium font-retro-sans"
                                 >
                                     Sign in
                                 </Link>
                                 <Link
                                     href="/dashboard"
-                                    className="ml-3 inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                                    className="ml-3 inline-flex items-center px-4 py-2 border-2 border-walnut-700 text-sm font-medium rounded-retro shadow-retro text-walnut-50 bg-walnut-600 hover:bg-walnut-700 hover:shadow-retro-hover transition-all font-retro-sans uppercase tracking-wide"
                                 >
                                     Get Started
                                 </Link>

@@ -1,0 +1,94 @@
+{
+  "$meta": {
+    "name": "Authentication Pages UI",
+    "requirement": "REQ-001",
+    "routes": ["/login", "/register"],
+    "layout": "LAYOUT-REQ-001-auth.json"
+  },
+
+  "auth": "guest-only",
+
+  "routes": {
+    "/login": {
+      "tree": {
+        "container": {
+          "classes": "min-h-screen flex items-center justify-center bg-retro-cream p-4",
+          
+          "Card": {
+            "props": { "variant": "elevated", "padding": "lg" },
+            "classes": "w-full max-w-md",
+            
+            "children": [
+              { "component": "Logo", "props": { "centered": true, "size": "lg" } },
+              { "component": "Heading", "props": { "level": 1, "text": "Welcome Back", "centered": true } },
+              
+              {
+                "component": "LoginForm",
+                "fields": [
+                  { "name": "email", "type": "Input", "props": { "type": "email", "label": "Email", "required": true } },
+                  { "name": "password", "type": "Input", "props": { "type": "password", "label": "Password", "required": true } }
+                ],
+                "submitButton": { "label": "Sign In", "fullWidth": true }
+              },
+
+              { "component": "Link", "props": { "href": "/forgot-password", "text": "Forgot password?", "centered": true } },
+              
+              { "component": "Divider", "props": { "text": "Or continue with" } },
+              
+              { "component": "KeycloakButton", "props": { "fullWidth": true } },
+              
+              { 
+                "component": "Text", 
+                "props": { "text": "Don't have an account?", "centered": true },
+                "children": [
+                  { "component": "Link", "props": { "href": "/register", "text": "Sign up" } }
+                ]
+              }
+            ]
+          }
+        }
+      }
+    },
+
+    "/register": {
+      "tree": {
+        "container": {
+          "classes": "min-h-screen flex items-center justify-center bg-retro-cream p-4",
+          
+          "Card": {
+            "props": { "variant": "elevated", "padding": "lg" },
+            "classes": "w-full max-w-md",
+            
+            "children": [
+              { "component": "Logo", "props": { "centered": true, "size": "lg" } },
+              { "component": "Heading", "props": { "level": 1, "text": "Create Account", "centered": true } },
+              
+              {
+                "component": "RegisterForm",
+                "fields": [
+                  { "name": "name", "type": "Input", "props": { "label": "Full Name", "required": true } },
+                  { "name": "email", "type": "Input", "props": { "type": "email", "label": "Email", "required": true } },
+                  { "name": "password", "type": "Input", "props": { "type": "password", "label": "Password", "required": true } },
+                  { "name": "confirmPassword", "type": "Input", "props": { "type": "password", "label": "Confirm Password", "required": true } }
+                ],
+                "submitButton": { "label": "Create Account", "fullWidth": true }
+              },
+
+              { "component": "Divider", "props": { "text": "Or continue with" } },
+              
+              { "component": "KeycloakButton", "props": { "fullWidth": true } },
+              
+              { 
+                "component": "Text", 
+                "props": { "text": "Already have an account?", "centered": true },
+                "children": [
+                  { "component": "Link", "props": { "href": "/login", "text": "Sign in" } }
+                ]
+              }
+            ]
+          }
+        }
+      }
+    }
+  }
+}

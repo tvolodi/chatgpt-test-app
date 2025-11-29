@@ -7,17 +7,17 @@ export default defineConfig({
     timeout: 10_000
   },
   use: {
-    baseURL: "http://localhost:3001",
+    baseURL: "http://localhost:3000",
     headless: true
   },
   webServer: {
     command: "npm run dev",
     cwd: __dirname,
-    url: "http://localhost:3001",
+    url: "http://localhost:3000",
     timeout: 120_000,
     reuseExistingServer: true,
     env: {
-      PORT: "3001"
+      PORT: "3000"
     }
   }
 });

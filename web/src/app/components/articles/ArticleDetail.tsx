@@ -51,11 +51,11 @@ export default function ArticleDetail({ article }: ArticleDetailProps) {
     }, [article.id]);
 
     return (
-        <div className="bg-white rounded-lg shadow-sm p-8">
-            <h1 className="text-3xl font-bold text-gray-900 mb-4">{article.title}</h1>
+        <div className="bg-walnut-50 rounded-retro shadow-retro border-2 border-walnut-500 p-8">
+            <h1 className="text-3xl font-bold text-walnut-800 mb-4 font-retro">{article.title}</h1>
 
-            <div className="flex items-center justify-between mb-8 pb-4 border-b">
-                <div className="flex items-center space-x-4 text-sm text-gray-500">
+            <div className="flex items-center justify-between mb-8 pb-4 border-b-2 border-walnut-200">
+                <div className="flex items-center space-x-4 text-sm text-walnut-500 font-retro-sans">
                     <span>By Author {article.author_id.slice(0, 8)}</span>
                     {article.published_at && (
                         <span>{format(new Date(article.published_at), 'MMM d, yyyy')}</span>
@@ -69,14 +69,14 @@ export default function ArticleDetail({ article }: ArticleDetailProps) {
             </div>
 
             <div
-                className="prose max-w-none mb-12"
+                className="prose prose-walnut max-w-none mb-12 font-retro-sans"
                 dangerouslySetInnerHTML={{ __html: htmlContent }}
             />
 
             {article.tags && article.tags.length > 0 && (
                 <div className="flex flex-wrap gap-2 mb-8">
                     {article.tags.map(tag => (
-                        <span key={tag} className="px-3 py-1 bg-gray-100 text-gray-600 rounded-full text-sm">
+                        <span key={tag} className="px-3 py-1 bg-walnut-200 text-walnut-700 rounded-retro text-sm border border-walnut-400 font-retro-sans">
                             #{tag}
                         </span>
                     ))}
@@ -84,9 +84,9 @@ export default function ArticleDetail({ article }: ArticleDetailProps) {
             )}
 
             {status !== 'authenticated' && status !== 'loading' && (
-                <div className="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
-                    <p className="text-sm text-blue-800">
-                        <Link href="/api/auth/signin" className="font-medium underline hover:text-blue-900">
+                <div className="mb-6 p-4 bg-walnut-100 border-2 border-walnut-400 rounded-retro">
+                    <p className="text-sm text-walnut-700 font-retro-sans">
+                        <Link href="/api/auth/signin" className="font-medium underline hover:text-walnut-900 text-retro-orange">
                             Sign in
                         </Link>
                         {' '}to leave comments and like this article.

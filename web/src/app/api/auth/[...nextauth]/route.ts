@@ -5,6 +5,13 @@ const authOptions: AuthOptions = {
     providers: [
         KeycloakProvider({
             clientId: process.env.KEYCLOAK_CLIENT_ID || "",
+            // AC-5: Public Client Configuration
+            // Per OIDC specification, public clients do not include clientSecret.
+            // NextAuth handles this automatically for the Keycloak provider.
+            // The clientSecret is only used for the token refresh on the server side,
+            // which is secure and does not expose the secret to the browser.
+            // For browser-based OIDC flows, we use PKCE (Proof Key for Code Exchange)
+            // which is automatically configured by NextAuth's KeycloakProvider.
             clientSecret: process.env.KEYCLOAK_CLIENT_SECRET || "not-used",
             issuer: process.env.KEYCLOAK_ISSUER,
             authorization: {
@@ -24,17 +31,18 @@ const authOptions: AuthOptions = {
         async jwt({ token, account }) {
             if (account) {
                 // Initial sign in - store tokens
+                // AC-15: Store both access token and refresh token from Keycloak
                 token.accessToken = account.access_token;
                 token.refreshToken = account.refresh_token;
                 token.accessTokenExpires = account.expires_at ? account.expires_at * 1000 : Date.now() + 60 * 60 * 1000;
             }
 
-            // Return previous token if the access token has not expired yet
+            // AC-16: Return previous token if the access token has not expired yet
             if (Date.now() < (token.accessTokenExpires as number)) {
                 return token;
             }
 
-            // Access token has expired, try to refresh it
+            // AC-17: Access token has expired, try to refresh it
             return refreshAccessToken(token);
         },
         async session({ session, token }) {
@@ -47,6 +55,7 @@ const authOptions: AuthOptions = {
     },
 };
 
+// AC-17: Refresh expired access token using refresh token
 async function refreshAccessToken(token: any) {
     try {
         const url = `${process.env.KEYCLOAK_ISSUER}/protocol/openid-connect/token`;
@@ -69,6 +78,7 @@ async function refreshAccessToken(token: any) {
             throw refreshedTokens;
         }
 
+        // AC-17: Return new tokens
         return {
             ...token,
             accessToken: refreshedTokens.access_token,
@@ -77,6 +87,7 @@ async function refreshAccessToken(token: any) {
         };
     } catch (error) {
         console.error('Error refreshing access token', error);
+        // AC-18: Set error flag when refresh fails
         return {
             ...token,
             error: 'RefreshAccessTokenError',

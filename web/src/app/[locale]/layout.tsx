@@ -3,10 +3,21 @@ import { getMessages } from 'next-intl/server';
 import { notFound } from 'next/navigation';
 import "../globals.css";
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
+import { Playfair_Display, Source_Sans_3 } from "next/font/google";
 import Providers from "../providers";
 
-const inter = Inter({ subsets: ["latin"] });
+// Walnut Retro Typography
+const playfair = Playfair_Display({ 
+    subsets: ["latin"],
+    variable: '--font-retro',
+    display: 'swap',
+});
+
+const sourceSans = Source_Sans_3({ 
+    subsets: ["latin"],
+    variable: '--font-retro-sans',
+    display: 'swap',
+});
 
 export const metadata: Metadata = {
     title: "AI Dala",
@@ -32,7 +43,7 @@ export default async function LocaleLayout({
 
     return (
         <html lang={locale}>
-            <body className={inter.className}>
+            <body className={`${playfair.variable} ${sourceSans.variable} font-retro-sans bg-retro-cream`}>
                 <NextIntlClientProvider messages={messages} locale={locale}>
                     <Providers>{children}</Providers>
                 </NextIntlClientProvider>

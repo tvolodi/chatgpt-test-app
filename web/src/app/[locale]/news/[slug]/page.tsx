@@ -1,50 +1,36 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
 import { format } from 'date-fns';
 import { marked } from 'marked';
-
-interface Article {
-  id: string;
-  title: string;
-  slug: string;
-  body: string;
-  published_at: string;
-  author_id: string;
-  tags: string[];
-}
+import { fetchNewsItem } from '../services';
+import type { NewsItem } from '../services';
 
 export default function NewsDetailPage() {
   const params = useParams();
   const slug = params.slug as string;
 
-  const [article, setArticle] = useState<Article | null>(null);
+  const [article, setArticle] = useState<NewsItem | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    if (slug) {
-      fetchArticle();
-    }
-  }, [slug]);
-
-  const fetchArticle = async () => {
+  const fetchArticle = useCallback(async () => {
     try {
-      const response = await fetch(`http://localhost:4000/api/articles/slug/${slug}`);
-      if (!response.ok) {
-        if (response.status === 404) throw new Error('Article not found');
-        throw new Error('Failed to fetch article');
-      }
-      const data = await response.json();
-      setArticle({ ...data.article, tags: data.tags });
+      const data = await fetchNewsItem(slug);
+      if (!data) throw new Error('Article not found');
+      setArticle(data);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'An error occurred');
     } finally {
       setLoading(false);
     }
-  };
+  }, [slug]);
+
+  useEffect(() => {
+    fetchArticle();
+  }, [fetchArticle]);
 
   if (loading) {
     return (
@@ -111,7 +97,7 @@ export default function NewsDetailPage() {
         </header>
 
         <div className="prose prose-lg max-w-none prose-indigo">
-          <div dangerouslySetInnerHTML={{ __html: marked(article.body) as string }} />
+          <div dangerouslySetInnerHTML={{ __html: article.bodyHtml || marked(article.body) }} />
         </div>
 
         {article.tags && article.tags.length > 0 && (

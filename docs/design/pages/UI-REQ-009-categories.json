@@ -1,0 +1,74 @@
+{
+  "$meta": {
+    "name": "Categories Management UI",
+    "requirement": "REQ-009",
+    "route": "/dashboard/categories",
+    "layout": "LAYOUT-core.json → DashboardLayout"
+  },
+
+  "auth": "required",
+  "roles": ["admin"],
+
+  "tree": {
+    "DashboardHeader": {},
+    "DashboardSidebar": { "activeItem": "categories" },
+    
+    "main": {
+      "children": [
+        {
+          "component": "PageHeader",
+          "props": { "title": "Categories" },
+          "actions": [
+            { "component": "Button", "props": { "variant": "primary", "label": "New Category", "onClick": "openCreateModal" } }
+          ]
+        },
+        {
+          "component": "CategoriesTable",
+          "dataSource": "GET /api/categories",
+          "columns": [
+            { "key": "name", "label": "Name", "sortable": true },
+            { "key": "slug", "label": "Slug" },
+            { "key": "description", "label": "Description", "truncate": 50 },
+            { "key": "article_count", "label": "Articles", "align": "right" },
+            { "key": "actions", "label": "" }
+          ],
+          "rowActions": [
+            { "action": "edit", "icon": "pencil" },
+            { "action": "delete", "icon": "trash", "confirm": true, "disabled": "article_count > 0" }
+          ]
+        }
+      ]
+    },
+
+    "modals": {
+      "createCategory": {
+        "component": "Modal",
+        "props": { "title": "Create Category" },
+        "form": {
+          "fields": [
+            { "name": "name", "type": "Input", "label": "Name", "required": true },
+            { "name": "slug", "type": "Input", "label": "Slug", "autoGenerate": "from name" },
+            { "name": "description", "type": "Textarea", "label": "Description" }
+          ],
+          "actions": [
+            { "label": "Cancel", "action": "close" },
+            { "label": "Create", "action": "submit", "variant": "primary" }
+          ]
+        }
+      },
+      "editCategory": {
+        "component": "Modal",
+        "props": { "title": "Edit Category" },
+        "form": {
+          "fields": [
+            { "name": "name", "type": "Input", "label": "Name", "required": true },
+            { "name": "slug", "type": "Input", "label": "Slug" },
+            { "name": "description", "type": "Textarea", "label": "Description" }
+          ]
+        }
+      }
+    },
+
+    "DashboardFooter": {}
+  }
+}

@@ -20,11 +20,30 @@ type newsItem struct {
 	Tags        []string `json:"tags,omitempty"`
 }
 
+type articleItem struct {
+	ID          string   `json:"id"`
+	Slug        string   `json:"slug"`
+	Title       string   `json:"title"`
+	Summary     string   `json:"summary"`
+	Body        string   `json:"body"`
+	URL         string   `json:"url"`
+	Image       string   `json:"image"`
+	PublishedAt string   `json:"published_at"`
+	Tags        []string `json:"tags,omitempty"`
+}
+
 type newsListResponse struct {
 	Items    []newsItem `json:"items"`
 	Total    int        `json:"total"`
 	Page     int        `json:"page"`
 	PageSize int        `json:"page_size"`
+}
+
+type articleListResponse struct {
+	Items    []articleItem `json:"items"`
+	Total    int           `json:"total"`
+	Page     int           `json:"page"`
+	PageSize int           `json:"page_size"`
 }
 
 func newsListHandler(w http.ResponseWriter, r *http.Request) {
@@ -74,6 +93,129 @@ func newsDetailHandler(w http.ResponseWriter, r *http.Request) {
 	writeJSON(w, http.StatusNotFound, errorResponse{ErrorCode: "NOT_FOUND", Message: "news not found"})
 }
 
+func articlesListHandler(w http.ResponseWriter, r *http.Request) {
+	// For now, return mock data in the same format as news
+	// In a real implementation, this would query the articles service
+	page, pageSize, category, err := parseNewsQuery(r.URL.Query())
+	if err != nil {
+		writeJSON(w, http.StatusBadRequest, errorResponse{ErrorCode: "INVALID_QUERY", Message: err.Error()})
+		return
+	}
+
+	// Mock articles data - in real implementation, fetch from articles service
+	articles := []articleItem{
+		{
+			ID:          "article-001",
+			Slug:        "getting-started-with-ai-dala",
+			Title:       "Getting Started with AI-Dala",
+			Summary:     "A comprehensive guide to building your first AI-powered application.",
+			Body:        "# Getting Started with AI-Dala\n\nLearn how to build AI-powered applications.",
+			URL:         "/articles/getting-started-with-ai-dala",
+			Image:       "/AI-Dala-logo.png",
+			PublishedAt: "2025-11-20T10:00:00Z",
+			Tags:        []string{"tutorial", "beginners"},
+		},
+		{
+			ID:          "article-002",
+			Slug:        "advanced-ai-search",
+			Title:       "Advanced AI Search Techniques",
+			Summary:     "Deep dive into vector embeddings and semantic search.",
+			Body:        "# Advanced AI Search Techniques\n\nExplore vector embeddings and semantic search.",
+			URL:         "/articles/advanced-ai-search",
+			Image:       "/AI-Dala-logo.png",
+			PublishedAt: "2025-11-18T14:30:00Z",
+			Tags:        []string{"advanced", "search"},
+		},
+		{
+			ID:          "article-003",
+			Slug:        "securing-your-ai-app",
+			Title:       "Securing Your AI Application",
+			Summary:     "Best practices for authentication and authorization in AI apps.",
+			Body:        "# Securing Your AI Application\n\nBest practices for auth in AI applications.",
+			URL:         "/articles/securing-your-ai-app",
+			Image:       "/AI-Dala-logo.png",
+			PublishedAt: "2025-11-15T09:15:00Z",
+			Tags:        []string{"security", "auth"},
+		},
+	}
+
+	filtered := filterArticles(articles, category)
+	sorted := sortArticles(filtered)
+	total := len(sorted)
+
+	start := (page - 1) * pageSize
+	if start > total {
+		start = total
+	}
+	end := start + pageSize
+	if end > total {
+		end = total
+	}
+
+	resp := articleListResponse{
+		Items:    sorted[start:end],
+		Total:    total,
+		Page:     page,
+		PageSize: pageSize,
+	}
+
+	writeJSON(w, http.StatusOK, resp)
+}
+
+func articlesDetailHandler(w http.ResponseWriter, r *http.Request) {
+	parts := strings.Split(strings.TrimPrefix(r.URL.Path, "/api/content/articles/"), "/")
+	if len(parts) == 0 || parts[0] == "" {
+		writeJSON(w, http.StatusNotFound, errorResponse{ErrorCode: "NOT_FOUND", Message: "article not found"})
+		return
+	}
+	slug := parts[0]
+
+	// Mock articles data - in real implementation, fetch from articles service
+	articles := []articleItem{
+		{
+			ID:          "article-001",
+			Slug:        "getting-started-with-ai-dala",
+			Title:       "Getting Started with AI-Dala",
+			Summary:     "A comprehensive guide to building your first AI-powered application.",
+			Body:        "# Getting Started with AI-Dala\n\nLearn how to build AI-powered applications.",
+			URL:         "/articles/getting-started-with-ai-dala",
+			Image:       "/AI-Dala-logo.png",
+			PublishedAt: "2025-11-20T10:00:00Z",
+			Tags:        []string{"tutorial", "beginners"},
+		},
+		{
+			ID:          "article-002",
+			Slug:        "advanced-ai-search",
+			Title:       "Advanced AI Search Techniques",
+			Summary:     "Deep dive into vector embeddings and semantic search.",
+			Body:        "# Advanced AI Search Techniques\n\nExplore vector embeddings and semantic search.",
+			URL:         "/articles/advanced-ai-search",
+			Image:       "/AI-Dala-logo.png",
+			PublishedAt: "2025-11-18T14:30:00Z",
+			Tags:        []string{"advanced", "search"},
+		},
+		{
+			ID:          "article-003",
+			Slug:        "securing-your-ai-app",
+			Title:       "Securing Your AI Application",
+			Summary:     "Best practices for authentication and authorization in AI apps.",
+			Body:        "# Securing Your AI Application\n\nBest practices for auth in AI applications.",
+			URL:         "/articles/securing-your-ai-app",
+			Image:       "/AI-Dala-logo.png",
+			PublishedAt: "2025-11-15T09:15:00Z",
+			Tags:        []string{"security", "auth"},
+		},
+	}
+
+	for _, item := range articles {
+		if item.Slug == slug {
+			writeJSON(w, http.StatusOK, item)
+			return
+		}
+	}
+	writeJSON(w, http.StatusNotFound, errorResponse{ErrorCode: "NOT_FOUND", Message: "article not found"})
+}
+
 func parseNewsQuery(q url.Values) (page int, pageSize int, category string, err error) {
 	page = 1
 	pageSize = 10
@@ -91,11 +233,11 @@ func parseNewsQuery(q url.Values) (page int, pageSize int, category string, err 
 	return
 }
 
-func filterNews(items []newsItem, category string) []newsItem {
+func filterArticles(items []articleItem, category string) []articleItem {
 	if category == "" {
 		return items
 	}
-	out := make([]newsItem, 0, len(items))
+	out := make([]articleItem, 0, len(items))
 	for _, item := range items {
 		for _, tag := range item.Tags {
 			if tag == category {
@@ -107,8 +249,8 @@ func filterNews(items []newsItem, category string) []newsItem {
 	return out
 }
 
-func sortNews(items []newsItem) []newsItem {
-	sorted := make([]newsItem, len(items))
+func sortArticles(items []articleItem) []articleItem {
+	sorted := make([]articleItem, len(items))
 	copy(sorted, items)
 	for i := 1; i < len(sorted); i++ {
 		j := i

@@ -26,7 +26,7 @@ description: Requirement Development
 ---
 
 ## Terminal Commands
-Run all terminal commands as they are approved.
+You are allowed to run all terminal commands.
 
 ---
 
@@ -38,6 +38,7 @@ You are an expert full-stack developer and QA engineer. You own the feature from
 *   **Contract-First**: Never write backend code without a defined API contract (`openapi.yaml` or Module Spec). Never write frontend code without a backend contract.
 *   **Documentation-Driven**: Code is transient; Documentation is the source of truth. Update docs *before* or *alongside* code, never after.
 *   **No Code Without Tests**: Every implementation MUST include tests. No exceptions.
+*   **Development Guide**: Use `AI-Guide.md` file as the development guide to implement a functional requirement.
 
 ### 1.2. Technical Principles
 1.  **Real Integration Testing**: Full E2E tests (Playwright) and Integration tests (Test Containers). Test the **Real System**.

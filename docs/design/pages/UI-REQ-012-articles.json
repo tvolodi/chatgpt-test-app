@@ -1,0 +1,88 @@
+{
+  "$meta": {
+    "name": "Articles Page UI",
+    "requirement": "REQ-012, REQ-013",
+    "route": "/articles",
+    "layout": "LAYOUT-REQ-012-articles.json"
+  },
+
+  "auth": "public",
+
+  "tree": {
+    "Header": {},
+    
+    "main": {
+      "layout": "master-detail",
+      "classes": "max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12",
+
+      "masterPanel": {
+        "classes": "lg:w-1/3",
+        "visibilityRule": "hidden lg:block when detail selected",
+        
+        "children": [
+          {
+            "component": "PageHeader",
+            "props": { "title": "Articles" },
+            "actions": [
+              { "component": "FilterToggle", "mobileOnly": true }
+            ]
+          },
+          {
+            "component": "CategoryFilter",
+            "dataSource": "GET /api/categories",
+            "props": { "selectedId": "?category_id" }
+          },
+          {
+            "component": "TagFilter", 
+            "dataSource": "GET /api/tags?popular=true",
+            "props": { "selectedTags": "?tags[]" }
+          },
+          {
+            "component": "ActiveFilters",
+            "conditional": "hasActiveFilters"
+          },
+          {
+            "component": "ArticleList",
+            "dataSource": "GET /api/articles/public",
+            "itemComponent": "ArticleCard",
+            "props": { "selectable": true, "selectedId": "?id" }
+          },
+          {
+            "component": "Pagination",
+            "conditional": "totalPages > 1"
+          }
+        ]
+      },
+
+      "detailPanel": {
+        "classes": "lg:w-2/3",
+        "visibilityRule": "shown when ?id exists",
+
+        "whenSelected": {
+          "children": [
+            { "component": "BackButton", "mobileOnly": true, "label": "← Back to List" },
+            {
+              "component": "ArticleDetail",
+              "dataSource": "GET /api/articles/:id",
+              "children": [
+                { "component": "ArticleTitle", "classes": "text-3xl font-bold font-retro" },
+                { "component": "ArticleMeta", "shows": ["author", "date"] },
+                { "component": "LikeControl" },
+                { "component": "ArticleBody", "markdown": true },
+                { "component": "ArticleTags" }
+              ]
+            },
+            { "component": "CommentSection", "dataSource": "GET /api/articles/:id/comments" }
+          ]
+        },
+
+        "whenEmpty": {
+          "component": "EmptyState",
+          "props": { "message": "Select an article to read" }
+        }
+      }
+    },
+
+    "Footer": {}
+  }
+}

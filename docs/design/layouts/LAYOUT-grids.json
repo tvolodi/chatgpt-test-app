@@ -1,0 +1,61 @@
+{
+  "$meta": {
+    "name": "Grid Layouts & Containers",
+    "description": "Reusable grid configurations and container width presets"
+  },
+
+  "grids": {
+    "twoColumn": {
+      "classes": "grid grid-cols-1 md:grid-cols-2 gap-6",
+      "usage": "Feature cards, side-by-side content"
+    },
+    "threeColumn": {
+      "classes": "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6",
+      "usage": "Article cards, feature lists"
+    },
+    "fourColumn": {
+      "classes": "grid grid-cols-2 md:grid-cols-4 gap-8",
+      "usage": "Footer columns, stats"
+    },
+    "sidebar": {
+      "classes": "grid grid-cols-1 lg:grid-cols-[256px_1fr] gap-6",
+      "usage": "Page with fixed sidebar"
+    }
+  },
+
+  "containers": {
+    "full": {
+      "classes": "w-full",
+      "maxWidth": "100%",
+      "usage": "Full-width sections"
+    },
+    "wide": {
+      "classes": "max-w-7xl mx-auto px-4 sm:px-6 lg:px-8",
+      "maxWidth": "1280px",
+      "usage": "Standard page content"
+    },
+    "medium": {
+      "classes": "max-w-4xl mx-auto px-4 sm:px-6",
+      "maxWidth": "896px",
+      "usage": "Article content, forms"
+    },
+    "narrow": {
+      "classes": "max-w-2xl mx-auto px-4",
+      "maxWidth": "672px",
+      "usage": "Auth forms, focused content"
+    }
+  },
+
+  "responsive": {
+    "breakpoints": {
+      "mobile": "< 768px",
+      "tablet": "768px - 1023px",
+      "desktop": ">= 1024px"
+    },
+    "rules": {
+      "sidebar": { "mobile": "hidden", "desktop": "visible w-64" },
+      "navigation": { "mobile": "hamburger menu", "desktop": "inline" },
+      "gridColumns": { "mobile": "1", "tablet": "2", "desktop": "3-4" }
+    }
+  }
+}

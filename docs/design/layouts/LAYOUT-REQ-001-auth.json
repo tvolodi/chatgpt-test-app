@@ -1,0 +1,48 @@
+{
+  "$meta": {
+    "name": "Authentication Pages Layout",
+    "requirement": "REQ-001",
+    "routes": ["/login", "/register", "/forgot-password"],
+    "description": "Centered card layout for auth pages"
+  },
+
+  "layout": {
+    "type": "centered",
+    "classes": "min-h-screen flex items-center justify-center bg-retro-cream p-4"
+  },
+
+  "card": {
+    "classes": "w-full max-w-md",
+    "component": "Card",
+    "props": { "variant": "elevated", "padding": "lg" }
+  },
+
+  "structure": [
+    { "slot": "logo", "centered": true },
+    { "slot": "title", "classes": "text-2xl font-bold font-retro text-walnut-800 text-center" },
+    { "slot": "form" },
+    { "slot": "divider", "text": "Or continue with" },
+    { "slot": "socialLogin" },
+    { "slot": "links", "classes": "text-center text-sm" }
+  ],
+
+  "diagram": [
+    "┌─────────────────────────────────────┐",
+    "│                                     │",
+    "│     ┌───────────────────────┐       │",
+    "│     │        LOGO           │       │",
+    "│     │       TITLE           │       │",
+    "│     │                       │       │",
+    "│     │    [ Email Input ]    │       │",
+    "│     │    [ Password    ]    │       │",
+    "│     │    [ Submit Btn  ]    │       │",
+    "│     │                       │       │",
+    "│     │   ─── Or ───          │       │",
+    "│     │   [ Keycloak ]        │       │",
+    "│     │                       │       │",
+    "│     │   Links               │       │",
+    "│     └───────────────────────┘       │",
+    "│                                     │",
+    "└─────────────────────────────────────┘"
+  ]
+}

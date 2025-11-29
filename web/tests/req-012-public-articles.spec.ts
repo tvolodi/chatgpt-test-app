@@ -1,4 +1,5 @@
 import { test, expect } from '@playwright/test';
+import { createPublishedTestArticle, cleanupTestData } from './helpers/test-factory';
 
 const BASE_URL = process.env.E2E_BASE_URL || 'http://localhost:3000';
 
@@ -55,43 +56,25 @@ test.describe('REQ-012: Public Article List', () => {
         }
     });
 
-    test('Article Card Double Click Navigation', async ({ page }) => {
-        // Create a published article first to ensure we have something to click
-        // Login
-        await page.goto(`${BASE_URL}/api/auth/signin`);
-        // Assuming mock auth or existing session, skipping login steps for now as we are testing public pages
-        // But we need data. Let's assume data exists or we mock the API.
+    test('Article Card Double Click Navigation', async ({ page, request }) => {
+        // Create a real published test article for this test
+        const testArticle = await createPublishedTestArticle(request);
 
-        // Let's mock the API response for consistent testing
-        await page.route('**/api/articles/public*', async route => {
-            await route.fulfill({
-                status: 200,
-                contentType: 'application/json',
-                body: JSON.stringify({
-                    articles: [
-                        {
-                            id: 'test-article-id',
-                            title: 'Test Article Title',
-                            body: 'This is a preview of the article body...',
-                            author_id: 'author-1',
-                            published_at: new Date().toISOString(),
-                            tags: ['test', 'playwright']
-                        }
-                    ],
-                    total: 1,
-                    page: 1,
-                    limit: 10
-                })
-            });
-        });
+        try {
+            await page.goto(`${BASE_URL}/articles`);
 
-        await page.goto(`${BASE_URL}/articles`);
-        const card = page.locator('text=Test Article Title').first();
-        await expect(card).toBeVisible();
+            // Wait for the article to appear in the list
+            const card = page.locator(`text=${testArticle.title}`).first();
+            await expect(card).toBeVisible();
 
-        // Double click
-        await card.dblclick();
-        // Expect navigation to dashboard OR login (if unauthenticated)
-        await expect(page).toHaveURL(/\/dashboard\/articles\/test-article-id|signin|login/);
+            // Double click
+            await card.dblclick();
+
+            // Expect navigation to article view page
+            await expect(page).toHaveURL(new RegExp(`/articles/${testArticle.id}`));
+        } finally {
+            // Clean up the test article
+            await cleanupTestData(request, { articles: [testArticle.id] });
+        }
     });
 });

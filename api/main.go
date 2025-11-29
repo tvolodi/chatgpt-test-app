@@ -67,7 +67,7 @@ func main() {
 	articlesHandler := articles.NewHandler(articlesService)
 
 	// Initialize Uploads Module
-	uploadsHandler := uploads.NewHandler("./uploads/images")
+	uploadsHandler := uploads.NewHandler("/uploads/images")
 
 	// Initialize Server
 	srv := server.NewServer(authService, tagsHandler, categoriesHandler, articlesHandler, uploadsHandler)

@@ -1,73 +1,26 @@
-import type { CSSProperties } from "react";
-
 export function DashboardFooter() {
     return (
-        <footer style={footerStyle}>
-            <div style={containerStyle}>
+        <footer className="bg-walnut-800 text-walnut-50 px-6 py-3 border-t-2 border-walnut-600 mt-auto">
+            <div className="flex items-center justify-between flex-wrap gap-4 text-sm font-retro-sans">
                 {/* Copyright */}
-                <div style={copyrightStyle}>
+                <div className="font-normal">
                     © 2025 AI-Dala. All rights reserved.
                 </div>
 
                 {/* Links */}
-                <div style={linksStyle}>
-                    <a href="/about" style={linkStyle}>About</a>
-                    <span style={separatorStyle}>•</span>
-                    <a href="/privacy" style={linkStyle}>Privacy Policy</a>
-                    <span style={separatorStyle}>•</span>
-                    <a href="/terms" style={linkStyle}>Terms of Service</a>
+                <div className="flex items-center gap-3">
+                    <a href="/about" className="text-walnut-100 no-underline font-medium hover:text-walnut-50 transition-colors">About</a>
+                    <span className="text-walnut-400">•</span>
+                    <a href="/privacy" className="text-walnut-100 no-underline font-medium hover:text-walnut-50 transition-colors">Privacy Policy</a>
+                    <span className="text-walnut-400">•</span>
+                    <a href="/terms" className="text-walnut-100 no-underline font-medium hover:text-walnut-50 transition-colors">Terms of Service</a>
                 </div>
 
                 {/* Tagline */}
-                <div style={taglineStyle}>
+                <div className="italic text-retro-mustard font-normal font-retro">
                     &quot;Where Ideas Meet the Steppe — and Grow with AI&quot;
                 </div>
             </div>
         </footer>
     );
 }
-
-const footerStyle: CSSProperties = {
-    background: "#2B2B2B",
-    color: "#FFFFFF",
-    padding: "12px 24px",
-    borderTop: "1px solid #404040",
-    marginTop: "auto"
-};
-
-const containerStyle: CSSProperties = {
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "space-between",
-    flexWrap: "wrap",
-    gap: 16,
-    fontSize: "13px",
-    fontFamily: "Inter, system-ui, sans-serif"
-};
-
-const copyrightStyle: CSSProperties = {
-    fontWeight: 400
-};
-
-const linksStyle: CSSProperties = {
-    display: "flex",
-    alignItems: "center",
-    gap: 12
-};
-
-const linkStyle: CSSProperties = {
-    color: "#FFFFFF",
-    textDecoration: "none",
-    fontWeight: 500,
-    transition: "color 0.3s ease"
-};
-
-const separatorStyle: CSSProperties = {
-    color: "#9CA3AF"
-};
-
-const taglineStyle: CSSProperties = {
-    fontStyle: "italic",
-    color: "#E6C68E",
-    fontWeight: 400
-};

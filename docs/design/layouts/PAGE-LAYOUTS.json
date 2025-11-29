@@ -1,0 +1,37 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$meta": {
+    "name": "AI-Dala Page Layouts Index",
+    "version": "2.0.0",
+    "description": "Index file pointing to layout definitions split by feature/requirement."
+  },
+
+  "structure": {
+    "description": "Layouts are split into smaller files by feature area",
+    "files": {
+      "LAYOUT-core.json": "Core layouts (PublicLayout, DashboardLayout) - ~80 lines",
+      "LAYOUT-grids.json": "Grid configurations and container widths - ~50 lines",
+      "LAYOUT-REQ-003-landing.json": "Landing page sections layout - ~40 lines",
+      "LAYOUT-REQ-012-articles.json": "Articles master-detail layout - ~50 lines",
+      "LAYOUT-REQ-001-auth.json": "Authentication pages layout - ~30 lines"
+    }
+  },
+
+  "howToUse": {
+    "forAIAgents": [
+      "1. Read this index to find relevant layout file",
+      "2. Load only the specific LAYOUT-*.json needed for your task",
+      "3. Reference LAYOUT-core.json for base page structures",
+      "4. Reference LAYOUT-grids.json for grid/container helpers"
+    ]
+  },
+
+  "quickLookup": {
+    "/": "LAYOUT-REQ-003-landing.json",
+    "/articles": "LAYOUT-REQ-012-articles.json", 
+    "/dashboard": "LAYOUT-core.json → DashboardLayout",
+    "/dashboard/*": "LAYOUT-core.json → DashboardLayout",
+    "/login": "LAYOUT-REQ-001-auth.json",
+    "/register": "LAYOUT-REQ-001-auth.json"
+  }
+}

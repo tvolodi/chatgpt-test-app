@@ -7,9 +7,9 @@ import ArticleCard from '../articles/ArticleCard';
 interface Article {
     id: string;
     title: string;
-    body: string;
-    author_id: string;
-    published_at?: string;
+    slug: string;
+    summary: string;
+    published_at: string;
     tags?: string[];
 }
 
@@ -40,32 +40,32 @@ export default function LatestArticles() {
         return (
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 animate-pulse">
                 {[1, 2, 3].map((i) => (
-                    <div key={i} className="h-64 bg-gray-100 rounded-lg"></div>
+                    <div key={i} className="h-64 bg-walnut-200 rounded-retro"></div>
                 ))}
             </div>
         );
     }
 
     if (error) {
-        return <div className="text-red-500 text-center py-8">{error}</div>;
+        return <div className="text-retro-rust text-center py-8 font-retro-sans">{error}</div>;
     }
 
     if (articles.length === 0) {
         return (
-            <div className="text-center py-12 bg-gray-50 rounded-lg">
-                <p className="text-gray-500">No articles published yet.</p>
+            <div className="text-center py-12 bg-walnut-100 rounded-retro border-2 border-walnut-300">
+                <p className="text-walnut-500 font-retro-sans">No articles published yet.</p>
             </div>
         );
     }
 
     return (
-        <section className="py-12">
+        <section className="py-12 bg-walnut-50">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div className="flex justify-between items-center mb-8">
-                    <h2 className="text-3xl font-bold text-gray-900">Latest Articles</h2>
+                    <h2 className="text-3xl font-bold text-walnut-800 font-retro">Latest Articles</h2>
                     <Link
                         href="/articles"
-                        className="text-blue-600 font-semibold hover:text-blue-800 transition-colors"
+                        className="text-walnut-600 font-semibold hover:text-walnut-800 transition-colors font-retro-sans uppercase tracking-wide"
                     >
                         Show All →
                     </Link>
@@ -73,7 +73,7 @@ export default function LatestArticles() {
 
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                     {articles.map((article) => (
-                        <Link key={article.id} href={`/articles?id=${article.id}`} className="block h-full">
+                        <Link key={article.id} href={`/articles?slug=${article.slug}`} className="block h-full">
                             <ArticleCard article={article} />
                         </Link>
                     ))}

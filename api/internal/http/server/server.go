@@ -2,8 +2,11 @@ package server
 
 import (
 	"encoding/json"
+	"fmt"
 	"log"
 	"net/http"
+	"net/url"
+	"os"
 
 	"github.com/ai-dala/api/internal/auth"
 	"github.com/ai-dala/api/internal/modules/articles"
@@ -72,6 +75,14 @@ func (s *Server) RegisterRoutes(mux *http.ServeMux) {
 	mux.HandleFunc("GET /api/content/news", newsListHandler)
 	mux.HandleFunc("GET /api/content/news/", newsDetailHandler)
 	mux.HandleFunc("GET /api/content/news/{slug}", newsDetailHandler)
+	mux.HandleFunc("GET /api/content/articles", articlesListHandler)
+	mux.HandleFunc("GET /api/content/articles/", articlesDetailHandler)
+	mux.HandleFunc("GET /api/content/articles/{slug}", articlesDetailHandler)
+
+	// Test auth endpoint (only in test environment)
+	if os.Getenv("ENV") == "test" {
+		mux.HandleFunc("POST /api/auth/test-token", s.testTokenHandler)
+	}
 
 	// Tag routes (optional)
 	if s.tagsHandler != nil {
@@ -107,6 +118,108 @@ func (s *Server) RegisterRoutes(mux *http.ServeMux) {
 
 func (s *Server) protectedHandler(w http.ResponseWriter, r *http.Request) {
 	writeJSON(w, http.StatusOK, map[string]string{"message": "You have accessed a protected resource!"})
+}
+
+// testTokenHandler provides test authentication for E2E tests (only available in test environment)
+func (s *Server) testTokenHandler(w http.ResponseWriter, r *http.Request) {
+	if os.Getenv("ENV") != "test" {
+		writeJSON(w, http.StatusForbidden, errorResponse{
+			ErrorCode: "FORBIDDEN",
+			Message:   "Test endpoint only available in test environment",
+		})
+		return
+	}
+
+	var req struct {
+		Username string `json:"username"`
+		Password string `json:"password"`
+	}
+
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		writeJSON(w, http.StatusBadRequest, errorResponse{
+			ErrorCode: "INVALID_REQUEST",
+			Message:   "Invalid request body",
+		})
+		return
+	}
+
+	// Validate test credentials
+	validUsers := map[string]string{
+		"testuser":        "test123",
+		"ai-admin":        "admin123",
+		"content_manager": "content123",
+	}
+
+	password, exists := validUsers[req.Username]
+	if !exists || password != req.Password {
+		writeJSON(w, http.StatusUnauthorized, errorResponse{
+			ErrorCode: "INVALID_CREDENTIALS",
+			Message:   "Invalid test credentials",
+		})
+		return
+	}
+
+	// Get token from Keycloak programmatically
+	token, err := s.getKeycloakToken(req.Username, req.Password)
+	if err != nil {
+		log.Printf("Failed to get Keycloak token for test user %s: %v", req.Username, err)
+		writeJSON(w, http.StatusInternalServerError, errorResponse{
+			ErrorCode: "TOKEN_ERROR",
+			Message:   "Failed to obtain authentication token",
+		})
+		return
+	}
+
+	writeJSON(w, http.StatusOK, map[string]interface{}{
+		"token": token,
+		"user": map[string]string{
+			"username": req.Username,
+		},
+	})
+}
+
+// getKeycloakToken obtains an access token from Keycloak for test users
+func (s *Server) getKeycloakToken(username, password string) (string, error) {
+	issuer := os.Getenv("KEYCLOAK_ISSUER")
+	clientID := os.Getenv("KEYCLOAK_CLIENT_ID")
+	clientSecret := os.Getenv("KEYCLOAK_CLIENT_SECRET")
+
+	if issuer == "" || clientID == "" {
+		return "", fmt.Errorf("Keycloak configuration missing")
+	}
+
+	tokenURL := issuer + "/protocol/openid-connect/token"
+
+	data := url.Values{}
+	data.Set("grant_type", "password")
+	data.Set("client_id", clientID)
+	data.Set("username", username)
+	data.Set("password", password)
+	data.Set("scope", "openid profile email")
+
+	if clientSecret != "" {
+		data.Set("client_secret", clientSecret)
+	}
+
+	resp, err := http.PostForm(tokenURL, data)
+	if err != nil {
+		return "", err
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		return "", fmt.Errorf("Keycloak returned status %d", resp.StatusCode)
+	}
+
+	var tokenResp struct {
+		AccessToken string `json:"access_token"`
+	}
+
+	if err := json.NewDecoder(resp.Body).Decode(&tokenResp); err != nil {
+		return "", err
+	}
+
+	return tokenResp.AccessToken, nil
 }
 
 type errorResponse struct {

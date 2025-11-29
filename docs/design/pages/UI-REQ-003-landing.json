@@ -1,0 +1,70 @@
+{
+  "$meta": {
+    "name": "Landing Page UI",
+    "requirement": "REQ-003",
+    "route": "/",
+    "layout": "LAYOUT-REQ-003-landing.json"
+  },
+
+  "auth": "public",
+
+  "tree": {
+    "Header": {
+      "slots": {
+        "logo": { "component": "Logo", "props": { "variant": "full" } },
+        "navigation": [
+          { "component": "NavLink", "props": { "href": "/", "label": "Home" } },
+          { "component": "NavLink", "props": { "href": "/articles", "label": "Articles" } },
+          { "component": "NavLink", "props": { "href": "/about", "label": "About" } }
+        ],
+        "actions": [
+          { "component": "LanguageSelector" },
+          { "component": "AuthButton" }
+        ]
+      }
+    },
+
+    "HeroSection": {
+      "content": {
+        "badge": "✦ AI-NATIVE PLATFORM ✦",
+        "title": "AI Dala",
+        "subtitle": "Your intelligent content platform with AI-powered search and discovery",
+        "primaryCTA": { "label": "Get Started", "href": "/register" },
+        "secondaryCTA": { "label": "View Articles", "href": "/articles" }
+      }
+    },
+
+    "FeatureSection": {
+      "sectionLabel": "Features",
+      "sectionTitle": "What is AI-Dala?",
+      "features": [
+        { "icon": "server", "title": "Headless CMS", "description": "Manage content with Go backend" },
+        { "icon": "search", "title": "AI Search", "description": "Vector embeddings and AI" },
+        { "icon": "lock", "title": "Secure Auth", "description": "Enterprise-grade auth" }
+      ],
+      "audienceLabel": "Audience",
+      "audienceTitle": "Who is this for?",
+      "audiences": [
+        { "title": "Entrepreneurs", "description": "Launch digital products faster" },
+        { "title": "Developers", "description": "Modern stack with clean architecture" },
+        { "title": "Students", "description": "Learn production-grade AI apps" }
+      ]
+    },
+
+    "LatestArticles": {
+      "dataSource": "GET /api/articles/public?limit=3",
+      "title": "Latest Articles",
+      "showAllLink": "/articles"
+    },
+
+    "AboutSection": {
+      "title": "Ready to dive in?",
+      "subtitle": "Start building with AI-Dala today.",
+      "description": "Open-source project by Volodymyr",
+      "primaryCTA": { "label": "Contact Us", "href": "/contact" },
+      "secondaryCTA": { "label": "Join Telegram", "href": "https://t.me/ai_dala" }
+    },
+
+    "Footer": {}
+  }
+}

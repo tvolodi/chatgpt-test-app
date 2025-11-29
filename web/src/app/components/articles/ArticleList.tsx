@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
+import { useSession } from 'next-auth/react';
 
 interface Article {
     id: string;
@@ -21,6 +22,7 @@ interface ArticleListProps {
 }
 
 export default function ArticleList({ onDelete }: ArticleListProps) {
+    const { data: session } = useSession();
     const [articles, setArticles] = useState<Article[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
@@ -62,6 +64,9 @@ export default function ArticleList({ onDelete }: ArticleListProps) {
         try {
             const response = await fetch(`http://localhost:4000/api/articles/${id}`, {
                 method: 'DELETE',
+                headers: {
+                    'Authorization': `Bearer ${session?.accessToken}`
+                }
             });
             if (!response.ok) throw new Error('Failed to delete article');
 
@@ -79,37 +84,37 @@ export default function ArticleList({ onDelete }: ArticleListProps) {
     const totalPages = Math.ceil(total / limit);
 
     if (loading && articles.length === 0) {
-        return <div className="text-center py-8 text-gray-500">Loading articles...</div>;
+        return <div className="text-center py-8 text-walnut-500 font-retro-sans">Loading articles...</div>;
     }
 
     if (error) {
-        return <div className="text-center py-8 text-red-600">Error: {error}</div>;
+        return <div className="text-center py-8 text-retro-rust font-retro-sans">Error: {error}</div>;
     }
 
     return (
         <div className="space-y-4">
             {/* Filters */}
-            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
+            <div className="bg-walnut-50 rounded-retro shadow-retro border-2 border-walnut-500 p-4">
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">Search</label>
+                        <label className="block text-sm font-medium text-walnut-700 mb-1 font-retro-sans uppercase tracking-wide">Search</label>
                         <input
                             type="text"
                             value={searchQuery}
                             onChange={(e) => setSearchQuery(e.target.value)}
                             placeholder="Search by title..."
-                            className="block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
+                            className="block w-full border-2 border-walnut-300 rounded-retro shadow-sm focus:ring-walnut-500 focus:border-walnut-500 bg-walnut-50 font-retro-sans"
                         />
                     </div>
                     <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">Status</label>
+                        <label className="block text-sm font-medium text-walnut-700 mb-1 font-retro-sans uppercase tracking-wide">Status</label>
                         <select
                             value={statusFilter}
                             onChange={(e) => {
                                 setStatusFilter(e.target.value);
                                 setPage(1);
                             }}
-                            className="block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
+                            className="block w-full border-2 border-walnut-300 rounded-retro shadow-sm focus:ring-walnut-500 focus:border-walnut-500 bg-walnut-50 font-retro-sans"
                         >
                             <option value="">All Statuses</option>
                             <option value="DRAFT">Draft</option>
@@ -120,7 +125,7 @@ export default function ArticleList({ onDelete }: ArticleListProps) {
                     <div className="flex items-end">
                         <Link
                             href="/dashboard/articles/new"
-                            className="w-full px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 transition-colors text-center"
+                            className="w-full px-4 py-2 bg-walnut-600 text-walnut-50 rounded-retro hover:bg-walnut-700 transition-colors text-center border-2 border-walnut-700 shadow-retro hover:shadow-retro-hover font-retro-sans uppercase tracking-wide"
                         >
                             + New Article
                         </Link>
@@ -129,70 +134,70 @@ export default function ArticleList({ onDelete }: ArticleListProps) {
             </div>
 
             {/* Articles Table */}
-            <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
-                <table className="min-w-full divide-y divide-gray-200">
-                    <thead className="bg-gray-50">
+            <div className="bg-walnut-50 rounded-retro shadow-retro border-2 border-walnut-500 overflow-hidden">
+                <table className="min-w-full divide-y divide-walnut-300">
+                    <thead className="bg-walnut-200">
                         <tr>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            <th className="px-6 py-3 text-left text-xs font-medium text-walnut-700 uppercase tracking-wider font-retro-sans">
                                 Title
                             </th>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            <th className="px-6 py-3 text-left text-xs font-medium text-walnut-700 uppercase tracking-wider font-retro-sans">
                                 Status
                             </th>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            <th className="px-6 py-3 text-left text-xs font-medium text-walnut-700 uppercase tracking-wider font-retro-sans">
                                 Published At
                             </th>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            <th className="px-6 py-3 text-left text-xs font-medium text-walnut-700 uppercase tracking-wider font-retro-sans">
                                 Updated At
                             </th>
-                            <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            <th className="px-6 py-3 text-right text-xs font-medium text-walnut-700 uppercase tracking-wider font-retro-sans">
                                 Actions
                             </th>
                         </tr>
                     </thead>
-                    <tbody className="bg-white divide-y divide-gray-200">
+                    <tbody className="bg-walnut-50 divide-y divide-walnut-200">
                         {filteredArticles.length === 0 ? (
                             <tr>
-                                <td colSpan={5} className="px-6 py-8 text-center text-gray-500">
+                                <td colSpan={5} className="px-6 py-8 text-center text-walnut-500 font-retro-sans">
                                     No articles found
                                 </td>
                             </tr>
                         ) : (
                             filteredArticles.map((article) => (
-                                <tr key={article.id} className="hover:bg-gray-50 transition-colors">
+                                <tr key={article.id} className="hover:bg-walnut-100 transition-colors">
                                     <td className="px-6 py-4">
-                                        <div className="text-sm font-medium text-gray-900">{article.title}</div>
+                                        <div className="text-sm font-medium text-walnut-800 font-retro">{article.title}</div>
                                     </td>
                                     <td className="px-6 py-4">
                                         <span
-                                            className={`inline-flex items-center px-2.5 py-0.5 rounded-md text-xs font-medium ${article.status === 'PUBLISHED'
-                                                ? 'bg-green-100 text-green-800'
+                                            className={`inline-flex items-center px-2.5 py-0.5 rounded-retro text-xs font-medium border ${article.status === 'PUBLISHED'
+                                                ? 'bg-retro-olive/20 text-retro-olive border-retro-olive'
                                                 : article.status === 'DRAFT'
-                                                    ? 'bg-yellow-100 text-yellow-800'
-                                                    : 'bg-gray-100 text-gray-800'
-                                                }`}
+                                                    ? 'bg-retro-mustard/20 text-retro-rust border-retro-mustard'
+                                                    : 'bg-walnut-200 text-walnut-600 border-walnut-400'
+                                                } font-retro-sans uppercase`}
                                         >
                                             {article.status}
                                         </span>
                                     </td>
-                                    <td className="px-6 py-4 text-sm text-gray-500">
+                                    <td className="px-6 py-4 text-sm text-walnut-600 font-retro-sans">
                                         {article.published_at
                                             ? new Date(article.published_at).toLocaleDateString()
                                             : '-'}
                                     </td>
-                                    <td className="px-6 py-4 text-sm text-gray-500">
+                                    <td className="px-6 py-4 text-sm text-walnut-600 font-retro-sans">
                                         {new Date(article.updated_at).toLocaleDateString()}
                                     </td>
-                                    <td className="px-6 py-4 text-right text-sm font-medium space-x-2">
+                                    <td className="px-6 py-4 text-right text-sm font-medium space-x-2 font-retro-sans">
                                         <Link
                                             href={`/dashboard/articles/${article.id}`}
-                                            className="text-indigo-600 hover:text-indigo-900"
+                                            className="text-walnut-600 hover:text-walnut-800 uppercase tracking-wide"
                                         >
                                             Edit
                                         </Link>
                                         <button
                                             onClick={() => handleDelete(article.id)}
-                                            className="text-red-600 hover:text-red-900"
+                                            className="text-retro-rust hover:text-retro-orange uppercase tracking-wide"
                                         >
                                             Delete
                                         </button>
@@ -210,17 +215,17 @@ export default function ArticleList({ onDelete }: ArticleListProps) {
                     <button
                         onClick={() => setPage(p => Math.max(1, p - 1))}
                         disabled={page === 1}
-                        className="px-3 py-1 border border-gray-300 rounded-md disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
+                        className="px-3 py-1 border-2 border-walnut-500 rounded-retro disabled:opacity-50 disabled:cursor-not-allowed hover:bg-walnut-100 bg-walnut-50 text-walnut-700 font-retro-sans uppercase tracking-wide text-sm"
                     >
                         Previous
                     </button>
-                    <span className="text-sm text-gray-700">
+                    <span className="text-sm text-walnut-700 font-retro-sans">
                         Page {page} of {totalPages}
                     </span>
                     <button
                         onClick={() => setPage(p => Math.min(totalPages, p + 1))}
                         disabled={page === totalPages}
-                        className="px-3 py-1 border border-gray-300 rounded-md disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
+                        className="px-3 py-1 border-2 border-walnut-500 rounded-retro disabled:opacity-50 disabled:cursor-not-allowed hover:bg-walnut-100 bg-walnut-50 text-walnut-700 font-retro-sans uppercase tracking-wide text-sm"
                     >
                         Next
                     </button>

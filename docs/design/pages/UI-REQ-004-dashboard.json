@@ -1,0 +1,88 @@
+{
+  "$meta": {
+    "name": "Dashboard UI",
+    "requirement": "REQ-004, REQ-005",
+    "routes": ["/dashboard", "/dashboard/profile"],
+    "layout": "LAYOUT-core.json → DashboardLayout"
+  },
+
+  "auth": "required",
+  "roles": ["user", "admin"],
+
+  "routes": {
+    "/dashboard": {
+      "tree": {
+        "DashboardHeader": {},
+        "DashboardSidebar": { "activeItem": "dashboard" },
+        
+        "main": {
+          "children": [
+            {
+              "component": "PageHeader",
+              "props": { "title": "Dashboard", "description": "Welcome back!" }
+            },
+            {
+              "component": "StatsGrid",
+              "layout": "grid-cols-1 md:grid-cols-3 gap-6",
+              "children": [
+                { "component": "StatCard", "props": { "label": "Total Articles", "dataKey": "articleCount", "icon": "document" } },
+                { "component": "StatCard", "props": { "label": "Published", "dataKey": "publishedCount", "icon": "check" } },
+                { "component": "StatCard", "props": { "label": "Drafts", "dataKey": "draftCount", "icon": "edit" } }
+              ]
+            },
+            {
+              "component": "RecentActivity",
+              "dataSource": "GET /api/activity/recent"
+            }
+          ]
+        },
+
+        "DashboardFooter": {}
+      }
+    },
+
+    "/dashboard/profile": {
+      "tree": {
+        "DashboardHeader": {},
+        "DashboardSidebar": { "activeItem": "profile" },
+        
+        "main": {
+          "children": [
+            {
+              "component": "PageHeader",
+              "props": { "title": "Profile" }
+            },
+            {
+              "component": "Card",
+              "children": [
+                {
+                  "component": "ProfileForm",
+                  "sections": [
+                    {
+                      "title": "Personal Information",
+                      "fields": [
+                        { "name": "avatar", "type": "AvatarUpload" },
+                        { "name": "name", "type": "Input" },
+                        { "name": "email", "type": "Input", "disabled": true },
+                        { "name": "bio", "type": "Textarea" }
+                      ]
+                    },
+                    {
+                      "title": "Preferences",
+                      "fields": [
+                        { "name": "language", "type": "LanguageSelect" },
+                        { "name": "notifications", "type": "Toggle" }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+
+        "DashboardFooter": {}
+      }
+    }
+  }
+}

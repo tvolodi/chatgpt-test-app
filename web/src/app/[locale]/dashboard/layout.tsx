@@ -2,15 +2,14 @@ import { DashboardHeader } from "../../components/dashboard/Header";
 import { DashboardSidebar } from "../../components/dashboard/Sidebar";
 import { DashboardFooter } from "../../components/dashboard/Footer";
 import type { ReactNode } from "react";
-import type { CSSProperties } from "react";
 
 export default function DashboardLayout({ children }: { children: ReactNode }) {
     return (
-        <div style={layoutStyle}>
+        <div className="min-h-screen flex flex-col font-retro-sans">
             <DashboardHeader />
-            <div style={bodyStyle}>
+            <div className="flex flex-1">
                 <DashboardSidebar />
-                <main style={mainStyle}>
+                <main className="flex-1 p-6 bg-retro-cream min-h-[calc(100vh-64px-48px)] overflow-auto">
                     {children}
                 </main>
             </div>
@@ -18,23 +17,3 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
         </div>
     );
 }
-
-const layoutStyle: CSSProperties = {
-    minHeight: "100vh",
-    display: "flex",
-    flexDirection: "column",
-    fontFamily: "Inter, system-ui, sans-serif"
-};
-
-const bodyStyle: CSSProperties = {
-    display: "flex",
-    flex: 1
-};
-
-const mainStyle: CSSProperties = {
-    flex: 1,
-    padding: "24px",
-    background: "linear-gradient(135deg, #F7F9FC 0%, #E8F4F8 100%)",
-    minHeight: "calc(100vh - 64px - 48px)",
-    overflow: "auto"
-};

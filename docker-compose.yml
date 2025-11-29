@@ -23,6 +23,8 @@ services:
     environment:
       DATABASE_URL: "postgres://postgres:postgres@db:5432/ai_dala?sslmode=disable"
       KEYCLOAK_ISSUER: "http://keycloak:8080/realms/ai-dala-realm"
+      KEYCLOAK_CLIENT_ID: "webapp"
+      ENV: "test"
     depends_on:
       - db
       - keycloak

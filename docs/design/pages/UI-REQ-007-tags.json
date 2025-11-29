@@ -1,0 +1,71 @@
+{
+  "$meta": {
+    "name": "Tags Management UI",
+    "requirement": "REQ-007, REQ-008",
+    "route": "/dashboard/tags",
+    "layout": "LAYOUT-core.json → DashboardLayout"
+  },
+
+  "auth": "required",
+  "roles": ["admin"],
+
+  "tree": {
+    "DashboardHeader": {},
+    "DashboardSidebar": { "activeItem": "tags" },
+    
+    "main": {
+      "children": [
+        {
+          "component": "PageHeader",
+          "props": { "title": "Tags" },
+          "actions": [
+            { "component": "Button", "props": { "variant": "primary", "label": "New Tag", "onClick": "openCreateModal" } }
+          ]
+        },
+        {
+          "component": "TagsTable",
+          "dataSource": "GET /api/tags",
+          "columns": [
+            { "key": "code", "label": "Code", "sortable": true },
+            { "key": "name", "label": "Name" },
+            { "key": "article_count", "label": "Articles", "align": "right" },
+            { "key": "actions", "label": "" }
+          ],
+          "rowActions": [
+            { "action": "edit", "icon": "pencil" },
+            { "action": "delete", "icon": "trash", "confirm": true }
+          ]
+        }
+      ]
+    },
+
+    "modals": {
+      "createTag": {
+        "component": "Modal",
+        "props": { "title": "Create Tag" },
+        "form": {
+          "fields": [
+            { "name": "code", "type": "Input", "label": "Code", "required": true, "pattern": "^[a-z0-9-]+$" },
+            { "name": "name", "type": "Input", "label": "Display Name", "required": true }
+          ],
+          "actions": [
+            { "label": "Cancel", "action": "close" },
+            { "label": "Create", "action": "submit", "variant": "primary" }
+          ]
+        }
+      },
+      "editTag": {
+        "component": "Modal",
+        "props": { "title": "Edit Tag" },
+        "form": {
+          "fields": [
+            { "name": "code", "type": "Input", "label": "Code", "disabled": true },
+            { "name": "name", "type": "Input", "label": "Display Name", "required": true }
+          ]
+        }
+      }
+    },
+
+    "DashboardFooter": {}
+  }
+}

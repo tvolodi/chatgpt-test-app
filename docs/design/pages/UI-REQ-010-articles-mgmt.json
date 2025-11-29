@@ -1,0 +1,134 @@
+{
+  "$meta": {
+    "name": "Article Management UI",
+    "requirement": "REQ-010, REQ-011",
+    "routes": ["/dashboard/articles", "/dashboard/articles/new", "/dashboard/articles/[id]"],
+    "layout": "LAYOUT-core.json → DashboardLayout"
+  },
+
+  "auth": "required",
+  "roles": ["user", "admin"],
+
+  "routes": {
+    "/dashboard/articles": {
+      "description": "Article list and management",
+      "tree": {
+        "DashboardHeader": {},
+        "DashboardSidebar": { "activeItem": "articles" },
+        
+        "main": {
+          "children": [
+            {
+              "component": "PageHeader",
+              "props": { "title": "My Articles" },
+              "actions": [
+                { "component": "Button", "props": { "variant": "primary", "label": "New Article", "href": "/dashboard/articles/new" } }
+              ]
+            },
+            {
+              "component": "ArticleList",
+              "variant": "table",
+              "dataSource": "GET /api/articles (with auth)",
+              "columns": [
+                { "key": "title", "label": "Title", "sortable": true },
+                { "key": "status", "label": "Status", "component": "Badge" },
+                { "key": "published_at", "label": "Published", "format": "date" },
+                { "key": "actions", "label": "", "component": "ActionButtons" }
+              ],
+              "rowActions": [
+                { "action": "edit", "icon": "pencil", "href": "/dashboard/articles/:id" },
+                { "action": "delete", "icon": "trash", "confirm": true }
+              ]
+            }
+          ]
+        },
+
+        "DashboardFooter": {}
+      }
+    },
+
+    "/dashboard/articles/new": {
+      "description": "Create new article",
+      "tree": {
+        "DashboardHeader": {},
+        "DashboardSidebar": { "activeItem": "articles" },
+        
+        "main": {
+          "children": [
+            {
+              "component": "PageHeader",
+              "props": { "title": "New Article" },
+              "actions": [
+                { "component": "Button", "props": { "variant": "ghost", "label": "Cancel", "href": "/dashboard/articles" } }
+              ]
+            },
+            {
+              "component": "ArticleForm",
+              "mode": "create",
+              "fields": [
+                { "name": "title", "type": "Input", "label": "Title", "required": true, "placeholder": "Enter article title" },
+                { "name": "body", "type": "TiptapEditor", "label": "Content", "required": true },
+                { "name": "category_id", "type": "CategorySelect", "label": "Category" },
+                { "name": "tags", "type": "TagInput", "label": "Tags", "multiple": true }
+              ],
+              "actions": [
+                { "component": "Button", "props": { "variant": "secondary", "label": "Save Draft", "action": "saveDraft" } },
+                { "component": "Button", "props": { "variant": "primary", "label": "Publish", "action": "publish" } }
+              ]
+            }
+          ]
+        },
+
+        "DashboardFooter": {}
+      }
+    },
+
+    "/dashboard/articles/[id]": {
+      "description": "Edit existing article",
+      "tree": {
+        "DashboardHeader": {},
+        "DashboardSidebar": { "activeItem": "articles" },
+        
+        "main": {
+          "dataSource": "GET /api/articles/:id",
+          "children": [
+            {
+              "component": "PageHeader",
+              "props": { "title": "Edit Article" },
+              "actions": [
+                { "component": "Button", "props": { "variant": "ghost", "label": "Back", "href": "/dashboard/articles" } },
+                { "component": "StatusBadge", "dataKey": "status" }
+              ]
+            },
+            {
+              "component": "ArticleForm",
+              "mode": "edit",
+              "fields": [
+                { "name": "title", "type": "Input", "label": "Title", "required": true },
+                { "name": "body", "type": "TiptapEditor", "label": "Content", "required": true },
+                { "name": "category_id", "type": "CategorySelect", "label": "Category" },
+                { "name": "tags", "type": "TagInput", "label": "Tags", "multiple": true }
+              ],
+              "actions": [
+                { "component": "Button", "props": { "variant": "danger", "label": "Delete", "action": "delete", "confirm": true } },
+                { "component": "Button", "props": { "variant": "secondary", "label": "Save", "action": "save" } },
+                { 
+                  "component": "Button", 
+                  "conditional": "status === 'draft'",
+                  "props": { "variant": "primary", "label": "Publish", "action": "publish" } 
+                },
+                { 
+                  "component": "Button", 
+                  "conditional": "status === 'published'",
+                  "props": { "variant": "secondary", "label": "Unpublish", "action": "unpublish" } 
+                }
+              ]
+            }
+          ]
+        },
+
+        "DashboardFooter": {}
+      }
+    }
+  }
+}

@@ -62,12 +62,14 @@ export function DashboardSidebar() {
                             style={{
                                 ...navItemStyle,
                                 background: isActive ? "#0066FF" : "transparent",
-                                color: isActive ? "#FFFFFF" : "#6B7280",
-                                fontWeight: isActive ? 700 : 600
+                                color: isActive ? "#FFFFFF" : "#6d5a3a",
+                                fontWeight: isActive ? 700 : 600,
+                                boxShadow: isActive ? "3px 3px 0px 0px rgba(0, 102, 255, 0.3)" : "none",
+                                border: isActive ? "2px solid #0047B3" : "2px solid transparent"
                             }}
                         >
                             <span style={{ fontSize: 20 }}>{item.icon}</span>
-                            {!collapsed && <span>{item.label}</span>}
+                            {!collapsed && <span style={{ textTransform: "uppercase", letterSpacing: "0.05em", fontSize: "12px" }}>{item.label}</span>}
                         </Link>
                     );
                 })}
@@ -78,8 +80,8 @@ export function DashboardSidebar() {
 
 const sidebarStyle: CSSProperties = {
     height: "calc(100vh - 64px)",
-    background: "#F7F9FC",
-    borderRight: "1px solid #E5E7EB",
+    background: "#f5f0e8",  // walnut-100
+    borderRight: "2px solid #8b6914",  // walnut-500
     display: "flex",
     flexDirection: "column",
     padding: "16px 0",
@@ -92,14 +94,15 @@ const toggleButtonStyle: CSSProperties = {
     alignSelf: "flex-end",
     margin: "0 16px 16px",
     padding: "8px 12px",
-    background: "#FFFFFF",
-    border: "1px solid #E5E7EB",
-    borderRadius: 8,
+    background: "#faf8f5",  // walnut-50
+    border: "2px solid #8b6914",  // walnut-500
+    borderRadius: "2px",
     cursor: "pointer",
     fontSize: "16px",
     fontWeight: 700,
-    color: "#0066FF",
-    transition: "all 0.3s ease"
+    color: "#8b6914",  // walnut-500
+    transition: "all 0.3s ease",
+    boxShadow: "2px 2px 0px 0px rgba(139, 105, 20, 0.3)"
 };
 
 const navStyle: CSSProperties = {
@@ -114,9 +117,9 @@ const navItemStyle: CSSProperties = {
     alignItems: "center",
     gap: 12,
     padding: "12px 16px",
-    borderRadius: 8,
+    borderRadius: "2px",
     textDecoration: "none",
     fontSize: "14px",
     transition: "all 0.3s ease",
-    fontFamily: "Inter, system-ui, sans-serif"
+    fontFamily: '"Source Sans Pro", "Helvetica Neue", sans-serif'
 };

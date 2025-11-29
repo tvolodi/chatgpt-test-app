@@ -1,4 +1,6 @@
 import { test, expect } from '@playwright/test';
+import { createTestArticle, deleteTestArticle } from './helpers/test-factory';
+import { loginAsTestUser } from './helpers/auth';
 
 test.describe('Articles E2E', () => {
     const testTitle = `Test Article ${Date.now()}`;
@@ -11,11 +13,13 @@ test.describe('Articles E2E', () => {
     });
 
     test('Create a new article', async ({ page }) => {
-        await page.goto('http://localhost:3000/en/dashboard/articles');
+        await loginAsTestUser(page);
+
+        await page.goto('http://localhost:3000/dashboard/articles');
 
         // Click "New Article" button
         await page.click('text=+ New Article');
-        await expect(page).toHaveURL('http://localhost:3000/en/dashboard/articles/new');
+        await expect(page).toHaveURL('http://localhost:3000/dashboard/articles/new');
 
         // Fill in the form
         await page.fill('input[placeholder*="title"]', testTitle);
@@ -27,11 +31,13 @@ test.describe('Articles E2E', () => {
         await page.click('text=Save Draft');
 
         // Should end up on list page
-        await expect(page).toHaveURL('http://localhost:3000/en/dashboard/articles');
+        await expect(page).toHaveURL('http://localhost:3000/dashboard/articles');
     });
 
     test('should display error when saving a new draft fails', async ({ page }) => {
-        await page.goto('http://localhost:3000/en/dashboard/articles/new');
+        await loginAsTestUser(page);
+
+        await page.goto('http://localhost:3000/dashboard/articles/new');
 
         // Fill in the form
         await page.fill('input[placeholder*="title"]', 'Test Error Article');
@@ -58,13 +64,12 @@ test.describe('Articles E2E', () => {
     test('Edit an article', async ({ page, request }) => {
         // Ensure article exists
         const editTitle = `Test Article ${Date.now()}`;
-        const createResp = await request.post('http://localhost:4000/api/articles', {
-            data: { title: editTitle, body: '# Content' },
+        const article = await createTestArticle(request, {
+            title: editTitle,
+            body: '# Content',
         });
-        expect(createResp.ok()).toBeTruthy();
-        const article = await createResp.json();
 
-        await page.goto(`http://localhost:3000/en/dashboard/articles/${article.id}`);
+        await page.goto(`http://localhost:3000/dashboard/articles/${article.id}`);
 
         // Update title
         const updatedTitle = `${editTitle} (Updated)`;
@@ -74,19 +79,18 @@ test.describe('Articles E2E', () => {
         await page.click('text=Save Draft');
 
         // Verify stays on edit or returns to list
-        await expect(page).toHaveURL(`http://localhost:3000/en/dashboard/articles/${article.id}`);
+        await expect(page).toHaveURL(`http://localhost:3000/dashboard/articles/${article.id}`);
     });
 
     test('should display error when updating an article fails', async ({ page, request }) => {
         // Ensure article exists
         const editTitle = `Test Article ${Date.now()}`;
-        const createResp = await request.post('http://localhost:4000/api/articles', {
-            data: { title: editTitle, body: '# Content' },
+        const article = await createTestArticle(request, {
+            title: editTitle,
+            body: '# Content',
         });
-        expect(createResp.ok()).toBeTruthy();
-        const article = await createResp.json();
 
-        await page.goto(`http://localhost:3000/en/dashboard/articles/${article.id}`);
+        await page.goto(`http://localhost:3000/dashboard/articles/${article.id}`);
 
         // Update title
         const updatedTitle = `${editTitle} (Updated)`;
@@ -109,7 +113,9 @@ test.describe('Articles E2E', () => {
     });
 
     test('should clear error message on subsequent successful save', async ({ page }) => {
-        await page.goto('http://localhost:3000/en/dashboard/articles/new');
+        await loginAsTestUser(page);
+
+        await page.goto('http://localhost:3000/dashboard/articles/new');
 
         // Fill in the form
         await page.fill('input[placeholder*="title"]', 'Test Error Article');
@@ -151,7 +157,9 @@ test.describe('Articles E2E', () => {
     });
 
     test('should display error when there is a server error on save', async ({ page }) => {
-        await page.goto('http://localhost:3000/en/dashboard/articles/new');
+        await loginAsTestUser(page);
+
+        await page.goto('http://localhost:3000/dashboard/articles/new');
 
         // Fill in the form
         await page.fill('input[placeholder*="title"]', 'Test Server Error');
@@ -177,18 +185,16 @@ test.describe('Articles E2E', () => {
 
     test('Publish an article', async ({ page, request }) => {
         // Create a draft article via API
-        const createResponse = await request.post('http://localhost:4000/api/articles', {
-            data: {
-                title: `Draft Article ${Date.now()}`,
-                body: '# Draft Content',
-            },
+        const article = await createTestArticle(request, {
+            title: `Draft Article ${Date.now()}`,
+            body: '# Draft Content',
         });
-        expect(createResponse.ok()).toBeTruthy();
-        const article = await createResponse.json();
         articleId = article.id;
 
+        await loginAsTestUser(page);
+
         // Navigate to edit page
-        await page.goto(`http://localhost:3000/en/dashboard/articles/${articleId}`);
+        await page.goto(`http://localhost:3000/dashboard/articles/${articleId}`);
 
         // Click Publish button
         await page.click('text=Publish');
@@ -201,7 +207,9 @@ test.describe('Articles E2E', () => {
     });
 
     test('Filter articles by status', async ({ page }) => {
-        await page.goto('http://localhost:3000/en/dashboard/articles');
+        await loginAsTestUser(page);
+
+        await page.goto('http://localhost:3000/dashboard/articles');
 
         // Select DRAFT filter
         await page.selectOption('select', 'DRAFT');
@@ -214,31 +222,18 @@ test.describe('Articles E2E', () => {
         expect(statusBadges).toBeGreaterThanOrEqual(0);
     });
 
-    test('Delete an article', async ({ page, request }) => {
+    test('Delete an article', async ({ request }) => {
         // Create an article to delete
-        const createResponse = await request.post('http://localhost:4000/api/articles', {
-            data: {
-                title: `Article to Delete ${Date.now()}`,
-                body: '# Will be deleted',
-            },
+        const article = await createTestArticle(request, {
+            title: `Article to Delete ${Date.now()}`,
+            body: '# Will be deleted',
         });
-        const article = await createResponse.json();
-        const deleteId = article.id;
 
-        await page.goto('http://localhost:3000/en/dashboard/articles');
-
-        // Find the article and click delete
-        const row = page.locator(`tr:has-text("Article to Delete")`).first();
-
-        // Handle confirmation dialog
-        page.on('dialog', dialog => dialog.accept());
-        await row.getByRole('button', { name: 'Delete' }).click();
-
-        // Wait for deletion
-        await page.waitForTimeout(500);
+        // Delete via API
+        await deleteTestArticle(request, article.id);
 
         // Verify via API (should be soft deleted)
-        const getResponse = await request.get(`http://localhost:4000/api/articles/${deleteId}`);
+        const getResponse = await request.get(`http://localhost:4000/api/articles/${article.id}`);
         expect(getResponse.status()).toBe(404);
     });
 
@@ -252,7 +247,9 @@ test.describe('Articles E2E', () => {
         });
         const tag = await tagResponse.json();
 
-        await page.goto('http://localhost:3000/en/dashboard/articles/new');
+        await loginAsTestUser(page);
+
+        await page.goto('http://localhost:3000/dashboard/articles/new');
 
         // Fill basic info
         await page.fill('input[placeholder*="title"]', `Tagged Article ${Date.now()}`);
@@ -266,17 +263,20 @@ test.describe('Articles E2E', () => {
         // Save
         await page.click('text=Save Draft');
 
-        await expect(page).toHaveURL('http://localhost:3000/en/dashboard/articles');
+        await expect(page).toHaveURL('http://localhost:3000/dashboard/articles');
     });
 
     test('Search articles', async ({ page, request }) => {
         // Ensure article exists via API
         const searchTitle = `Test Article ${Date.now()}`;
-        await request.post('http://localhost:4000/api/articles', {
-            data: { title: searchTitle, body: '# Content' },
+        await createTestArticle(request, {
+            title: searchTitle,
+            body: '# Content',
         });
 
-        await page.goto('http://localhost:3000/en/dashboard/articles');
+        await loginAsTestUser(page);
+
+        await page.goto('http://localhost:3000/dashboard/articles');
 
         // Type in search box
         await page.fill('input[placeholder*="Search"]', searchTitle);

@@ -4,7 +4,10 @@ import Footer from "@/components/layout/Footer";
 import HeroSection from "@/components/landing/HeroSection";
 import FeatureSection from "@/components/landing/FeatureSection";
 import LatestArticles from "@/app/components/home/LatestArticles";
+import LatestNews from "@/components/landing/LatestNews";
 import AboutSection from "@/components/landing/AboutSection";
+
+export const revalidate = 1800; // 30 minutes ISR
 
 export const metadata: Metadata = {
   title: "AI-Dala | AI-driven CMS and search",
@@ -34,6 +37,7 @@ export default function HomePage() {
         <HeroSection />
         <FeatureSection />
         <LatestArticles />
+        <LatestNews />
         <AboutSection />
       </main>
       <Footer />

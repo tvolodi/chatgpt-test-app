@@ -3,7 +3,6 @@
 import { useSession, signOut } from "next-auth/react";
 import Image from "next/image";
 import { useState } from "react";
-import type { CSSProperties } from "react";
 
 export function DashboardHeader() {
     const { data: session } = useSession();
@@ -14,24 +13,24 @@ export function DashboardHeader() {
     };
 
     return (
-        <header style={headerStyle}>
-            <div style={containerStyle}>
+        <header className="sticky top-0 z-50 bg-retro-cream border-b-2 border-walnut-500 h-16 flex items-center">
+            <div className="w-full px-6 flex justify-between items-center">
                 {/* Logo - Clickable to return home */}
-                <a href="/" style={{ display: "flex", alignItems: "center", gap: 12, textDecoration: "none" }}>
+                <a href="/" className="flex items-center gap-3 no-underline">
                     <Image src="/AI-Dala-logo.png" alt="AI-Dala" width={40} height={40} priority />
-                    <span style={logoTextStyle}>AI-Dala</span>
+                    <span className="text-lg font-bold text-walnut-800 font-retro">AI-Dala</span>
                 </a>
 
                 {/* User Menu */}
-                <div style={{ position: "relative" }}>
+                <div className="relative">
                     <button
                         onClick={() => setMenuOpen(!menuOpen)}
-                        style={userButtonStyle}
+                        className="flex items-center gap-3 px-4 py-2 bg-transparent border-2 border-walnut-400 rounded-retro cursor-pointer text-walnut-800 hover:bg-walnut-100 transition-all font-retro-sans"
                     >
-                        <div style={avatarStyle}>
+                        <div className="w-8 h-8 rounded-full bg-walnut-600 text-walnut-50 flex items-center justify-center text-sm font-bold">
                             {session?.user?.name?.charAt(0).toUpperCase() || "U"}
                         </div>
-                        <span style={{ fontSize: "14px", fontWeight: 600 }}>
+                        <span className="text-sm font-semibold">
                             {session?.user?.name || "User"}
                         </span>
                         <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
@@ -41,8 +40,11 @@ export function DashboardHeader() {
 
                     {/* Dropdown Menu */}
                     {menuOpen && (
-                        <div style={dropdownStyle}>
-                            <button onClick={handleLogout} style={menuItemStyle}>
+                        <div className="absolute top-[calc(100%+8px)] right-0 bg-walnut-50 border-2 border-walnut-500 rounded-retro shadow-retro min-w-[160px] overflow-hidden">
+                            <button 
+                                onClick={handleLogout} 
+                                className="w-full px-4 py-3 bg-transparent border-none text-left cursor-pointer font-retro-sans text-sm font-semibold text-walnut-700 hover:bg-walnut-100 transition-colors"
+                            >
                                 Logout
                             </button>
                         </div>
@@ -52,83 +54,3 @@ export function DashboardHeader() {
         </header>
     );
 }
-
-const headerStyle: CSSProperties = {
-    position: "sticky",
-    top: 0,
-    zIndex: 100,
-    background: "#FFFFFF",
-    borderBottom: "1px solid #E5E7EB",
-    height: "64px",
-    display: "flex",
-    alignItems: "center"
-};
-
-const containerStyle: CSSProperties = {
-    width: "100%",
-    maxWidth: "100%",
-    padding: "0 24px",
-    display: "flex",
-    justifyContent: "space-between",
-    alignItems: "center"
-};
-
-const logoTextStyle: CSSProperties = {
-    fontSize: "18px",
-    fontWeight: 700,
-    color: "#2B2B2B",
-    fontFamily: "Inter, system-ui, sans-serif"
-};
-
-const userButtonStyle: CSSProperties = {
-    display: "flex",
-    alignItems: "center",
-    gap: 12,
-    padding: "8px 16px",
-    background: "none",
-    border: "1px solid #E5E7EB",
-    borderRadius: 8,
-    cursor: "pointer",
-    fontFamily: "inherit",
-    color: "#2B2B2B",
-    transition: "all 0.3s ease"
-};
-
-const avatarStyle: CSSProperties = {
-    width: 32,
-    height: 32,
-    borderRadius: "50%",
-    background: "linear-gradient(135deg, #3A9BDC 0%, #2B7FB8 100%)",
-    color: "#FFFFFF",
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-    fontSize: "14px",
-    fontWeight: 700
-};
-
-const dropdownStyle: CSSProperties = {
-    position: "absolute",
-    top: "calc(100% + 8px)",
-    right: 0,
-    background: "#FFFFFF",
-    border: "1px solid #E5E7EB",
-    borderRadius: 8,
-    boxShadow: "0 8px 24px rgba(0, 0, 0, 0.1)",
-    minWidth: 160,
-    overflow: "hidden"
-};
-
-const menuItemStyle: CSSProperties = {
-    width: "100%",
-    padding: "12px 16px",
-    background: "none",
-    border: "none",
-    textAlign: "left",
-    cursor: "pointer",
-    fontFamily: "inherit",
-    fontSize: "14px",
-    fontWeight: 600,
-    color: "#2B2B2B",
-    transition: "background 0.2s ease"
-};
