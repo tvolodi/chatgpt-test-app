@@ -6,9 +6,236 @@ description: Requirement Development
 
 # AI Agent Development Directives & Guide
 
-**Version**: 3.0
+**Version**: 4.0
 **Status**: Active
 **Purpose**: This is the **Single Source of Truth** for AI Agents (and humans) working on the AI-Dala project. It consolidates development standards, workflows, and role-specific instructions.
+
+---
+
+## 0. WORKFLOW MODES (MANDATORY)
+
+⚠️ **CRITICAL**: Every user request MUST start with a workflow prefix. Agent MUST identify the workflow before taking any action.
+
+### 0.1. Workflow Quick Reference
+
+| Prefix | Workflow | Approval Required | Auto-Commit |
+|--------|----------|-------------------|-------------|
+| `NEW:` | New Requirement Development | ✅ YES (Phase 1 → Phase 2) | After approval |
+| `TEST-ALL:` | Run All Tests & Fix Errors | ❌ NO | ✅ YES |
+| `TEST:` | Test Specific REQ & Fix | ❌ NO | ✅ YES |
+| `FIX:` | Bug Fix / Debug | ❌ NO | ✅ YES |
+| `REFACTOR:` | Code Refactoring | ❌ NO | ✅ YES |
+| `DOCS:` | Documentation Only | ❌ NO | ✅ YES |
+| `CHAT:` | General Discussion | ❌ NO | ❌ NO (no code) |
+
+### 0.2. Workflow Detection Rules
+
+1. **If prefix is present** → Use that workflow
+2. **If NO prefix** → Agent MUST ask: *"Which workflow? (NEW/TEST-ALL/TEST/FIX/REFACTOR/DOCS/CHAT)"*
+3. **Never assume** → When in doubt, ask
+
+---
+
+### 0.3. `NEW:` — New Requirement Development
+
+**Trigger**: `NEW: REQ-XXX` or `NEW: [feature description]`
+
+**Purpose**: Implement a new feature from scratch with full two-phase workflow.
+
+**Workflow**:
+```
+Phase 1 (BLOCKING - requires APPROVED):
+  1. Agent analyzes requirement
+  2. Agent enriches REQ document (AC, edge cases, API contract)
+  3. Agent asks clarifying questions
+  4. Human reviews and adjusts
+  5. Loop until Human says "APPROVED"
+  
+Phase 2 (ATOMIC - runs to completion):
+  1. Backend: Code → Test → Fix → Commit
+  2. Frontend: Code → Test → Fix → Commit
+  3. Docs: Update REQ status → Commit
+```
+
+**Example**:
+```
+Human: NEW: REQ-018 User profile page
+Agent: [Analyzes, enriches REQ-018.md, asks questions]
+Human: APPROVED
+Agent: [Implements backend, frontend, tests, commits]
+```
+
+---
+
+### 0.4. `TEST-ALL:` — Run All Tests & Fix Errors
+
+**Trigger**: `TEST-ALL:` or `TEST-ALL: [optional scope]`
+
+**Purpose**: Run the full test suite, identify failures, fix them, auto-commit.
+
+**Workflow**:
+```
+1. Start services (db, api, frontend)
+2. Run backend tests: go test ./...
+3. Run E2E tests: npx playwright test
+4. Collect all failures
+5. For each failure:
+   a. Analyze root cause
+   b. Fix code
+   c. Re-run affected test
+   d. Commit: fix([scope]): [description]
+6. Report summary
+```
+
+**Commit Pattern**: `fix(backend): resolve [test name] failure` or `fix(e2e): fix [test name]`
+
+**Example**:
+```
+Human: TEST-ALL:
+Agent: [Starts services, runs all tests, fixes 3 failures, commits each fix]
+Agent: "Fixed 3 test failures: TC-001, TC-015, TC-022. All tests passing."
+```
+
+---
+
+### 0.5. `TEST:` — Test Specific REQ & Fix
+
+**Trigger**: `TEST: REQ-XXX` or `TEST: [test file pattern]`
+
+**Purpose**: Run tests for a specific requirement, fix any failures, auto-commit.
+
+**Workflow**:
+```
+1. Start services if needed
+2. Identify test files for REQ-XXX (from traceability section)
+3. Run: npx playwright test req-xxx-*.spec.ts
+4. Run: go test -run TestXXX ./...
+5. Fix any failures
+6. Re-run until green
+7. Commit: fix(REQ-XXX): resolve test failures
+```
+
+**Example**:
+```
+Human: TEST: REQ-015
+Agent: [Runs req-015-*.spec.ts, finds 1 failure, fixes, commits]
+Agent: "REQ-015 tests: 5 passed, 1 fixed. Committed fix."
+```
+
+---
+
+### 0.6. `FIX:` — Bug Fix / Debug
+
+**Trigger**: `FIX: [bug description]` or `FIX: [error message]`
+
+**Purpose**: Investigate and fix a specific bug or error.
+
+**Workflow**:
+```
+1. Analyze the bug/error
+2. Locate affected code
+3. Identify root cause
+4. Implement fix
+5. Run related tests to verify
+6. Commit: fix([scope]): [description]
+```
+
+**Commit Pattern**: `fix(module): resolve [issue description]`
+
+**Example**:
+```
+Human: FIX: Login button not working on mobile
+Agent: [Investigates, finds CSS issue, fixes, tests, commits]
+Agent: "Fixed: Added touch event handler for mobile login button."
+```
+
+---
+
+### 0.7. `REFACTOR:` — Code Refactoring
+
+**Trigger**: `REFACTOR: [description]` or `REFACTOR: [file/module]`
+
+**Purpose**: Improve code quality without changing functionality.
+
+**Workflow**:
+```
+1. Identify refactoring scope
+2. Run existing tests (baseline)
+3. Apply refactoring changes
+4. Run tests again (must still pass)
+5. Commit: refactor([scope]): [description]
+```
+
+**Commit Pattern**: `refactor(module): [description]`
+
+**Example**:
+```
+Human: REFACTOR: Extract common API error handling
+Agent: [Refactors, ensures tests pass, commits]
+Agent: "Refactored: Created shared errorHandler in api/internal/http/errors.go"
+```
+
+---
+
+### 0.8. `DOCS:` — Documentation Only
+
+**Trigger**: `DOCS: [description]` or `DOCS: [file to update]`
+
+**Purpose**: Update documentation without code changes.
+
+**Workflow**:
+```
+1. Identify documentation to update
+2. Make changes to .md files
+3. Commit: docs: [description]
+```
+
+**Commit Pattern**: `docs: [description]`
+
+**Example**:
+```
+Human: DOCS: Add API examples to REQ-010
+Agent: [Updates REQ-010.md with examples, commits]
+Agent: "Updated REQ-010.md with API request/response examples."
+```
+
+---
+
+### 0.9. `CHAT:` — General Discussion
+
+**Trigger**: `CHAT: [question]` or any question without action intent
+
+**Purpose**: Answer questions, explain concepts, provide advice. NO code changes.
+
+**Workflow**:
+```
+1. Answer the question
+2. Provide explanations, examples, recommendations
+3. NO file modifications
+4. NO commits
+```
+
+**Example**:
+```
+Human: CHAT: What's the best way to handle pagination?
+Agent: [Explains pagination patterns, recommends approach]
+```
+
+---
+
+### 0.10. Workflow Cheat Sheet
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│  NEW: REQ-XXX        → Phase 1 (approval) → Phase 2 (develop)  │
+│  TEST-ALL:           → Run all tests → Fix → Auto-commit       │
+│  TEST: REQ-XXX       → Run REQ tests → Fix → Auto-commit       │
+│  FIX: [bug]          → Debug → Fix → Test → Auto-commit        │
+│  REFACTOR: [scope]   → Refactor → Test → Auto-commit           │
+│  DOCS: [description] → Update docs → Auto-commit               │
+│  CHAT: [question]    → Answer only (no code changes)           │
+└─────────────────────────────────────────────────────────────────┘
+```
 
 ---
 
@@ -72,7 +299,9 @@ You are an expert full-stack developer and QA engineer. You own the feature from
 
 ---
 
-## 2. TWO-PHASE DEVELOPMENT WORKFLOW
+## 2. `NEW:` TWO-PHASE DEVELOPMENT WORKFLOW
+
+**This section applies ONLY to `NEW:` workflow.**
 
 The development process is strictly divided into **two phases**. Phase 2 cannot begin until Phase 1 is approved.
 
@@ -320,7 +549,18 @@ test.skip('BAD: Mock example - DO NOT USE', async ({ page }) => {
 
 ## 10. Quick Reference Card
 
-### Phase 1 Commands (Requirement Only)
+### Workflow Prefixes (MANDATORY)
+```
+NEW: REQ-XXX          → New feature (Phase 1 + Phase 2)
+TEST-ALL:             → Run all tests, fix errors
+TEST: REQ-XXX         → Test specific requirement
+FIX: [description]    → Bug fix
+REFACTOR: [scope]     → Code improvement
+DOCS: [description]   → Documentation update
+CHAT: [question]      → Discussion only
+```
+
+### Phase 1 Commands (NEW: workflow only)
 ```
 Human: "I need feature X that does Y"
 Agent: [Enriches REQ, asks questions, creates REQ-XXX.md]
