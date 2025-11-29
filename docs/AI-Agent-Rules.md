@@ -6,7 +6,7 @@ description: Requirement Development
 
 # AI Agent Development Directives & Guide
 
-**Version**: 4.0
+**Version**: 5.0
 **Status**: Active
 **Purpose**: This is the **Single Source of Truth** for AI Agents (and humans) working on the AI-Dala project. It consolidates development standards, workflows, and role-specific instructions.
 
@@ -20,7 +20,9 @@ description: Requirement Development
 
 | Prefix | Workflow | Approval Required | Auto-Commit |
 |--------|----------|-------------------|-------------|
-| `NEW:` | New Requirement Development | ✅ YES (Phase 1 → Phase 2) | After approval |
+| `IDEA:` | Formalize Idea → New REQ | ✅ YES (Phase 1 → Phase 2) | After approval |
+| `NEW:` | Implement Existing REQ | ✅ YES (Phase 1 → Phase 2) | After approval |
+| `UPDATE:` | Modify Implemented REQ | ✅ YES (Phase 1 → Phase 2) | After approval |
 | `TEST-ALL:` | Run All Tests & Fix Errors | ❌ NO | ✅ YES |
 | `TEST:` | Test Specific REQ & Fix | ❌ NO | ✅ YES |
 | `FIX:` | Bug Fix / Debug | ❌ NO | ✅ YES |
@@ -31,25 +33,43 @@ description: Requirement Development
 ### 0.2. Workflow Detection Rules
 
 1. **If prefix is present** → Use that workflow
-2. **If NO prefix** → Agent MUST ask: *"Which workflow? (NEW/TEST-ALL/TEST/FIX/REFACTOR/DOCS/CHAT)"*
+2. **If NO prefix** → Agent MUST ask: *"Which workflow? (IDEA/NEW/UPDATE/TEST-ALL/TEST/FIX/REFACTOR/DOCS/CHAT)"*
 3. **Never assume** → When in doubt, ask
+
+### 0.2.1. Requirement Workflow Selection Guide
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│  Do you have a REQ-XXX file?                                    │
+│  ├─ NO  → Do you have a vague idea?                            │
+│  │        ├─ YES → Use IDEA:                                    │
+│  │        └─ NO  → Use CHAT: to discuss first                   │
+│  └─ YES → Is the REQ implemented (status: implemented)?         │
+│           ├─ NO  → Use NEW: REQ-XXX                             │
+│           └─ YES → Use UPDATE: REQ-XXX                          │
+└─────────────────────────────────────────────────────────────────┘
+```
 
 ---
 
-### 0.3. `NEW:` — New Requirement Development
+### 0.3. `IDEA:` — Formalize Idea into New Requirement
 
-**Trigger**: `NEW: REQ-XXX` or `NEW: [feature description]`
+**Trigger**: `IDEA: [vague idea description]`
 
-**Purpose**: Implement a new feature from scratch with full two-phase workflow.
+**Purpose**: Transform a vague idea into a formal REQ document, then implement it.
+
+**Precondition**: No REQ file exists. Agent will auto-assign next REQ number.
 
 **Workflow**:
 ```
 Phase 1 (BLOCKING - requires APPROVED):
-  1. Agent analyzes requirement
-  2. Agent enriches REQ document (AC, edge cases, API contract)
-  3. Agent asks clarifying questions
-  4. Human reviews and adjusts
-  5. Loop until Human says "APPROVED"
+  1. Agent scans docs/requirements/ to find next REQ number
+  2. Agent creates REQ-XXX.md with initial structure
+  3. Agent formalizes idea into user stories, acceptance criteria
+  4. Agent asks clarifying questions
+  5. Human reviews, adjusts, answers
+  6. Agent updates REQ document
+  7. Loop until Human says "APPROVED"
   
 Phase 2 (ATOMIC - runs to completion):
   1. Backend: Code → Test → Fix → Commit
@@ -57,17 +77,116 @@ Phase 2 (ATOMIC - runs to completion):
   3. Docs: Update REQ status → Commit
 ```
 
+**REQ Auto-Assignment**: Agent scans `docs/requirements/REQ-*.md`, finds highest number, increments by 1.
+
 **Example**:
 ```
-Human: NEW: REQ-018 User profile page
-Agent: [Analyzes, enriches REQ-018.md, asks questions]
+Human: IDEA: I want users to be able to bookmark articles for later reading
+Agent: [Creates REQ-018.Bookmarks.md, adds user stories, AC, asks questions]
+        "Created REQ-018. Questions:
+         1. Should bookmarks sync across devices?
+         2. Maximum bookmarks per user?"
+Human: 1. Yes, sync via account. 2. No limit.
+Agent: [Updates REQ-018.md with answers]
+        "REQ-018 updated. Ready for approval?"
 Human: APPROVED
 Agent: [Implements backend, frontend, tests, commits]
 ```
 
 ---
 
-### 0.4. `TEST-ALL:` — Run All Tests & Fix Errors
+### 0.4. `NEW:` — Implement Existing Requirement
+
+**Trigger**: `NEW: REQ-XXX`
+
+**Purpose**: Implement an existing REQ document that has status `draft` or `approved`.
+
+**Precondition**: REQ-XXX.md exists with status NOT `implemented`.
+
+**Workflow**:
+```
+Phase 1 (BLOCKING - requires APPROVED):
+  1. Agent reads existing REQ-XXX.md
+  2. Agent enriches with missing details (AC, API contract, test plan)
+  3. Agent asks clarifying questions if needed
+  4. Human reviews and adjusts
+  5. Loop until Human says "APPROVED"
+  
+Phase 2 (ATOMIC - runs to completion):
+  1. Backend: Code → Test → Fix → Commit
+  2. Frontend: Code → Test → Fix → Commit
+  3. Docs: Update REQ status to "implemented" → Commit
+```
+
+**Example**:
+```
+Human: NEW: REQ-015
+Agent: [Reads REQ-015.md, enriches missing AC, asks questions]
+Human: APPROVED
+Agent: [Implements backend, frontend, tests, commits]
+```
+
+---
+
+### 0.5. `UPDATE:` — Modify Implemented Requirement
+
+**Trigger**: `UPDATE: REQ-XXX [change description]`
+
+**Purpose**: Modify an already implemented requirement (add feature, change behavior, remove functionality).
+
+**Precondition**: REQ-XXX.md exists with status `implemented`.
+
+**Workflow**:
+```
+Phase 1 (BLOCKING - requires APPROVED):
+  1. Agent reads existing REQ-XXX.md and related code
+  2. Agent adds "Change Log" section to REQ if not exists
+  3. Agent documents proposed changes with:
+     - What changes (add/modify/remove)
+     - Affected acceptance criteria
+     - Impact on existing tests
+  4. Agent asks clarifying questions
+  5. Human reviews and adjusts
+  6. Loop until Human says "APPROVED"
+  
+Phase 2 (ATOMIC - runs to completion):
+  1. Backend: Modify code → Update tests → Fix → Commit
+  2. Frontend: Modify code → Update tests → Fix → Commit
+  3. Docs: Update REQ with change log entry → Commit
+```
+
+**Change Log Format** (added to REQ document):
+```markdown
+## Change Log
+
+| Date | Version | Description |
+|------|---------|-------------|
+| 2025-11-29 | 1.1 | Added bookmark sync across devices |
+| 2025-11-15 | 1.0 | Initial implementation |
+```
+
+**Commit Pattern**: `feat(REQ-XXX): [change description]` or `fix(REQ-XXX): [change description]`
+
+**Example**:
+```
+Human: UPDATE: REQ-010 Add bulk delete for articles
+Agent: [Reads REQ-010.md, proposes changes]
+        "Proposed changes to REQ-010:
+         - Add AC-10.5: Bulk delete with checkbox selection
+         - Add AC-10.6: Confirmation dialog for bulk delete
+         - Modify API: Add DELETE /api/articles/bulk endpoint
+         Questions:
+         1. Maximum articles per bulk delete?
+         2. Soft delete or hard delete?"
+Human: 1. Max 50. 2. Soft delete.
+Agent: [Updates REQ-010.md with change log]
+Human: APPROVED
+Agent: [Modifies backend, frontend, tests, commits]
+```
+
+---
+
+### 0.6. `TEST-ALL:` — Run All Tests & Fix Errors
 
 **Trigger**: `TEST-ALL:` or `TEST-ALL: [optional scope]`
 
@@ -98,7 +217,7 @@ Agent: "Fixed 3 test failures: TC-001, TC-015, TC-022. All tests passing."
 
 ---
 
-### 0.5. `TEST:` — Test Specific REQ & Fix
+### 0.7. `TEST:` — Test Specific REQ & Fix
 
 **Trigger**: `TEST: REQ-XXX` or `TEST: [test file pattern]`
 
@@ -124,7 +243,7 @@ Agent: "REQ-015 tests: 5 passed, 1 fixed. Committed fix."
 
 ---
 
-### 0.6. `FIX:` — Bug Fix / Debug
+### 0.8. `FIX:` — Bug Fix / Debug
 
 **Trigger**: `FIX: [bug description]` or `FIX: [error message]`
 
@@ -151,7 +270,7 @@ Agent: "Fixed: Added touch event handler for mobile login button."
 
 ---
 
-### 0.7. `REFACTOR:` — Code Refactoring
+### 0.9. `REFACTOR:` — Code Refactoring
 
 **Trigger**: `REFACTOR: [description]` or `REFACTOR: [file/module]`
 
@@ -177,7 +296,7 @@ Agent: "Refactored: Created shared errorHandler in api/internal/http/errors.go"
 
 ---
 
-### 0.8. `DOCS:` — Documentation Only
+### 0.10. `DOCS:` — Documentation Only
 
 **Trigger**: `DOCS: [description]` or `DOCS: [file to update]`
 
@@ -201,7 +320,7 @@ Agent: "Updated REQ-010.md with API request/response examples."
 
 ---
 
-### 0.9. `CHAT:` — General Discussion
+### 0.11. `CHAT:` — General Discussion
 
 **Trigger**: `CHAT: [question]` or any question without action intent
 
@@ -223,16 +342,23 @@ Agent: [Explains pagination patterns, recommends approach]
 
 ---
 
-### 0.10. Workflow Cheat Sheet
+### 0.12. Workflow Cheat Sheet
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
-│  NEW: REQ-XXX        → Phase 1 (approval) → Phase 2 (develop)  │
+│  REQUIREMENT WORKFLOWS (Two-Phase, require APPROVED):          │
+│  IDEA: [description] → Create REQ → Enrich → Implement         │
+│  NEW: REQ-XXX        → Enrich existing REQ → Implement         │
+│  UPDATE: REQ-XXX     → Propose changes → Modify implementation │
+├─────────────────────────────────────────────────────────────────┤
+│  MAINTENANCE WORKFLOWS (Single-Phase, auto-commit):            │
 │  TEST-ALL:           → Run all tests → Fix → Auto-commit       │
 │  TEST: REQ-XXX       → Run REQ tests → Fix → Auto-commit       │
 │  FIX: [bug]          → Debug → Fix → Test → Auto-commit        │
 │  REFACTOR: [scope]   → Refactor → Test → Auto-commit           │
 │  DOCS: [description] → Update docs → Auto-commit               │
+├─────────────────────────────────────────────────────────────────┤
+│  NO-CODE WORKFLOW:                                              │
 │  CHAT: [question]    → Answer only (no code changes)           │
 └─────────────────────────────────────────────────────────────────┘
 ```
@@ -299,11 +425,11 @@ You are an expert full-stack developer and QA engineer. You own the feature from
 
 ---
 
-## 2. `NEW:` TWO-PHASE DEVELOPMENT WORKFLOW
+## 2. `IDEA:`/`NEW:`/`UPDATE:` TWO-PHASE DEVELOPMENT WORKFLOW
 
-**This section applies ONLY to `NEW:` workflow.**
+**This section applies to `IDEA:`, `NEW:`, and `UPDATE:` workflows.**
 
-The development process is strictly divided into **two phases**. Phase 2 cannot begin until Phase 1 is approved.
+All three workflows share the same two-phase structure:
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
@@ -551,16 +677,23 @@ test.skip('BAD: Mock example - DO NOT USE', async ({ page }) => {
 
 ### Workflow Prefixes (MANDATORY)
 ```
-NEW: REQ-XXX          → New feature (Phase 1 + Phase 2)
-TEST-ALL:             → Run all tests, fix errors
-TEST: REQ-XXX         → Test specific requirement
-FIX: [description]    → Bug fix
-REFACTOR: [scope]     → Code improvement
-DOCS: [description]   → Documentation update
-CHAT: [question]      → Discussion only
+REQUIREMENT WORKFLOWS (Two-Phase, require APPROVED):
+  IDEA: [description]   → Create new REQ from idea
+  NEW: REQ-XXX          → Implement existing REQ
+  UPDATE: REQ-XXX       → Modify implemented REQ
+
+MAINTENANCE WORKFLOWS (Single-Phase, auto-commit):
+  TEST-ALL:             → Run all tests, fix errors
+  TEST: REQ-XXX         → Test specific requirement
+  FIX: [description]    → Bug fix
+  REFACTOR: [scope]     → Code improvement
+  DOCS: [description]   → Documentation update
+
+NO-CODE:
+  CHAT: [question]      → Discussion only
 ```
 
-### Phase 1 Commands (NEW: workflow only)
+### Phase 1 Commands (IDEA/NEW/UPDATE workflows)
 ```
 Human: "I need feature X that does Y"
 Agent: [Enriches REQ, asks questions, creates REQ-XXX.md]
