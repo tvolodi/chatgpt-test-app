@@ -188,19 +188,5 @@
         "tryDifferentQuery": "Попробуйте другой поисковый запрос или проверьте орфографию.",
         "enterQuery": "Введите поисковый запрос для поиска статей",
         "suggestionsComingSoon": "Поисковые предложения скоро появятся"
-    },
-    "categories": {
-        "createNewCategory": "Создать новую категорию",
-        "categoryCode": "Код категории",
-        "parentCategory": "Родительская категория",
-        "noneRootCategory": "(Нет - Корневая категория)",
-        "displayNames": "Отображаемые названия",
-        "english": "Английский",
-        "russian": "Русский",
-        "kazakh": "Казахский",
-        "reset": "Сбросить",
-        "createCategory": "Создать категорию",
-        "updateCategory": "Обновить категорию",
-        "deleteCategory": "Удалить категорию"
     }
 }

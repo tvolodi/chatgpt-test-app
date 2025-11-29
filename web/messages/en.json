@@ -217,19 +217,5 @@
         "tryDifferentQuery": "Try a different search query or check your spelling.",
         "enterQuery": "Enter a search query to find articles",
         "suggestionsComingSoon": "Search suggestions coming soon"
-    },
-    "categories": {
-        "createNewCategory": "Create New Category",
-        "categoryCode": "Category Code",
-        "parentCategory": "Parent Category",
-        "noneRootCategory": "(None - Root Category)",
-        "displayNames": "Display Names",
-        "english": "English",
-        "russian": "Russian",
-        "kazakh": "Kazakh",
-        "reset": "Reset",
-        "createCategory": "Create Category",
-        "updateCategory": "Update Category",
-        "deleteCategory": "Delete Category"
     }
 }
