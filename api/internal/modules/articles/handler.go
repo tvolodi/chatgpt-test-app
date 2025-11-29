@@ -35,6 +35,12 @@ func (h *Handler) RegisterRoutes(mux *http.ServeMux) {
 	mux.Handle("POST /api/articles/{id}/like", auth.Middleware(http.HandlerFunc(h.handleAddLike)))
 	mux.Handle("DELETE /api/articles/{id}/like", auth.Middleware(http.HandlerFunc(h.handleRemoveLike)))
 	mux.HandleFunc("GET /api/articles/{id}/interactions", h.handleGetInteractions)
+
+// Search route
+mux.HandleFunc("GET /api/articles/search", h.handleSearch)
+
+// Test route for creating articles without auth (for E2E tests)
+mux.HandleFunc("POST /api/test/articles", h.handleCreateTest)
 }
 
 // handleList lists all articles with filters
@@ -526,5 +532,111 @@ func (h *Handler) handleGetInteractions(w http.ResponseWriter, r *http.Request) 
 	}
 
 	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(response)
+}
+
+// handleSearch performs full-text search on articles
+func (h *Handler) handleSearch(w http.ResponseWriter, r *http.Request) {
+	query := r.URL.Query().Get("q")
+	if query == "" {
+		http.Error(w, "query parameter 'q' is required", http.StatusBadRequest)
+		return
+	}
+
+	categoryID := r.URL.Query().Get("category_id")
+	tags := r.URL.Query()["tags"]
+
+	limitStr := r.URL.Query().Get("limit")
+	limit := 10
+	if limitStr != "" {
+		if l, err := strconv.Atoi(limitStr); err == nil && l > 0 && l <= 50 {
+			limit = l
+		}
+	}
+
+	pageStr := r.URL.Query().Get("page")
+	page := 1
+	if pageStr != "" {
+		if p, err := strconv.Atoi(pageStr); err == nil && p > 0 {
+			page = p
+		}
+	}
+	offset := (page - 1) * limit
+
+	results, total, err := h.service.Search(query, categoryID, tags, limit, offset)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	response := map[string]interface{}{
+		"articles": results,
+		"total":    total,
+		"page":     page,
+		"limit":    limit,
+		"query":    query,
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(response)
+}
+
+// handleCreateTest creates a new article without auth (for E2E tests)
+func (h *Handler) handleCreateTest(w http.ResponseWriter, r *http.Request) {
+	var req struct {
+		Title      string   `json:"title"`
+		Body       string   `json:"body"`
+		CategoryID *string  `json:"category_id"`
+		TagIDs     []string `json:"tag_ids"`
+	}
+
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		http.Error(w, "invalid request body", http.StatusBadRequest)
+		return
+	}
+
+	// Use a test author ID
+	authorID := "test-user-id"
+
+	article := &Article{
+		Title:      req.Title,
+		Body:       req.Body,
+		CategoryID: req.CategoryID,
+		AuthorID:   authorID,
+		Status:     "DRAFT",
+	}
+
+	if err := h.service.Create(article); err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	// Add tags if provided
+	if len(req.TagIDs) > 0 {
+		if err := h.service.AddTags(article.ID, req.TagIDs); err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+	}
+
+	// Publish the article for testing
+	if err := h.service.Publish(article.ID); err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	// Get tags for response
+	tags, err := h.service.GetTags(article.ID)
+	if err != nil {
+		tags = []string{}
+	}
+
+	response := map[string]interface{}{
+		"article": article,
+		"tags":    tags,
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusCreated)
 	json.NewEncoder(w).Encode(response)
 }

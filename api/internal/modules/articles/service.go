@@ -234,6 +234,16 @@ func (s *Service) GetUserLike(articleID, userID string) (*bool, error) {
 	return s.repo.GetUserLike(articleID, userID)
 }
 
+// Search performs full-text search on published articles
+func (s *Service) Search(query string, categoryID string, tags []string, limit, offset int) ([]SearchResult, int, error) {
+	if len(query) < 2 {
+		return []SearchResult{}, 0, fmt.Errorf("query too short")
+	}
+
+	results, total, err := s.repo.Search(query, categoryID, tags, limit, offset)
+	return results, total, err
+}
+
 // generateSlug creates a URL-friendly slug from a string
 func generateSlug(s string) string {
 	s = strings.ToLower(s)

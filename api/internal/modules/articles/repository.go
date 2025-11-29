@@ -3,6 +3,8 @@ package articles
 import (
 	"database/sql"
 	"fmt"
+	"regexp"
+	"strings"
 	"time"
 
 	"github.com/jmoiron/sqlx"
@@ -403,4 +405,122 @@ func (r *Repository) GetTagsWithCounts(popular bool, limit int) ([]TagWithCount,
 	var tags []TagWithCount
 	err := r.db.Select(&tags, query)
 	return tags, err
+}
+
+// SearchResult represents a search result with highlights
+type SearchResult struct {
+	ID         string   `json:"id"`
+	Title      string   `json:"title"`
+	Excerpt    string   `json:"excerpt"`
+	Slug       string   `json:"slug"`
+	CategoryID *string  `json:"category_id"`
+	PublishedAt *time.Time `json:"published_at"`
+	Tags       []string `json:"tags"`
+}
+
+// Search performs full-text search on articles
+func (r *Repository) Search(query string, categoryID string, tags []string, limit, offset int) ([]SearchResult, int, error) {
+	// Build the main search query
+	searchQuery := `
+		SELECT a.id, a.title, a.slug, a.category_id, a.published_at,
+			   ts_headline('english', a.body, plainto_tsquery('english', $1), 'StartSel=<mark>, StopSel=</mark>') as excerpt
+		FROM articles a
+		WHERE a.search_vector @@ plainto_tsquery('english', $1)
+		  AND a.status = 'PUBLISHED'
+		  AND a.deleted_at IS NULL
+	`
+
+	args := []interface{}{query}
+	argPos := 2
+
+	if categoryID != "" {
+		searchQuery += fmt.Sprintf(` AND a.category_id = $%d`, argPos)
+		args = append(args, categoryID)
+		argPos++
+	}
+
+	if len(tags) > 0 {
+		searchQuery += ` AND EXISTS (
+			SELECT 1 FROM article_tags at2
+			JOIN tags t ON at2.tag_id = t.id
+			WHERE at2.article_id = a.id AND t.code = ANY($` + fmt.Sprintf("%d", argPos) + `)
+		)`
+		args = append(args, pq.Array(tags))
+		argPos++
+	}
+
+	searchQuery += fmt.Sprintf(` ORDER BY ts_rank(a.search_vector, plainto_tsquery('english', $1)) DESC LIMIT $%d OFFSET $%d`, argPos, argPos+1)
+	args = append(args, limit, offset)
+
+	var results []SearchResult
+	err := r.db.Select(&results, searchQuery, args...)
+	if err != nil {
+		return nil, 0, err
+	}
+
+	// Highlight titles and get tags for each result
+	for i := range results {
+		// Highlight title
+		results[i].Title = highlightText(results[i].Title, query)
+
+		// Get tags
+		tags, err := r.GetTags(results[i].ID)
+		if err != nil {
+			tags = []string{}
+		}
+		results[i].Tags = tags
+	}
+
+	// Get total count
+	countQuery := `
+		SELECT COUNT(*)
+		FROM articles a
+		WHERE a.search_vector @@ plainto_tsquery('english', $1)
+		  AND a.status = 'PUBLISHED'
+		  AND a.deleted_at IS NULL
+	`
+
+	countArgs := []interface{}{query}
+	countArgPos := 2
+
+	if categoryID != "" {
+		countQuery += fmt.Sprintf(` AND a.category_id = $%d`, countArgPos)
+		countArgs = append(countArgs, categoryID)
+		countArgPos++
+	}
+
+	if len(tags) > 0 {
+		countQuery += ` AND EXISTS (
+			SELECT 1 FROM article_tags at2
+			JOIN tags t ON at2.tag_id = t.id
+			WHERE at2.article_id = a.id AND t.code = ANY($` + fmt.Sprintf("%d", countArgPos) + `)
+		)`
+		countArgs = append(countArgs, pq.Array(tags))
+	}
+
+	var total int
+	err = r.db.Get(&total, countQuery, countArgs...)
+	if err != nil {
+		return nil, 0, err
+	}
+
+	return results, total, nil
+}
+
+// highlightText highlights search terms in text using <mark> tags
+func highlightText(text, query string) string {
+	// Simple case-insensitive highlighting
+	// Split query into words
+	terms := strings.Fields(strings.ToLower(query))
+	
+	result := text
+	for _, term := range terms {
+		if len(term) < 2 {
+			continue
+		}
+		// Use regex to replace case-insensitively
+		re := regexp.MustCompile(`(?i)(` + regexp.QuoteMeta(term) + `)`)
+		result = re.ReplaceAllString(result, `<mark>$1</mark>`)
+	}
+	return result
 }

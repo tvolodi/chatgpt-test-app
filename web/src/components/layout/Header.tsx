@@ -5,6 +5,7 @@ import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 import { useSession, signOut } from 'next-auth/react';
 import { LanguageSwitcher } from '@/app/components/LanguageSwitcher';
+import { SearchBar } from '@/app/components/common/SearchBar';
 
 export default function Header() {
     const pathname = usePathname();
@@ -48,46 +49,51 @@ export default function Header() {
                             </Link>
                         </div>
                     </div>
-                    <div className="hidden sm:ml-6 sm:flex sm:items-center">
-                        <div className="mr-3">
-                            <LanguageSwitcher />
+                    <div className="flex items-center space-x-4">
+                        <div className="hidden md:block w-64">
+                            <SearchBar />
                         </div>
-                        {status === 'loading' ? (
-                            <span className="text-walnut-400 px-3 py-2 text-sm">...</span>
-                        ) : session ? (
-                            <>
-                                <Link
-                                    href="/dashboard"
-                                    className="text-walnut-600 hover:text-walnut-800 px-3 py-2 rounded-retro text-sm font-medium font-retro-sans"
-                                >
-                                    Dashboard
-                                </Link>
-                                <span className="text-walnut-700 px-3 py-2 text-sm font-medium font-retro-sans">
-                                    {session.user?.email || session.user?.name || 'User'}
-                                </span>
-                                <button
-                                    onClick={() => signOut({ callbackUrl: '/' })}
-                                    className="ml-3 text-walnut-600 hover:text-walnut-800 px-3 py-2 rounded-retro text-sm font-medium font-retro-sans"
-                                >
-                                    Sign out
-                                </button>
-                            </>
-                        ) : (
-                            <>
-                                <Link
-                                    href="/api/auth/signin"
-                                    className="text-walnut-600 hover:text-walnut-800 px-3 py-2 rounded-retro text-sm font-medium font-retro-sans"
-                                >
-                                    Sign in
-                                </Link>
-                                <Link
-                                    href="/dashboard"
-                                    className="ml-3 inline-flex items-center px-4 py-2 border-2 border-walnut-700 text-sm font-medium rounded-retro shadow-retro text-walnut-50 bg-walnut-600 hover:bg-walnut-700 hover:shadow-retro-hover transition-all font-retro-sans uppercase tracking-wide"
-                                >
-                                    Get Started
-                                </Link>
-                            </>
-                        )}
+                        <div className="hidden sm:ml-6 sm:flex sm:items-center">
+                            <div className="mr-3">
+                                <LanguageSwitcher />
+                            </div>
+                            {status === 'loading' ? (
+                                <span className="text-walnut-400 px-3 py-2 text-sm">...</span>
+                            ) : session ? (
+                                <>
+                                    <Link
+                                        href="/dashboard"
+                                        className="text-walnut-600 hover:text-walnut-800 px-3 py-2 rounded-retro text-sm font-medium font-retro-sans"
+                                    >
+                                        Dashboard
+                                    </Link>
+                                    <span className="text-walnut-700 px-3 py-2 text-sm font-medium font-retro-sans">
+                                        {session.user?.email || session.user?.name || 'User'}
+                                    </span>
+                                    <button
+                                        onClick={() => signOut({ callbackUrl: '/' })}
+                                        className="ml-3 text-walnut-600 hover:text-walnut-800 px-3 py-2 rounded-retro text-sm font-medium font-retro-sans"
+                                    >
+                                        Sign out
+                                    </button>
+                                </>
+                            ) : (
+                                <>
+                                    <Link
+                                        href="/api/auth/signin"
+                                        className="text-walnut-600 hover:text-walnut-800 px-3 py-2 rounded-retro text-sm font-medium font-retro-sans"
+                                    >
+                                        Sign in
+                                    </Link>
+                                    <Link
+                                        href="/dashboard"
+                                        className="ml-3 inline-flex items-center px-4 py-2 border-2 border-walnut-700 text-sm font-medium rounded-retro shadow-retro text-walnut-50 bg-walnut-600 hover:bg-walnut-700 hover:shadow-retro-hover transition-all font-retro-sans uppercase tracking-wide"
+                                    >
+                                        Get Started
+                                    </Link>
+                                </>
+                            )}
+                        </div>
                     </div>
                 </div>
             </div>

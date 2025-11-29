@@ -147,6 +147,62 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
+  /articles/search:
+    get:
+      tags: [articles]
+      summary: Search articles by keyword
+      operationId: searchArticles
+      parameters:
+        - in: query
+          name: q
+          required: true
+          schema:
+            type: string
+            minLength: 2
+          description: Search query string
+        - in: query
+          name: category_id
+          schema:
+            type: string
+            format: uuid
+          description: Filter by category ID
+        - in: query
+          name: tags
+          schema:
+            type: array
+            items:
+              type: string
+          style: form
+          explode: true
+          description: Filter by tag codes
+        - in: query
+          name: page
+          schema:
+            type: integer
+            minimum: 1
+            default: 1
+          description: Page number
+        - in: query
+          name: limit
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 50
+            default: 10
+          description: Results per page
+      responses:
+        '200':
+          description: Search results with highlighted content.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ArticleSearchResponse'
+        '400':
+          description: Invalid query parameters.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
 components:
   schemas:
     LoginRequest:
@@ -254,3 +310,103 @@ components:
           description: Localized name (JSONB)
           additionalProperties:
             type: string
+    Article:
+      type: object
+      required: [id, title, slug, body, author_id, status, created_at, updated_at]
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Article identifier.
+        title:
+          type: string
+          description: Article title.
+        slug:
+          type: string
+          description: URL-friendly slug.
+        body:
+          type: string
+          description: Article content in Markdown.
+        category_id:
+          type: string
+          format: uuid
+          nullable: true
+          description: Category identifier.
+        author_id:
+          type: string
+          format: uuid
+          description: Author identifier.
+        status:
+          type: string
+          enum: [DRAFT, PUBLISHED, ARCHIVED]
+          description: Article status.
+        published_at:
+          type: string
+          format: date-time
+          nullable: true
+          description: Publication timestamp.
+        created_at:
+          type: string
+          format: date-time
+          description: Creation timestamp.
+        updated_at:
+          type: string
+          format: date-time
+          description: Last update timestamp.
+        deleted_at:
+          type: string
+          format: date-time
+          nullable: true
+          description: Soft delete timestamp.
+    ArticleSearchResult:
+      type: object
+      required: [id, title, excerpt, slug, published_at, tags]
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Article identifier.
+        title:
+          type: string
+          description: Article title with search terms highlighted using <mark> tags.
+        excerpt:
+          type: string
+          description: Article excerpt with search terms highlighted using <mark> tags.
+        slug:
+          type: string
+          description: URL-friendly slug.
+        category_id:
+          type: string
+          format: uuid
+          nullable: true
+          description: Category identifier.
+        published_at:
+          type: string
+          format: date-time
+          description: Publication timestamp.
+        tags:
+          type: array
+          items:
+            type: string
+          description: Tag codes associated with the article.
+    ArticleSearchResponse:
+      type: object
+      required: [articles, total, page, limit, query]
+      properties:
+        articles:
+          type: array
+          items:
+            $ref: '#/components/schemas/ArticleSearchResult'
+          description: Search results.
+        total:
+          type: integer
+          description: Total number of matching articles.
+        page:
+          type: integer
+          description: Current page number.
+        limit:
+          type: integer
+          description: Results per page.
+        query:
+          type: string
+          description: The search query used.

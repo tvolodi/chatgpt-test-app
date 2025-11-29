@@ -26,6 +26,8 @@
 | `req-013-article-view.spec.ts` | REQ-013 | Article detail view |
 | `req-013-article-filters.spec.ts` | REQ-013 | Category/tag filtering |
 | `req-013-authenticated-comments.spec.ts` | REQ-013 | Comment functionality |
+| `req-016-article-likes.spec.ts` | REQ-016 | Like/Dislike functionality |
+| `req-017-search.spec.ts` | REQ-017 | Search functionality |
 
 ## 2. Backend Integration Tests (Go)
 
@@ -67,3 +69,5 @@
 | REQ-011 | 6 | 0 | ✅ Excellent |
 | REQ-012 | 1 | 0 | 🟡 Partial |
 | REQ-013 | 3 | 0 | 🟡 Partial |
+| REQ-016 | 1 | 0 | ✅ Good |
+| REQ-017 | 1 | 0 | ✅ Good |

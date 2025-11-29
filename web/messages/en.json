@@ -15,6 +15,7 @@
         "contact": "Contact / Subscribe",
         "categories": "Categories",
         "tags": "Tags",
+        "profile": "Profile",
         "settings": "Settings"
     },
     "landing": {
@@ -82,19 +83,55 @@
                 "emptyText": "Category management functionality will be added in a future update.",
                 "comingSoonText": "Create, edit, and organize categories for your content."
             },
-            "tags": {
-                "title": "Tags",
-                "subtitle": "Manage content tags",
-                "emptyTitle": "No Tags Yet",
-                "emptyText": "Tag management functionality will be added in a future update.",
-                "comingSoonText": "Create, edit, and organize tags for better content discovery."
-            },
+    "tags": {
+        "title": "Tags",
+        "subtitle": "Manage content tags",
+        "emptyTitle": "No Tags Yet",
+        "emptyText": "Tag management functionality will be added in a future update.",
+        "comingSoonText": "Create, edit, and organize tags for better content discovery.",
+        "search": "Search tags...",
+        "name": "Name",
+        "code": "Code",
+        "actions": "Actions",
+        "edit": "Edit",
+        "delete": "Delete",
+        "noTagsFound": "No tags found. Create your first tag to get started.",
+        "previous": "Previous",
+        "next": "Next",
+        "showing": "Showing {start} to {end} of {total} tags",
+        "page": "Page {current} of {total}"
+    },
+    "categories": {
+        "title": "Categories",
+        "newCategory": "New Category",
+        "noCategoriesFound": "No categories found.",
+        "editCategory": "Edit Category",
+        "createNewCategory": "Create New Category",
+        "categoryCode": "Category Code",
+        "parentCategory": "Parent Category",
+        "displayNames": "Display Names",
+        "english": "English",
+        "russian": "Russian", 
+        "kazakh": "Kazakh",
+        "reset": "Reset",
+        "updateCategory": "Update Category",
+        "createCategory": "Create Category",
+        "deleteCategory": "Delete Category",
+        "noneRootCategory": "(None - Root Category)"
+    },
             "settings": {
                 "title": "Settings",
                 "subtitle": "Manage your account and preferences",
                 "emptyTitle": "Settings",
                 "emptyText": "User settings and preferences will be added in a future update.",
                 "comingSoonText": "Manage your profile, preferences, and account settings."
+            },
+            "profile": {
+                "title": "Profile",
+                "subtitle": "View and manage your account information",
+                "emptyTitle": "Profile",
+                "emptyText": "Profile information will be displayed here.",
+                "comingSoonText": "View your profile details and account information."
             }
         }
     },
@@ -117,5 +154,82 @@
         "Article not found": "Article not found",
         "Select an article to read": "Select an article to read",
         "Hide Filters": "Hide Filters"
+    },
+    "Profile": {
+        "Profile": "Profile",
+        "ManageAccount": "Manage your account information and view your activity",
+        "AccessDenied": "Access Denied",
+        "PleaseLogin": "Please log in to view your profile.",
+        "EditInKeycloak": "Edit in Keycloak",
+        "RecentActivity": "Recent Activity",
+        "LikedArticles": "Liked Articles",
+        "Comments": "Comments",
+        "LoadingActivity": "Loading your activity...",
+        "ActivityError": "Failed to load activity",
+        "NoActivity": "No recent activity to display.",
+        "StartEngaging": "Start engaging with articles to see your activity here!",
+        "Roles": "Roles"
+    },
+    "Settings": {
+        "Settings": "Settings",
+        "ManagePreferences": "Manage your account preferences and settings",
+        "LanguagePreferences": "Language Preferences",
+        "InterfaceLanguage": "Interface Language",
+        "CurrentlySelected": "Currently selected",
+        "SavingPreferences": "Saving your preferences...",
+        "ComingSoon": "Coming Soon",
+        "Notifications": "Notifications",
+        "NotificationsDesc": "Configure how and when you receive notifications about new content and updates.",
+        "Appearance": "Appearance",
+        "AppearanceDesc": "Customize the look and feel of your dashboard with themes and layouts.",
+        "Privacy": "Privacy",
+        "PrivacyDesc": "Control your privacy settings and data sharing preferences.",
+        "Analytics": "Analytics",
+        "AnalyticsDesc": "View your reading statistics and content engagement metrics."
+    },
+    "Comments": {
+        "Comments": "Comments",
+        "ShareThoughts": "Share your thoughts...",
+        "SignInToComment": "Sign in to share your thoughts and join the discussion.",
+        "SignInToCommentButton": "Sign In to Comment",
+        "PostComment": "Post Comment",
+        "Posting": "Posting...",
+        "NoCommentsYet": "No comments yet. Be the first to share your thoughts!",
+        "LoadingComments": "Loading comments...",
+        "User": "User"
+    },
+    "Likes": {
+        "Like": "Like",
+        "Dislike": "Dislike",
+        "RemoveLike": "Remove like",
+        "RemoveDislike": "Remove dislike",
+        "SignInToInteract": "Please sign in to interact with this article.",
+        "Updating": "Updating...",
+        "FailedToUpdate": "Failed to update reaction. Please try again."
+    },
+    "search": {
+        "title": "Search Results",
+        "placeholder": "Search articles...",
+        "searching": "Searching...",
+        "resultsFor": "Found {count} results for \"{query}\"",
+        "error": "Search Error",
+        "noResults": "No results found",
+        "tryDifferentQuery": "Try a different search query or check your spelling.",
+        "enterQuery": "Enter a search query to find articles",
+        "suggestionsComingSoon": "Search suggestions coming soon"
+    },
+    "categories": {
+        "createNewCategory": "Create New Category",
+        "categoryCode": "Category Code",
+        "parentCategory": "Parent Category",
+        "noneRootCategory": "(None - Root Category)",
+        "displayNames": "Display Names",
+        "english": "English",
+        "russian": "Russian",
+        "kazakh": "Kazakh",
+        "reset": "Reset",
+        "createCategory": "Create Category",
+        "updateCategory": "Update Category",
+        "deleteCategory": "Delete Category"
     }
 }
