@@ -6,9 +6,44 @@ description: Requirement Development
 
 # AI Agent Development Directives & Guide
 
-**Version**: 5.0
+**Version**: 6.0
 **Status**: Active
 **Purpose**: This is the **Single Source of Truth** for AI Agents (and humans) working on the AI-Dala project. It consolidates development standards, workflows, and role-specific instructions.
+
+---
+
+## 📚 DOCUMENTATION DATABASE
+
+> **CRITICAL**: Documentation is structured as a queryable database. AI Agents MUST maintain index consistency.
+
+### Entry Point
+
+**Start here**: [`docs/index.md`](index.md) — Master index linking all documentation.
+
+### Index Files (MUST be kept in sync)
+
+| Index | Purpose | Update When |
+|-------|---------|-------------|
+| `docs/index.md` | Master navigation | Any doc added/removed |
+| `docs/requirements/index.md` | REQ registry & status | REQ created/status changed |
+| `docs/modules/index.md` | MOD registry | Module created |
+| `docs/tests/index.md` | Test coverage matrix | Test added |
+
+### Documentation Consistency Rules
+
+1. **Index-First**: Before creating any REQ/MOD, check the index for next number
+2. **Atomic Updates**: When updating a REQ status, update BOTH the file AND the index
+3. **Cross-Reference by ID**: Use `REQ-XXX`, `MOD-XXX` IDs, not file paths
+4. **Index is Authoritative**: If file status differs from index, index wins
+
+### Quick Queries
+
+| Question | Where to Look |
+|----------|---------------|
+| Next REQ number? | `docs/requirements/index.md` → "Next Available" |
+| REQ-015 status? | `docs/requirements/index.md` → Status column |
+| Tests for REQ-010? | `docs/tests/index.md` → REQ Coverage |
+| What modules exist? | `docs/modules/index.md` |
 
 ---
 
@@ -63,21 +98,22 @@ description: Requirement Development
 **Workflow**:
 ```
 Phase 1 (BLOCKING - requires APPROVED):
-  1. Agent scans docs/requirements/ to find next REQ number
+  1. Agent reads docs/requirements/index.md to find next REQ number
   2. Agent creates REQ-XXX.md with initial structure
-  3. Agent formalizes idea into user stories, acceptance criteria
-  4. Agent asks clarifying questions
-  5. Human reviews, adjusts, answers
-  6. Agent updates REQ document
-  7. Loop until Human says "APPROVED"
+  3. Agent adds entry to docs/requirements/index.md (status: draft)
+  4. Agent formalizes idea into user stories, acceptance criteria
+  5. Agent asks clarifying questions
+  6. Human reviews, adjusts, answers
+  7. Agent updates REQ document
+  8. Loop until Human says "APPROVED"
   
 Phase 2 (ATOMIC - runs to completion):
   1. Backend: Code → Test → Fix → Commit
   2. Frontend: Code → Test → Fix → Commit
-  3. Docs: Update REQ status → Commit
+  3. Docs: Update REQ status in file AND index → Commit
 ```
 
-**REQ Auto-Assignment**: Agent scans `docs/requirements/REQ-*.md`, finds highest number, increments by 1.
+**REQ Auto-Assignment**: Read `docs/requirements/index.md` → "Next Available REQ Number"
 
 **Example**:
 ```
@@ -517,11 +553,15 @@ Implement the approved requirement as a **single atomic operation**. This phase 
 5. **Fix**: Resolve any failures
 6. **Commit #2**: `feat(frontend): implement [REQ-XXX] [feature name] UI`
 
-#### 4.2.3. Documentation & Finalization
-1. **Update REQ**: Set status to `implemented`, add test file references
-2. **Update Module Spec**: If created/modified
-3. **Update Test Index**: Add new tests to `docs/tests/index.md`
-4. **Commit #3**: `docs: update [REQ-XXX] status and traceability`
+#### 4.2.3. Documentation & Finalization (INDEX UPDATES MANDATORY)
+1. **Update REQ file**: Set status to `implemented`, add test file references
+2. **Update `docs/requirements/index.md`**: Change status column for REQ-XXX
+3. **Update `docs/tests/index.md`**: Add new test files with REQ coverage
+4. **Update `docs/modules/index.md`**: If new module created
+5. **Update `docs/index.md`**: If counts changed significantly
+6. **Commit #3**: `docs: update [REQ-XXX] status and traceability`
+
+> ⚠️ **CRITICAL**: Skipping index updates breaks documentation queryability. Always update indexes!
 
 ### 4.3. Commit Structure
 
@@ -547,12 +587,19 @@ Once Phase 2 starts:
 
 ### Phase 1 Complete When:
 *   [ ] REQ document exists with all Acceptance Criteria
+*   [ ] REQ added to `docs/requirements/index.md` (for IDEA: workflow)
 *   [ ] Human has explicitly said **"APPROVED"**
 
 ### Phase 2 Complete When:
 *   [ ] All code implemented with tests passing
 *   [ ] Backend commit made (if applicable)
 *   [ ] Frontend commit made (if applicable)
+*   [ ] REQ status updated to `implemented` in file
+*   [ ] **`docs/requirements/index.md`** status column updated
+*   [ ] **`docs/tests/index.md`** test files added
+*   [ ] `docs/modules/index.md` updated (if new module)
+*   [ ] Documentation commit made
+*   [ ] All tests executed locally with recorded results
 *   [ ] REQ status updated to `implemented`
 *   [ ] Test files linked in REQ traceability section
 *   [ ] Documentation commit made
