@@ -36,11 +36,11 @@ func (h *Handler) RegisterRoutes(mux *http.ServeMux) {
 	mux.Handle("DELETE /api/articles/{id}/like", auth.Middleware(http.HandlerFunc(h.handleRemoveLike)))
 	mux.HandleFunc("GET /api/articles/{id}/interactions", h.handleGetInteractions)
 
-// Search route
-mux.HandleFunc("GET /api/articles/search", h.handleSearch)
+	// Search route
+	mux.HandleFunc("GET /api/articles/search", h.handleSearch)
 
-// Test route for creating articles without auth (for E2E tests)
-mux.HandleFunc("POST /api/test/articles", h.handleCreateTest)
+	// Test route for creating articles without auth (for E2E tests)
+	mux.HandleFunc("POST /api/test/articles", h.handleCreateTest)
 }
 
 // handleList lists all articles with filters

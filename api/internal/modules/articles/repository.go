@@ -409,13 +409,13 @@ func (r *Repository) GetTagsWithCounts(popular bool, limit int) ([]TagWithCount,
 
 // SearchResult represents a search result with highlights
 type SearchResult struct {
-	ID         string   `json:"id"`
-	Title      string   `json:"title"`
-	Excerpt    string   `json:"excerpt"`
-	Slug       string   `json:"slug"`
-	CategoryID *string  `json:"category_id"`
+	ID          string     `json:"id"`
+	Title       string     `json:"title"`
+	Excerpt     string     `json:"excerpt"`
+	Slug        string     `json:"slug"`
+	CategoryID  *string    `json:"category_id"`
 	PublishedAt *time.Time `json:"published_at"`
-	Tags       []string `json:"tags"`
+	Tags        []string   `json:"tags"`
 }
 
 // Search performs full-text search on articles
@@ -512,7 +512,7 @@ func highlightText(text, query string) string {
 	// Simple case-insensitive highlighting
 	// Split query into words
 	terms := strings.Fields(strings.ToLower(query))
-	
+
 	result := text
 	for _, term := range terms {
 		if len(term) < 2 {
